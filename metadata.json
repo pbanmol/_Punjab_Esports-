@@ -1,0 +1,6 @@
+{
+  "name": "Punjab Esports",
+  "description": "Punjab Esports - Free Fire Tournaments, Leaderboards & Gaming Wallet Platform",
+  "requestFramePermissions": ["camera", "storage"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
