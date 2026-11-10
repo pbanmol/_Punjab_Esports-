@@ -1,0 +1,6 @@
+{
+  "appId": "com.punjab.esports",
+  "appName": "Punjab Esports",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
