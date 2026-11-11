@@ -12,6 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
       - run: npm install
       - run: npm run build
       - name: Setup Java 17
@@ -19,18 +20,15 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Build Native Android
         run: |
-          # Initialize and add Android platform
           npx cap init com.punjab.esports PunjabEsports --web-dir dist
           npx cap add android
-          # Build APK (Debug) and AAB (Release)
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
-          ./gradlew bundleRelease
+          ./gradlew assembleDebug bundleRelease
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
