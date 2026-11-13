@@ -1932,6 +1932,38 @@ async function executeGoogleOAuthFlow() {
   if (isGoogleAuthInProgress) return;
   isGoogleAuthInProgress = true;
 
+  // Inside Native Android APK: show device's Google Accounts natively right inside the app (zero Chrome redirect!)
+  const nativeGoogleAuth = window.Capacitor?.Plugins?.NativeGoogleAuth;
+  const isNativeAndroid = !!(window.Capacitor?.isNativePlatform?.() || nativeGoogleAuth);
+
+  if (nativeGoogleAuth && typeof nativeGoogleAuth.pickAccount === 'function') {
+    try {
+      const res = await nativeGoogleAuth.pickAccount();
+      if (res && res.email) {
+        const cleanEmail = res.email.trim().toLowerCase();
+        const fallbackName = cleanEmail.split('@')[0];
+        addVerifiedDeviceGoogleAccount(cleanEmail, fallbackName);
+        await onGoogleUserAuthenticated(null, cleanEmail, fallbackName);
+      }
+      return;
+    } catch (nativeErr) {
+      console.warn('NativeGoogleAuth error:', nativeErr);
+      promptGoogleEmailFallback();
+      return;
+    } finally {
+      setTimeout(() => {
+        isGoogleAuthInProgress = false;
+      }, 400);
+    }
+  }
+
+  // Fallback inside Android WebView if native plugin unavailable (never kick user out to Chrome!)
+  if (isNativeAndroid) {
+    isGoogleAuthInProgress = false;
+    promptGoogleEmailFallback();
+    return;
+  }
+
   try {
     const cred = await signInWithPopup(auth, googleProvider);
     if (cred && cred.user) {
@@ -1947,7 +1979,7 @@ async function executeGoogleOAuthFlow() {
       return;
     }
 
-    if (code.includes('unauthorized-domain')) {
+    if (code.includes('unauthorized-domain') || code.includes('operation-not-supported')) {
       promptGoogleEmailFallback();
       return;
     }

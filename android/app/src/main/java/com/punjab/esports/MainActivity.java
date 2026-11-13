@@ -12,12 +12,14 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     private static final int IMAGE_PERMISSION_REQUEST_CODE = 1001;
+
     private boolean isRequestingPermission = false;
     private boolean openedSettingsForPermission = false;
     private long permissionPromptStartedAt = 0L;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        registerPlugin(NativeGoogleAuthPlugin.class);
         super.onCreate(savedInstanceState);
         checkAndEnforceImagePermission();
     }
@@ -72,13 +74,11 @@ public class MainActivity extends BridgeActivity {
         long elapsed = System.currentTimeMillis() - permissionPromptStartedAt;
         boolean canShowSystemDialogAgain = shouldShowRequestPermissionRationale(getRequiredImagePermission());
 
-        // If user saw the permission dialog and tapped "Don't allow", close the app immediately.
         if (canShowSystemDialogAgain || elapsed >= 250) {
             closeAppImmediately();
             return;
         }
 
-        // On Android 11+, if OS permanently blocks the popup after 2 denials, require Settings or Exit.
         new AlertDialog.Builder(this)
                 .setTitle("Images Permission Required")
                 .setMessage("Punjab Esports requires access to Photos/Images to continue. Please allow permission in Settings.")
