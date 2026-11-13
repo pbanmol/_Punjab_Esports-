@@ -1539,19 +1539,23 @@ function toast(type, title, msg, timeout=4000) {
   setTimeout(close, timeout);
 }
 
-function openModal({ title, bodyHTML, footerHTML, onMount=null, extraClass='' }) {
+function openModal({ title, bodyHTML, footerHTML, onMount=null, onClose=null, extraClass='' }) {
   const wrap = document.createElement('div');
   wrap.className = 'mb ' + extraClass;
   wrap.innerHTML = `<div class="modal" role="dialog"><div class="mh"><h3>${title}</h3><button class="close-x"><i class="fa-solid fa-xmark"></i></button></div><div class="mbody">${bodyHTML}</div>${footerHTML?`<div class="mfoot">${footerHTML}</div>`:''}</div>`;
   $('#modalHost').appendChild(wrap);
-  const close = () => { 
+  let closed = false;
+  const close = (reason = 'dismiss') => { 
+    if (closed) return;
+    closed = true;
     wrap.remove(); 
     document.removeEventListener('keydown', escFn); 
     if (extraClass === 'dm-modal' && State.dmListener) { State.dmListener(); State.dmListener = null; }
+    if (onClose) onClose(reason);
   };
-  wrap.querySelector('.close-x').onclick = close;
-  wrap.addEventListener('click', (e)=>{ if (e.target === wrap) close(); });
-  const escFn = (e) => { if (e.key === 'Escape') close(); };
+  wrap.querySelector('.close-x').onclick = () => close('dismiss');
+  wrap.addEventListener('click', (e)=>{ if (e.target === wrap) close('dismiss'); });
+  const escFn = (e) => { if (e.key === 'Escape') close('dismiss'); };
   document.addEventListener('keydown', escFn);
   if (onMount) onMount(wrap, close);
   return { el: wrap, close };
@@ -2076,6 +2080,20 @@ async function onGoogleUserAuthenticated(user, explicitEmail = null, explicitNam
 }
 
 function openGoogleRegistrationModal(email, defaultName, authUser) {
+  let registrationCompleted = false;
+  const returnToFirstAuthScreen = async () => {
+    if (registrationCompleted) return;
+    try { await signOut(auth); } catch(e) {}
+    State.user = null;
+    State.profile = null;
+    $('#appShell').classList.remove('active');
+    $('#authScreen').style.display = 'flex';
+    hideSplash();
+  };
+
+  $('#appShell').classList.remove('active');
+  $('#authScreen').style.display = 'flex';
+
   openModal({
     title: 'Complete Profile / Register',
     bodyHTML: `
@@ -2143,8 +2161,14 @@ function openGoogleRegistrationModal(email, defaultName, authUser) {
       </form>
     `,
     footerHTML: `<button class="btn btn-ghost w-100" data-x="c">Cancel</button>`,
+    onClose: (reason) => {
+      if (reason !== 'complete') {
+        returnToFirstAuthScreen();
+      }
+    },
     onMount: (el, close) => {
-      el.querySelector('[data-x="c"]').onclick = close;
+      el.querySelector('[data-x="c"]').onclick = () => close('cancel');
+      el._markRegistrationComplete = () => { registrationCompleted = true; };
 
       const passInput = el.querySelector('#gRegPass');
       const passToggle = el.querySelector('#gRegPassToggle');
@@ -2279,7 +2303,8 @@ function openGoogleRegistrationModal(email, defaultName, authUser) {
           State.user = currentAuthUser || { uid, email, displayName: ffName };
           State.profile = newProfile;
 
-          close();
+          registrationCompleted = true;
+          close('complete');
           $('#authScreen').style.display = 'none';
           $('#appShell').classList.add('active');
           await initApp();
