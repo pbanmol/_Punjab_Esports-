@@ -1367,7 +1367,7 @@ button:active:not(:disabled){filter:brightness(.94)}
       <button class="btn btn-outline btn-block" id="rulesBtn"><i class="fa-solid fa-scroll"></i> Terms & Fair Play Policy</button>
     </div>
     <button class="btn btn-danger btn-block" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
-    <p class="tc muted mt-3" style="font-size:.72rem">Version 2.5.1 · Punjab Esports</p>
+    <p class="tc muted mt-3" style="font-size:.72rem">Version 1.0.0 · Punjab Esports</p>
   </section>
 
   <nav class="bottom-nav">
@@ -1384,7 +1384,7 @@ button:active:not(:disabled){filter:brightness(.94)}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile, fetchSignInMethodsForEmail, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, get, set, update, push, remove, onValue, off, query, orderByChild, equalTo, limitToLast, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -1463,10 +1463,88 @@ function formatMatchDateTime(dateStr, timeStr) { if (!dateStr) return 'TBD'; try
 function fmtRelativeTime(ts) { if (!ts) return ''; const diff = Date.now() - ts; const s = Math.floor(diff / 1000); if (s < 60) return 'Just now'; const m = Math.floor(s / 60); if (m < 60) return `${m} min ago`; const h = Math.floor(m / 60); if (h < 24) return `${h} hr ago`; const d = Math.floor(h / 24); if (d < 7) return `${d} day${d>1?'s':''} ago`; return fmtDate(ts); }
 
 let audioCtx = null; let audioUnlocked = false;
-function getAudioCtx() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; } } if (audioCtx.state === 'suspended') { audioCtx.resume().catch(()=>{}); } return audioCtx; }
-function unlockAudio() { const ctx = getAudioCtx(); if (!ctx || audioUnlocked) return; try { const buf = ctx.createBuffer(1, 1, 22050); const src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); src.start(0); audioUnlocked = true; } catch(e) {} }
-['click','touchstart','touchend','keydown','pointerdown'].forEach(ev => { document.addEventListener(ev, unlockAudio, { once: false, passive: true }); });
-function playNotifSound() { const ctx = getAudioCtx(); if (!ctx) return; try { const now = ctx.currentTime; const notes = [ { f: 783.99, t: 0.00, d: 0.35, v: 0.22 }, { f: 987.77, t: 0.16, d: 0.40, v: 0.24 }, { f: 1318.51, t: 0.34, d: 0.85, v: 0.20 } ]; const master = ctx.createGain(); master.gain.setValueAtTime(0.85, now); master.connect(ctx.destination); notes.forEach(n => { const osc1 = ctx.createOscillator(); const g1 = ctx.createGain(); osc1.type = 'sine'; osc1.frequency.setValueAtTime(n.f, now + n.t); osc1.frequency.exponentialRampToValueAtTime(n.f * 0.995, now + n.t + n.d); g1.gain.setValueAtTime(0.0001, now + n.t); g1.gain.exponentialRampToValueAtTime(n.v, now + n.t + 0.018); g1.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d); osc1.connect(g1); g1.connect(master); osc1.start(now + n.t); osc1.stop(now + n.t + n.d + 0.08); }); if (navigator.vibrate) { try { navigator.vibrate([90, 50, 90]); } catch(e) {} } } catch(e) {} }
+function getAudioCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; }
+  }
+  return audioCtx;
+}
+function withAudioReady(fn) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  if (ctx.state === 'suspended') {
+    ctx.resume().then(() => { try { fn(ctx); } catch(e) {} }).catch(() => {});
+  } else {
+    try { fn(ctx); } catch(e) {}
+  }
+}
+function unlockAudio() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  if (ctx.state === 'suspended') { ctx.resume().catch(() => {}); }
+  if (audioUnlocked) return;
+  try {
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.start(0);
+    audioUnlocked = true;
+  } catch(e) {}
+}
+['click','touchstart','touchend','keydown','pointerdown'].forEach(ev => {
+  document.addEventListener(ev, unlockAudio, { once: false, passive: true, capture: true });
+});
+
+function playNotifSound() {
+  withAudioReady((ctx) => {
+    const now = ctx.currentTime;
+    const notes = [
+      { f: 783.99, t: 0.00, d: 0.35, v: 0.28 },
+      { f: 987.77, t: 0.16, d: 0.40, v: 0.30 },
+      { f: 1318.51, t: 0.34, d: 0.85, v: 0.25 }
+    ];
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.9, now);
+    master.connect(ctx.destination);
+    notes.forEach(n => {
+      const osc1 = ctx.createOscillator();
+      const g1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(n.f, now + n.t);
+      osc1.frequency.exponentialRampToValueAtTime(n.f * 0.995, now + n.t + n.d);
+      g1.gain.setValueAtTime(0.0001, now + n.t);
+      g1.gain.exponentialRampToValueAtTime(n.v, now + n.t + 0.018);
+      g1.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+      osc1.connect(g1); g1.connect(master);
+      osc1.start(now + n.t); osc1.stop(now + n.t + n.d + 0.08);
+    });
+    if (navigator.vibrate) { try { navigator.vibrate([90, 50, 90]); } catch(e) {} }
+  });
+}
+
+function playWarningSound() {
+  withAudioReady((ctx) => {
+    const now = ctx.currentTime;
+    const tones = [
+      { f1: 540, f2: 460, t: 0.00, d: 0.09 },
+      { f1: 420, f2: 340, t: 0.10, d: 0.13 }
+    ];
+    tones.forEach(n => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(n.f1, now + n.t);
+      osc.frequency.exponentialRampToValueAtTime(n.f2, now + n.t + n.d);
+      gain.gain.setValueAtTime(0.0001, now + n.t);
+      gain.gain.exponentialRampToValueAtTime(0.24, now + n.t + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now + n.t); osc.stop(now + n.t + n.d + 0.02);
+    });
+  });
+  if (navigator.vibrate) { try { navigator.vibrate(45); } catch(e) {} }
+}
 
 // Soft UI click sound. Preference is saved locally on this device.
 function isClickSoundEnabled() {
@@ -1474,26 +1552,24 @@ function isClickSoundEnabled() {
 }
 function playClickSound() {
   if (!isClickSoundEnabled()) return;
-  const ctx = getAudioCtx();
-  if (!ctx) return;
-  try {
+  withAudioReady((ctx) => {
+    const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    const now = ctx.currentTime;
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(620, now);
-    osc.frequency.exponentialRampToValueAtTime(440, now + 0.055);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(860, now);
+    osc.frequency.exponentialRampToValueAtTime(460, now + 0.045);
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.055, now + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.065);
+    gain.gain.exponentialRampToValueAtTime(0.24, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
     osc.connect(gain); gain.connect(ctx.destination);
-    osc.start(now); osc.stop(now + 0.07);
-  } catch(e) {}
+    osc.start(now); osc.stop(now + 0.06);
+  });
 }
-// One delegated listener covers dynamically-created modal buttons as well.
+// One delegated listener covers all buttons and interactive controls cleanly.
 document.addEventListener('click', (e) => {
-  const button = e.target.closest('button');
-  if (button && !button.disabled && button.id !== 'clickSoundToggle') playClickSound();
+  const target = e.target.closest('button, .btn, .bn-item, .nav-item, .filter-chip, .pe-account-row, [role="button"], .theme-card, a.channel-btn');
+  if (target && !target.disabled && target.id !== 'clickSoundToggle') playClickSound();
 }, true);
 
 async function copyTextToClipboard(value) {
@@ -1805,6 +1881,7 @@ function ensureTermsAgreed(actionCallback) {
     errBox.style.display = 'block';
     errBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+  playWarningSound();
   toast('warning', 'Terms Required', 'Please accept the Terms of Use and Privacy Policy to continue.');
   return false;
 }
@@ -2070,9 +2147,22 @@ function addVerifiedDeviceGoogleAccount(email, name) {
 async function onGoogleUserAuthenticated(user, explicitEmail = null, explicitName = null) {
   const email = (explicitEmail || user?.email || '').trim().toLowerCase();
   const displayName = explicitName || user?.displayName || email.split('@')[0];
-  const uid = user?.uid || ('g_' + btoa(email).replace(/=/g, ''));
 
-  // 1. Check if user already exists in RTDB
+  // If coming from native account picker (user === null), try saved device credential first so Firebase Auth is active!
+  if (!user && email) {
+    let savedPwd = '';
+    try { savedPwd = localStorage.getItem('pe_pwd_' + email) || ''; } catch(e) {}
+    if (savedPwd) {
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, savedPwd);
+        if (cred?.user) user = cred.user;
+      } catch(e) {}
+    }
+  }
+
+  const uid = user?.uid || auth.currentUser?.uid || ('g_' + btoa(email).replace(/=/g, ''));
+
+  // 1. Check if user already exists in RTDB (requires active Firebase Auth on protected rules)
   let existingUser = null;
   try {
     const userSnap = await get(ref(db, 'users/' + uid));
@@ -2095,9 +2185,24 @@ async function onGoogleUserAuthenticated(user, explicitEmail = null, explicitNam
     } catch (e) {}
   }
 
+  // Fallback scan if RTDB lacks .indexOn: "email" or email casing differs
+  if (!existingUser && (user || auth.currentUser)) {
+    try {
+      const allSnap = await get(ref(db, 'users'));
+      if (allSnap.exists()) {
+        allSnap.forEach(c => {
+          const val = c.val();
+          if (val && val.freeFireUid && String(val.email || '').trim().toLowerCase() === email) {
+            existingUser = { uid: c.key, ...val };
+          }
+        });
+      }
+    } catch (e) {}
+  }
+
   // FLOW RULE 1: Existing registered user -> direct dashboard redirect
   if (existingUser && existingUser.freeFireUid) {
-    State.user = user || { uid: existingUser.uid, email: existingUser.email, displayName: existingUser.displayName };
+    State.user = user || auth.currentUser || { uid: existingUser.uid, email: existingUser.email, displayName: existingUser.displayName };
     State.profile = existingUser;
     try { localStorage.setItem('pe_saved_email', email); } catch(e) {}
     $('#authScreen').style.display = 'none';
@@ -2105,6 +2210,17 @@ async function onGoogleUserAuthenticated(user, explicitEmail = null, explicitNam
     await initApp();
     toast('success', 'Logged In!', `Welcome back, ${existingUser.freeFireUsername || existingUser.displayName || 'Player'}!`);
     return;
+  }
+
+  // 2. If not authenticated yet, check whether this email is already registered in Firebase Auth
+  if (!user && !auth.currentUser && email) {
+    try {
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (Array.isArray(methods) && methods.length > 0) {
+        openPasswordLoginModal(email, true);
+        return;
+      }
+    } catch(e) {}
   }
 
   // FLOW RULE 2: New user -> Complete Profile / Register with read-only Google email and 4 fields
@@ -2190,6 +2306,9 @@ function openGoogleRegistrationModal(email, defaultName, authUser) {
         <button type="submit" class="btn btn-primary btn-block" id="gRegSubmitBtn" style="margin-top:16px;">
           <i class="fa-solid fa-check"></i> Complete Registration
         </button>
+        <p class="tc mt-3" style="margin-bottom:0;">
+          <a href="#" id="gRegSwitchToLogin" style="font-size:.82rem;font-weight:600;">Already have an account? Sign In with Password</a>
+        </p>
       </form>
     `,
     footerHTML: `<button class="btn btn-ghost w-100" data-x="c">Cancel</button>`,
@@ -2201,6 +2320,15 @@ function openGoogleRegistrationModal(email, defaultName, authUser) {
     onMount: (el, close) => {
       el.querySelector('[data-x="c"]').onclick = () => close('cancel');
       el._markRegistrationComplete = () => { registrationCompleted = true; };
+      const switchLoginLink = el.querySelector('#gRegSwitchToLogin');
+      if (switchLoginLink) {
+        switchLoginLink.onclick = (ev) => {
+          ev.preventDefault();
+          registrationCompleted = true;
+          close('complete');
+          openPasswordLoginModal(email, true);
+        };
+      }
 
       const passInput = el.querySelector('#gRegPass');
       const passToggle = el.querySelector('#gRegPassToggle');
@@ -2249,21 +2377,74 @@ function openGoogleRegistrationModal(email, defaultName, authUser) {
               uid = cred.user.uid;
             } catch(createErr) {
               if (createErr?.code?.includes('email-already-in-use')) {
+                // Email already exists! Try signing in with entered password — NEVER create a duplicate fake UID!
                 try {
                   const cred = await signInWithEmailAndPassword(auth, email, pass);
                   currentAuthUser = cred.user;
                   uid = cred.user.uid;
+
+                  // Check if profile already exists in RTDB so we NEVER overwrite existing balance/profile!
+                  const existSnap = await get(ref(db, 'users/' + uid)).catch(() => null);
+                  if (existSnap && existSnap.exists() && existSnap.val()?.freeFireUid) {
+                    const existingProf = existSnap.val();
+                    try {
+                      localStorage.setItem('pe_saved_email', email);
+                      localStorage.setItem('pe_pwd_' + email, pass);
+                    } catch(e) {}
+                    State.user = currentAuthUser;
+                    State.profile = existingProf;
+                    registrationCompleted = true;
+                    close('complete');
+                    $('#authScreen').style.display = 'none';
+                    $('#appShell').classList.add('active');
+                    await initApp();
+                    toast('success', 'Existing Account Loaded!', `Welcome back, ${existingProf.freeFireUsername || existingProf.displayName || 'Player'}!`);
+                    return;
+                  }
                 } catch(signErr) {
-                  uid = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+                  playWarningSound();
+                  alertBox.innerHTML = `
+                    <div class="alert error" style="flex-direction:column;align-items:flex-start;gap:8px;">
+                      <div><i class="fa-solid fa-circle-exclamation"></i> <b>Account already exists</b> for ${esc(email)}. Duplicate registration is not allowed.</div>
+                      <button type="button" class="btn btn-primary btn-sm" id="btnExistingGoLogin">Sign In with Password instead</button>
+                    </div>`;
+                  const goLoginBtn = alertBox.querySelector('#btnExistingGoLogin');
+                  if (goLoginBtn) {
+                    goLoginBtn.onclick = () => {
+                      registrationCompleted = true;
+                      close('complete');
+                      openPasswordLoginModal(email, true);
+                    };
+                  }
+                  btn.disabled = false;
+                  btn.innerHTML = '<i class="fa-solid fa-check"></i> Complete Registration';
+                  return;
                 }
               } else {
-                uid = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+                throw createErr;
               }
             }
           }
 
           if (currentAuthUser) {
             try { await updateProfile(currentAuthUser, { displayName: ffName }); } catch(e) {}
+          }
+
+          // Double-check if this UID already has an existing registered profile
+          if (uid) {
+            const doubleCheckSnap = await get(ref(db, 'users/' + uid)).catch(() => null);
+            if (doubleCheckSnap && doubleCheckSnap.exists() && doubleCheckSnap.val()?.freeFireUid) {
+              const existingProf = doubleCheckSnap.val();
+              State.user = currentAuthUser;
+              State.profile = existingProf;
+              registrationCompleted = true;
+              close('complete');
+              $('#authScreen').style.display = 'none';
+              $('#appShell').classList.add('active');
+              await initApp();
+              toast('success', 'Logged In!', `Welcome back, ${existingProf.freeFireUsername || existingProf.displayName || 'Player'}!`);
+              return;
+            }
           }
 
           const now = Date.now();
@@ -2356,11 +2537,11 @@ function openRegisterModal(prefilledEmail = '', prefilledName = '') {
   openGoogleRegistrationModal(prefilledEmail || '', prefilledName || '', null);
 }
 
-function openPasswordLoginModal() {
+function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
   openModal({
     title: 'Sign In with Password',
     bodyHTML: `
-      <div id="pwdModalAlert"></div>
+      <div id="pwdModalAlert">${isExistingNotice ? `<div class="alert info" style="margin-bottom:12px;"><i class="fa-solid fa-circle-info"></i><span>Account found for <b>${esc(prefilledEmail)}</b>. Enter your password to sign in.</span></div>` : ''}</div>
       <form id="pwdLoginForm" novalidate>
         <div class="field" style="position:relative;">
           <label>Email <span class="req">*</span></label>
@@ -2397,7 +2578,7 @@ function openPasswordLoginModal() {
       setupEmailAutocomplete(emailInput, emailSuggest);
 
       try {
-        const saved = localStorage.getItem('pe_saved_email');
+        const saved = prefilledEmail || localStorage.getItem('pe_saved_email');
         if (saved) emailInput.value = saved;
       } catch(e) {}
 
@@ -5616,7 +5797,7 @@ function initSpinWheel() {
 }
 
 window.PE = { State, toast, openModal, confirmDialog, playNotifSound, openVipStore, openAdminDM, loadMyTeam, renderMyTeam, switchMyTab };
-console.log('%cPunjab Esports v2.5.1 — Royal Gold', 'color:#d4af37;font-weight:bold;font-size:14px');
+console.log('%cPunjab Esports v1.0.0 — Royal Gold', 'color:#d4af37;font-weight:bold;font-size:14px');
 </script>
 </body>
 </html>
