@@ -1,0 +1,8 @@
+{
+	"appId": "com.punjab.esports",
+	"appName": "Punjab Esports",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	}
+}
