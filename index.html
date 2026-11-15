@@ -5,7 +5,12 @@
   // FIX: Apply theme and Dark/Light mode instantly from localStorage to prevent splash screen flash
   (function() {
     try {
-      const t = localStorage.getItem('pe_theme') || 'gold';
+      if (!localStorage.getItem('pe_default_theme_v2')) {
+        var cur = localStorage.getItem('pe_theme');
+        if (!cur || cur === 'gold') localStorage.setItem('pe_theme', 'mono');
+        localStorage.setItem('pe_default_theme_v2', '1');
+      }
+      const t = localStorage.getItem('pe_theme') || 'mono';
       const b = localStorage.getItem('pe_bg') || 'light';
       const splashColors = {
         amoled: ['#8b5cf6', '#a78bfa'], cyber: ['#00a3ff', '#4dc4ff'],
@@ -15,7 +20,7 @@
         mono: b === 'dark' ? ['#ffffff', '#d4d4d8'] : ['#111111', '#3f3f46'],
         sunset: ['#f43f5e', '#fb923c']
       };
-      const colors = splashColors[t] || splashColors.gold;
+      const colors = splashColors[t] || splashColors.mono;
       document.documentElement.style.setProperty('--splash-ac', colors[0]);
       document.documentElement.style.setProperty('--splash-ac2', colors[1]);
       document.documentElement.setAttribute('data-theme', t);
@@ -24,7 +29,7 @@
       const color = isDark ? '#000000' : '#ffffff';
       document.documentElement.style.backgroundColor = color;
     } catch(e) {
-      document.documentElement.setAttribute('data-theme', 'gold');
+      document.documentElement.setAttribute('data-theme', 'mono');
       document.documentElement.setAttribute('data-bg', 'light');
       document.documentElement.style.backgroundColor = '#ffffff';
     }
@@ -34,11 +39,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#ffffff" id="appThemeColor">
 <meta name="color-scheme" content="dark light">
-<link rel="icon" type="image/png" href="assets/aistudio/41120_logo_transparent_d86f7d93.png">
-<link rel="shortcut icon" type="image/png" href="assets/aistudio/41120_logo_transparent_d86f7d93.png">
-<link rel="apple-touch-icon" href="assets/aistudio/41120_logo_transparent_d86f7d93.png">
-<link rel="apple-touch-icon-precomposed" href="assets/aistudio/41120_logo_transparent_d86f7d93.png">
-<meta property="og:image" content="assets/aistudio/41120_logo_transparent_d86f7d93.png">
+<link rel="icon" type="image/png" href="assets/aistudio/41120_logo_black.png">
+<link rel="shortcut icon" type="image/png" href="assets/aistudio/41120_logo_black.png">
+<link rel="apple-touch-icon" href="assets/aistudio/41120_logo_black.png">
+<link rel="apple-touch-icon-precomposed" href="assets/aistudio/41120_logo_black.png">
+<meta property="og:image" content="assets/aistudio/41120_logo_black.png">
 <link rel="manifest" href="/manifest.json">
 <script>
   if ('serviceWorker' in navigator && !window.Capacitor?.isNativePlatform?.()) {
@@ -122,13 +127,13 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 :focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:4px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 
-/* Splash screen follows the saved app theme immediately, default Royal Gold */
-#splash{position:fixed;inset:0;background:var(--bg,#000000);color:var(--tx);display:grid;place-items:center;z-index:2000;transition:opacity .4s ease}
+/* Splash screen follows the saved app theme immediately, default Stealth Black */
+#splash{position:fixed;inset:0;background:var(--bg,#ffffff);color:var(--tx);display:grid;place-items:center;z-index:2000;transition:opacity .4s ease}
 #splash.hide{opacity:0;pointer-events:none}
-#splash .sp-logo{width:88px;height:88px;border-radius:24px;background:var(--splash-ac,#d4af37);display:grid;place-items:center;color:#fff;font-size:2.5rem;box-shadow:0 12px 35px color-mix(in srgb,var(--splash-ac,#d4af37) 22%,transparent);animation:spPulse 1.6s ease infinite}
+#splash .sp-logo{width:88px;height:88px;border-radius:24px;background:var(--splash-ac,#111111);display:grid;place-items:center;color:#fff;font-size:2.5rem;box-shadow:0 12px 35px color-mix(in srgb,var(--splash-ac,#111111) 22%,transparent);animation:spPulse 1.6s ease infinite}
 @keyframes spPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-#splash .sp-name{margin-top:20px;font-size:1.45rem;font-weight:700;letter-spacing:.3px;text-align:center;color:var(--splash-ac,#d4af37)}
-#splash .sp-loader{margin-top:24px;width:46px;height:46px;border-radius:50%;border:4.5px solid color-mix(in srgb,var(--splash-ac,#d4af37) 22%,transparent);border-top-color:var(--splash-ac,#d4af37);animation:spSpin .85s cubic-bezier(.65,.05,.36,1) infinite}
+#splash .sp-name{margin-top:20px;font-size:1.45rem;font-weight:700;letter-spacing:.3px;text-align:center;color:var(--splash-ac,#111111)}
+#splash .sp-loader{margin-top:24px;width:46px;height:46px;border-radius:50%;border:4.5px solid color-mix(in srgb,var(--splash-ac,#111111) 22%,transparent);border-top-color:var(--splash-ac,#111111);animation:spSpin .85s cubic-bezier(.65,.05,.36,1) infinite}
 @keyframes spSpin{to{transform:rotate(360deg)}}
 
 #authScreen{position:fixed;inset:0;display:grid;place-items:center;padding:20px;padding-top:calc(20px + var(--safe-t));padding-bottom:calc(20px + var(--safe-b));background:radial-gradient(circle at 20% 10%,var(--acs),transparent 55%),radial-gradient(circle at 85% 90%,var(--acs),transparent 50%),var(--bg);z-index:1000;overflow-y:auto;display:none}
@@ -171,7 +176,7 @@ button:active:not(:disabled){filter:brightness(.94)}
 #appShell{display:none}
 #appShell.active{display:block}
 .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:14px 18px;padding-top:calc(14px + var(--safe-t));background:var(--nav);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);transition:background var(--t),border-color var(--t)}
-.pe-theme-logo{display:inline-block;background:linear-gradient(135deg,var(--ac,#d4af37),var(--ac2,#f0cf6b));-webkit-mask-image:url('assets/aistudio/41120_logo_mask.png');mask-image:url('assets/aistudio/41120_logo_mask.png');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;flex-shrink:0}
+.pe-theme-logo{display:inline-block;background:linear-gradient(135deg,var(--ac,#111111),var(--ac2,#3f3f46));-webkit-mask-image:url('assets/aistudio/41120_logo_mask.png');mask-image:url('assets/aistudio/41120_logo_mask.png');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;flex-shrink:0}
 .topbar .tb-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 .topbar .tb-logo{width:38px;height:38px;border-radius:0;background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important;display:grid;place-items:center;flex-shrink:0}
 .topbar .tb-brand b{font-size:.95rem;display:-webkit-box;white-space:normal;line-height:1.2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -264,15 +269,16 @@ button:active:not(:disabled){filter:brightness(.94)}
 .slot-fill.full{background:linear-gradient(90deg,var(--er),#ff8566)}
 .slot-meta{display:flex;justify-content:space-between;font-size:.72rem;color:var(--txm)}
 
-.mb{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:9999;display:grid;place-items:center;padding:16px;padding-top:calc(16px + var(--safe-t));padding-bottom:calc(16px + var(--safe-b));overflow-y:auto}
-.modal{background:var(--sf,#ffffff);color:var(--tx,#0f172a);border:1px solid var(--bd,#e2e8f0);border-radius:var(--rl);box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;z-index:10000;width:100%;max-width:500px;max-height:92vh;display:flex;flex-direction:column;margin:auto}
-.mh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;border-bottom:1px solid var(--bd)}
-.mh h3{margin:0;font-size:1.05rem}
-.mbody{padding:18px;overflow-y:auto;flex:1}
-.mfoot{display:flex;gap:10px;justify-content:flex-end;padding:18px;border-top:1px solid var(--bd);flex-wrap:wrap}
-.close-x{background:none;border:none;color:var(--txm);font-size:1.15rem;cursor:pointer;width:36px;height:36px;border-radius:var(--rs);display:grid;place-items:center}
+.mb{position:fixed;inset:0;background:rgba(0,0,0,0.62);backdrop-filter:blur(6px);z-index:9999;display:grid;place-items:center;padding:max(42px,calc(22px + var(--safe-t))) 20px max(28px,calc(18px + var(--safe-b))) 20px;overflow-y:auto}
+.modal{background:var(--sf,#ffffff);color:var(--tx,#0f172a);border:1px solid var(--bd,#e2e8f0);border-radius:20px;box-shadow:0 18px 50px rgba(0,0,0,0.28);position:relative;z-index:10000;width:100%;max-width:392px;max-height:calc(100dvh - 82px);display:flex;flex-direction:column;margin:auto;overflow:hidden}
+.mh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--bd)}
+.mh h3{margin:0;font-size:.96rem;font-weight:700;line-height:1.3;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.mbody{padding:14px 16px;overflow-y:auto;flex:1;font-size:.84rem}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;padding:11px 16px;border-top:1px solid var(--bd);flex-wrap:wrap}
+.close-x{background:none;border:none;color:var(--txm);font-size:1rem;cursor:pointer;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
 .close-x:hover{background:var(--sf2);color:var(--er)}
-@media(max-width:480px){.mfoot{flex-direction:column-reverse}.mfoot .btn{width:100%}}
+.mfoot .btn{min-height:40px;padding:8px 14px;font-size:.84rem;border-radius:12px}
+@media(max-width:480px){.mb{padding:max(44px,calc(24px + var(--safe-t))) 18px max(28px,calc(18px + var(--safe-b))) 18px}.mfoot{flex-direction:column-reverse}.mfoot .btn{width:100%;min-height:40px}.mfoot.mfoot-row{flex-direction:row}.mfoot.mfoot-row .btn{width:auto;flex:1}}
 
 #toastHost{position:fixed;top:calc(16px + var(--safe-t));right:16px;left:16px;z-index:10001;display:flex;flex-direction:column;gap:8px;max-width:calc(100vw - 32px);margin-left:auto;pointer-events:none}
 @media(min-width:600px){#toastHost{left:auto;max-width:360px}}
@@ -341,13 +347,13 @@ button:active:not(:disabled){filter:brightness(.94)}
 .room-row .rv{font-weight:600;font-size:.95rem;font-family:ui-monospace,Menlo,monospace;color:var(--ac2);letter-spacing:1px}
 .copy-btn{background:var(--acs);color:var(--ac2);border:none;padding:6px 10px;border-radius:var(--rs);cursor:pointer;font-size:.72rem;font-weight:600}
 
-.notif-modal .modal{max-width:520px}
-.notif-header-count{background:var(--er);color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:var(--rp);margin-left:8px}
-.notif-list{display:flex;flex-direction:column;gap:10px}
-.notif-item{display:flex;gap:12px;padding:14px;border-radius:var(--rm);background:var(--sf2);border:1px solid var(--bd);transition:all var(--t);position:relative;cursor:pointer}
+.notif-modal .modal{max-width:392px}
+.notif-header-count{background:var(--er);color:#fff;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:var(--rp);margin-left:4px}
+.notif-list{display:flex;flex-direction:column;gap:8px}
+.notif-item{display:flex;gap:10px;padding:10px 12px;border-radius:12px;background:var(--sf2);border:1px solid var(--bd);transition:all var(--t);position:relative;cursor:pointer}
 .notif-item.unread{background:linear-gradient(135deg,var(--acs),transparent 80%);border-color:var(--acs)}
-.notif-item.unread::before{content:'';position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--ac);box-shadow:0 0 8px var(--ac)}
-.notif-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;font-size:1.15rem}
+.notif-item.unread::before{content:'';position:absolute;top:11px;right:11px;width:7px;height:7px;border-radius:50%;background:var(--ac);box-shadow:0 0 6px var(--ac)}
+.notif-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;font-size:.95rem}
 .notif-icon.registration{background:var(--oks);color:var(--ok)}
 .notif-icon.balance{background:var(--acs);color:var(--ac2)}
 .notif-icon.deposit{background:var(--oks);color:var(--ok)}
@@ -355,26 +361,30 @@ button:active:not(:disabled){filter:brightness(.94)}
 .notif-icon.reward{background:var(--wns);color:var(--wn)}
 .notif-icon.reject{background:var(--ers);color:var(--er)}
 .notif-icon.info{background:var(--sf3);color:var(--txd)}
-.notif-content{flex:1;min-width:0;padding-right:14px}
-.notif-title{font-weight:600;font-size:.9rem;color:var(--tx);margin-bottom:3px}
-.notif-body{font-size:.78rem;color:var(--txd);line-height:1.5;word-break:break-word;margin-bottom:6px}
-.notif-time{font-size:.68rem;color:var(--txm);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:5px}
-.notif-empty{text-align:center;padding:60px 20px;color:var(--txm)}
-.notif-empty i{font-size:3rem;margin-bottom:14px;opacity:.4;color:var(--ac2)}
-.notif-empty h4{color:var(--txd);font-size:.95rem;margin-bottom:6px}
+.notif-content{flex:1;min-width:0;padding-right:12px}
+.notif-title{font-weight:600;font-size:.84rem;color:var(--tx);margin-bottom:2px;line-height:1.3}
+.notif-body{font-size:.74rem;color:var(--txd);line-height:1.4;word-break:break-word;margin-bottom:4px}
+.notif-time{font-size:.64rem;color:var(--txm);text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:4px}
+.notif-empty{text-align:center;padding:38px 16px;color:var(--txm)}
+.notif-empty i{font-size:2.4rem;margin-bottom:10px;opacity:.4;color:var(--ac2)}
+.notif-empty h4{color:var(--txd);font-size:.9rem;margin-bottom:4px}
 
-.share-preview{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rm);padding:12px;font-size:.8rem;color:var(--txd);white-space:pre-wrap;line-height:1.5;margin-bottom:12px;max-height:100px;overflow-y:auto;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
-.share-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;width:100%;box-sizing:border-box}
-.share-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px 10px;border-radius:var(--rm);text-decoration:none;color:#fff;font-size:.85rem;font-weight:600;text-align:center;transition:transform var(--t);cursor:pointer;width:100%;box-sizing:border-box}
+.rules-body h4{font-size:.86rem;font-weight:700;color:var(--tx);margin:10px 0 3px}
+.rules-body h4:first-child{margin-top:0}
+.rules-body p{font-size:.77rem;line-height:1.45;color:var(--txd);margin:0 0 8px}
+
+.share-preview{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rm);padding:10px;font-size:.76rem;color:var(--txd);white-space:pre-wrap;line-height:1.45;margin-bottom:10px;max-height:90px;overflow-y:auto;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+.share-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;width:100%;box-sizing:border-box}
+.share-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 8px;border-radius:12px;text-decoration:none;color:#fff;font-size:.8rem;font-weight:600;text-align:center;transition:transform var(--t);cursor:pointer;width:100%;box-sizing:border-box}
 .share-btn:active{transform:scale(.95)}
-.share-btn i{font-size:1.6rem}
+.share-btn i{font-size:1.35rem}
 .share-btn.whatsapp{background:linear-gradient(135deg,#25d366,#128c7e)}
 .share-btn.telegram{background:linear-gradient(135deg,#0088cc,#229ed9)}
 .share-btn.instagram{background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)}
 .share-btn.sms{background:linear-gradient(135deg,#3b82f6,#2563eb)}
 .share-btn.gmail{background:linear-gradient(135deg,#ea4335,#c5221f)}
 
-.channel-btn{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;text-decoration:none;color:#fff;font-weight:600;transition:all var(--t);margin-bottom:12px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+.channel-btn{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:14px;text-decoration:none;color:#fff;font-weight:600;transition:all var(--t);margin-bottom:8px;box-shadow:0 3px 12px rgba(0,0,0,.12)}
 .channel-btn:active{transform:scale(.98)}
 .channel-btn:last-child{margin-bottom:0}
 .channel-btn.whatsapp{background:linear-gradient(90deg,#128c7e,#25d366)}
@@ -382,10 +392,10 @@ button:active:not(:disabled){filter:brightness(.94)}
 .channel-btn.instagram{background:linear-gradient(90deg,#833ab4 0%,#fd1d1d 50%,#fcb045 100%)}
 .channel-btn.youtube{background:linear-gradient(90deg,#b91c1c,#ef4444)}
 .channel-btn.email{background:linear-gradient(90deg,#c5221f,#ea4335)}
-.channel-btn-icon{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;flex-shrink:0;font-size:1.4rem}
+.channel-btn-icon{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;flex-shrink:0;font-size:1.1rem}
 .channel-btn .cb-text{flex:1;min-width:0}
-.channel-btn .cb-text b{display:block;font-size:1.02rem;letter-spacing:.2px}
-.channel-btn .cb-text small{font-size:.76rem;opacity:.92;display:block;font-weight:400;margin-top:2px}
+.channel-btn .cb-text b{display:block;font-size:.88rem;letter-spacing:.1px;line-height:1.25}
+.channel-btn .cb-text small{font-size:.7rem;opacity:.92;display:block;font-weight:400;margin-top:1px;line-height:1.3}
 
 #profileName{font-size:1.35rem;word-break:break-word;line-height:1.3;margin-bottom:4px}
 .reward-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--rp);background:var(--oks);color:var(--ok);font-size:.72rem;font-weight:700}
@@ -458,22 +468,22 @@ button:active:not(:disabled){filter:brightness(.94)}
 .emoji-picker-popup.show { display:grid; }
 
 /* VIP PLANS */
-.vip-plan-card{border:2px solid var(--bd);border-radius:var(--rm);padding:14px;margin-bottom:12px;cursor:pointer;transition:all var(--t);position:relative;overflow:hidden}
+.vip-plan-card{border:1.5px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:all var(--t);position:relative;overflow:hidden}
 .vip-plan-card:active{transform:scale(0.98)}
 .vip-plan-card.selected{border-color:var(--ac);background:var(--acs)}
-.vip-plan-card .vpc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.vip-plan-card .vpc-head b{color:var(--ac2);font-size:1.05rem}
-.vip-plan-card .vpc-prices{display:flex;gap:16px;flex-wrap:wrap;font-size:0.85rem}
+.vip-plan-card .vpc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.vip-plan-card .vpc-head b{color:var(--ac2);font-size:0.92rem}
+.vip-plan-card .vpc-prices{display:flex;gap:12px;flex-wrap:wrap;font-size:0.78rem}
 .vip-plan-card .vpc-price{display:flex;align-items:center;gap:5px}
-.vip-plan-card .vpc-price i{font-size:0.75rem;opacity:0.8}
-.vip-feature-list{list-style:none;padding:0;margin:0 0 16px 0}
-.vip-feature-list li{display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--txd);margin-bottom:8px}
-.vip-feature-list li i{color:var(--ok)}
-.vip-badge-premium{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:var(--rp);text-transform:uppercase;letter-spacing:0.5px;margin-left:6px}
+.vip-plan-card .vpc-price i{font-size:0.72rem;opacity:0.8}
+.vip-feature-list{list-style:none;padding:0;margin:0 0 12px 0}
+.vip-feature-list li{display:flex;align-items:center;gap:7px;font-size:0.77rem;color:var(--txd);margin-bottom:5px;line-height:1.35}
+.vip-feature-list li i{color:var(--ok);font-size:.75rem}
+.vip-badge-premium{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;font-size:0.6rem;font-weight:800;padding:2px 7px;border-radius:var(--rp);text-transform:uppercase;letter-spacing:0.4px;margin-left:6px}
 .diamond-display{display:flex;align-items:center;gap:6px;font-weight:700;color:#67e8f9}
 .diamond-display i{font-size:1rem}
 
-.admin-note{background:var(--wns);border:1px dashed var(--wn);border-radius:var(--rm);padding:10px 14px;font-size:0.75rem;color:var(--wn);margin-bottom:14px;display:flex;gap:8px;align-items:flex-start}
+.admin-note{background:var(--wns);border:1px dashed var(--wn);border-radius:10px;padding:8px 11px;font-size:0.72rem;color:var(--wn);margin-bottom:10px;display:flex;gap:7px;align-items:flex-start;line-height:1.35}
 .admin-note i{margin-top:2px}
 
 /* Emoji Picker */
@@ -593,7 +603,7 @@ button:active:not(:disabled){filter:brightness(.94)}
 #splash .sp-logo-img {
   width: 96px;
   height: 96px;
-  background: linear-gradient(135deg, var(--splash-ac, var(--ac, #d4af37)), var(--splash-ac2, var(--ac2, #f0cf6b)));
+  background: linear-gradient(135deg, var(--splash-ac, var(--ac, #111111)), var(--splash-ac2, var(--ac2, #3f3f46)));
 }
 #splash .sp-name {
   margin-top: 16px;
@@ -601,7 +611,7 @@ button:active:not(:disabled){filter:brightness(.94)}
   font-weight: 700;
   letter-spacing: 0.2px;
   text-align: center;
-  color: var(--splash-ac, var(--ac, #d4af37));
+  color: var(--splash-ac, var(--ac, #111111));
   font-family: 'Poppins', sans-serif;
 }
 #splash .sp-loader {
@@ -609,8 +619,8 @@ button:active:not(:disabled){filter:brightness(.94)}
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 4px solid color-mix(in srgb, var(--splash-ac, var(--ac, #d4af37)) 22%, transparent);
-  border-top-color: var(--splash-ac, var(--ac, #d4af37));
+  border: 4px solid color-mix(in srgb, var(--splash-ac, var(--ac, #111111)) 22%, transparent);
+  border-top-color: var(--splash-ac, var(--ac, #111111));
   animation: spSpin 0.8s cubic-bezier(.65,.05,.36,1) infinite;
 }
 
@@ -636,19 +646,19 @@ button:active:not(:disabled){filter:brightness(.94)}
 .auth-contact-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: #fef3c7;
-  color: #78350f;
-  border: none;
-  padding: 10px 18px;
+  gap: 7px;
+  background: #f4f4f5;
+  color: #111111;
+  border: 1px solid #d4d4d8;
+  padding: 9px 16px;
   border-radius: 9999px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
-.auth-contact-btn:hover { background: #fde68a; }
+.auth-contact-btn:hover { background: #e4e4e7; }
 .auth-contact-btn:active { transform: scale(0.96); }
 
 .auth-center-brand {
@@ -668,7 +678,7 @@ button:active:not(:disabled){filter:brightness(.94)}
 .auth-brand-title {
   font-size: 2.1rem;
   font-weight: 800;
-  color: var(--ac, #d4af37);
+  color: var(--ac, #111111);
   margin: 0;
   letter-spacing: -0.5px;
   font-family: 'Poppins', sans-serif;
@@ -970,13 +980,13 @@ button:active:not(:disabled){filter:brightness(.94)}
 }
 
 
-/* Professional Emoji-Decorated Gmail Account Chooser Bottom-Sheet */
+/* Clean Google Identity Choose-Your-Account Bottom Sheet */
 .pe-account-sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.62);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.56);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 10002;
   display: flex;
   flex-direction: column;
@@ -990,17 +1000,15 @@ button:active:not(:disabled){filter:brightness(.94)}
 }
 .pe-account-sheet {
   width: 100%;
-  max-width: 450px;
-  background: var(--sf, #ffffff);
-  color: var(--tx, #0f172a);
-  border-top-left-radius: 32px;
-  border-top-right-radius: 32px;
-  border: 1.5px solid var(--bd, #e2e8f0);
-  border-bottom: none;
-  padding: 14px 20px 26px;
-  box-shadow: 0 -16px 56px rgba(0, 0, 0, 0.28);
-  animation: peSheetSlideUp .28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  max-height: 88vh;
+  max-width: 440px;
+  background: #ffffff;
+  color: #111827;
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+  padding: 12px 18px calc(20px + var(--safe-b));
+  box-shadow: 0 -14px 48px rgba(0, 0, 0, 0.22);
+  animation: peSheetSlideUp .26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  max-height: 86vh;
   overflow-y: auto;
   box-sizing: border-box;
 }
@@ -1009,185 +1017,146 @@ button:active:not(:disabled){filter:brightness(.94)}
   to { transform: translateY(0); }
 }
 .pe-sheet-handle {
-  width: 44px;
-  height: 5px;
+  width: 38px;
+  height: 4px;
   border-radius: 999px;
-  background: var(--bd2, #cbd5e1);
-  margin: 0 auto 16px;
+  background: #cbd5e1;
+  margin: 0 auto 14px;
 }
-.pe-sheet-logo {
-  width: 56px;
-  height: 56px;
+.pe-sheet-google-mark {
+  width: 38px;
+  height: 38px;
   margin: 0 auto 10px;
   display: block;
 }
-.pe-sheet-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: var(--acs, rgba(212,175,55,.12));
-  color: var(--ac, #d4af37);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin: 0 auto 10px;
-}
 .pe-sheet-title {
-  font-size: 1.38rem;
-  font-weight: 800;
-  color: var(--tx, #0f172a);
-  margin: 0 0 4px;
+  font-size: 1.32rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px;
   text-align: center;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
   font-family: inherit;
 }
-.pe-sheet-sub {
-  font-size: 0.86rem;
-  color: var(--txd, #64748b);
-  margin: 0 0 18px;
-  text-align: center;
-  font-weight: 500;
-}
-.pe-accounts-section-label {
+.pe-sheet-brand-divider {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  font-size: 0.74rem;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.pe-sheet-brand-line {
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+.pe-sheet-brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.9rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--txm, #64748b);
-  margin: 4px 4px 10px;
+  color: #111827;
+  white-space: nowrap;
+}
+.pe-sheet-brand-pill img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
 }
 .pe-accounts-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 14px;
 }
 .pe-account-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: var(--sf2, #f8fafc);
-  border: 1.5px solid var(--bd, #e2e8f0);
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   cursor: pointer;
-  transition: all .18s ease;
+  transition: background .16s ease, border-color .16s ease, transform .14s ease;
   user-select: none;
-  position: relative;
 }
 .pe-account-row:hover {
-  border-color: var(--ac, #d4af37);
-  background: var(--sf3, #f1f5f9);
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 .pe-account-row:active {
   transform: scale(0.985);
 }
 .pe-account-avatar {
-  width: 46px;
-  height: 46px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-size: 1rem;
+  font-weight: 600;
   flex-shrink: 0;
-  position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  background: #1d4ed8;
 }
-.pe-account-emoji-tag {
-  position: absolute;
-  bottom: -2px;
-  right: -3px;
+.pe-account-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.pe-account-info {
+  flex: 1;
+  min-width: 0;
+}
+.pe-account-email {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #1e293b;
+  word-break: break-word;
+  line-height: 1.3;
+}
+.pe-account-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 1px;
+}
+.pe-account-radio {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--sf, #ffffff);
-  border: 1.5px solid var(--bd, #e2e8f0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.68rem;
-  line-height: 1;
-}
-.pe-account-name {
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: var(--tx, #0f172a);
-  line-height: 1.25;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.pe-account-email {
-  font-size: 0.82rem;
-  color: var(--txd, #64748b);
-  margin-top: 3px;
-  word-break: break-all;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.pe-gmail-chip {
-  font-size: 0.64rem;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: var(--acs, rgba(212,175,55,.15));
-  color: var(--ac, #d4af37);
-}
-.pe-account-go {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--sf, #ffffff);
-  border: 1px solid var(--bd, #e2e8f0);
-  color: var(--ac, #d4af37);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
+  border: 1.8px solid #475569;
   flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  transition: all .15s ease;
 }
-.pe-sheet-device-btn {
-  background: linear-gradient(135deg, var(--acs, rgba(212,175,55,.12)), transparent 85%);
-  border: 1.5px dashed var(--ac, #d4af37);
+.pe-account-row.selected .pe-account-radio {
+  border-color: #1a73e8;
+  background: #1a73e8;
 }
-.pe-sheet-manual-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  margin-top: 12px;
-  padding: 8px;
-  background: none;
-  border: none;
-  color: var(--ac, #d4af37);
-  font-size: 0.84rem;
-  font-weight: 600;
-  cursor: pointer;
+.pe-account-row.selected .pe-account-radio::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffffff;
 }
 .pe-sheet-cancel-btn {
   width: 100%;
-  height: 48px;
+  height: 46px;
   border-radius: 9999px;
-  border: 1.5px solid var(--bd2, #cbd5e1);
-  background: var(--sf2, #f8fafc);
-  color: var(--tx, #0f172a);
-  font-size: 0.96rem;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #111827;
+  font-size: 0.94rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 10px;
+  transition: background 0.16s ease, transform 0.14s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1195,6 +1164,7 @@ button:active:not(:disabled){filter:brightness(.94)}
 }
 .pe-sheet-cancel-btn:active {
   transform: scale(0.98);
+  background: #f8fafc;
 }
 
 </style>
@@ -1844,7 +1814,7 @@ const THEME_DEFS = [
   { id:'sunset', name:'Sunset Rose', dots:['#1f0610','#f43f5e','#fb923c'] }
 ];
 
-let themeState = { mode: 'user', globalTheme: 'gold', default: 'gold', enabled: {}, userTheme: null, darkMode: true };
+let themeState = { mode: 'user', globalTheme: 'mono', default: 'mono', enabled: {}, userTheme: null, darkMode: true };
 
 const SPLASH_THEME_COLORS = {
   amoled: ['#8b5cf6', '#a78bfa'], cyber: ['#00a3ff', '#4dc4ff'],
@@ -1858,13 +1828,13 @@ function updateSplashAccent(id) {
   const isDark = document.documentElement.getAttribute('data-bg') === 'dark';
   const colors = (id === 'mono' && isDark)
     ? ['#ffffff', '#d4d4d8']
-    : (SPLASH_THEME_COLORS[id] || SPLASH_THEME_COLORS.gold);
+    : (SPLASH_THEME_COLORS[id] || SPLASH_THEME_COLORS.mono);
   document.documentElement.style.setProperty('--splash-ac', colors[0]);
   document.documentElement.style.setProperty('--splash-ac2', colors[1]);
 }
 
 function applyTheme(id) {
-  if (!THEME_DEFS.find(t => t.id === id)) id = 'gold';
+  if (!THEME_DEFS.find(t => t.id === id)) id = 'mono';
   document.documentElement.setAttribute('data-theme', id);
   updateSplashAccent(id);
   try { localStorage.setItem('pe_theme', id); } catch(e) {}
@@ -1873,7 +1843,7 @@ function applyTheme(id) {
 function applyBgMode(isDark) {
   document.documentElement.setAttribute('data-bg', isDark ? 'dark' : 'light');
   try { localStorage.setItem('pe_bg', isDark ? 'dark' : 'light'); } catch(e) {}
-  updateSplashAccent(document.documentElement.getAttribute('data-theme') || 'gold');
+  updateSplashAccent(document.documentElement.getAttribute('data-theme') || 'mono');
   
   const toggle = $('#darkModeToggle');
   const knob = $('#darkModeKnob');
@@ -1900,18 +1870,26 @@ function applyBgMode(isDark) {
   }
 }
 
-let __initialTheme = 'gold';
+let __initialTheme = 'mono';
 let __initialBg = 'light';
 try { 
-  __initialTheme = localStorage.getItem('pe_theme') || 'gold'; 
+  __initialTheme = localStorage.getItem('pe_theme') || 'mono'; 
   __initialBg = localStorage.getItem('pe_bg') || 'light';
 } catch(e) {}
 applyTheme(__initialTheme);
 applyBgMode(__initialBg === 'dark');
 
-function computeActiveTheme() { if (themeState.mode === 'global') return themeState.globalTheme || themeState.default || 'gold'; const userPick = themeState.userTheme; if (userPick && THEME_DEFS.find(t => t.id === userPick)) { if (themeState.enabled[userPick] !== false) return userPick; } return themeState.default || 'gold'; }
+function computeActiveTheme() {
+  if (themeState.mode === 'global') return themeState.globalTheme || themeState.default || 'mono';
+  const userPick = themeState.userTheme;
+  if (userPick && THEME_DEFS.find(t => t.id === userPick)) {
+    if (themeState.enabled[userPick] !== false) return userPick;
+  }
+  const fallbackDef = (themeState.default && themeState.default !== 'gold') ? themeState.default : 'mono';
+  return fallbackDef;
+}
 function refreshTheme() { applyTheme(computeActiveTheme()); }
-async function loadThemeSettings() { try { const snap = await get(ref(db, 'themeSettings')); const cfg = snap.exists() ? snap.val() : {}; themeState.mode = cfg.mode || 'user'; themeState.globalTheme = cfg.globalTheme || 'gold'; themeState.default = cfg.default || 'gold'; themeState.enabled = cfg.enabled || {}; } catch (e) {} }
+async function loadThemeSettings() { try { const snap = await get(ref(db, 'themeSettings')); const cfg = snap.exists() ? snap.val() : {}; themeState.mode = cfg.mode || 'user'; themeState.globalTheme = cfg.globalTheme || 'mono'; themeState.default = (cfg.default && cfg.default !== 'gold') ? cfg.default : 'mono'; themeState.enabled = cfg.enabled || {}; } catch (e) {} }
 async function loadUserTheme() { if (!State.user) { refreshTheme(); return; } try { const snap = await get(ref(db, 'users/' + State.user.uid + '/theme')); if (snap.exists()) themeState.userTheme = snap.val(); } catch (e) {} refreshTheme(); }
 
 const splashEl = $('#splash');
@@ -2112,19 +2090,39 @@ function handleContinueWithGoogle() {
   openGoogleAccountBottomSheet();
 }
 
+function getCachedAvatarForEmail(email) {
+  const clean = String(email || '').trim().toLowerCase();
+  if (!clean) return '';
+  try {
+    const direct = localStorage.getItem('pe_avatar_' + clean);
+    if (direct && (direct.startsWith('data:image') || /^https?:\/\//i.test(direct))) return direct;
+  } catch(e) {}
+  return '';
+}
+
+function saveAccountAvatarCache(email, photoUrl) {
+  const clean = String(email || '').trim().toLowerCase();
+  const pic = String(photoUrl || '').trim();
+  if (!clean || !pic || (!pic.startsWith('data:image') && !/^https?:\/\//i.test(pic))) return;
+  try {
+    localStorage.setItem('pe_avatar_' + clean, pic);
+    let list = JSON.parse(localStorage.getItem('pe_verified_google_accounts') || '[]');
+    if (!Array.isArray(list)) list = [];
+    const idx = list.findIndex(a => String(a?.email || '').toLowerCase() === clean);
+    if (idx >= 0) {
+      list[idx].photoUrl = pic;
+      localStorage.setItem('pe_verified_google_accounts', JSON.stringify(list));
+    }
+  } catch(e) {}
+}
+
 async function openGoogleAccountBottomSheet() {
   const existingSheet = document.getElementById('peAccountSheetBackdrop');
   if (existingSheet) existingSheet.remove();
 
-  const avatarColors = [
-    'linear-gradient(135deg,#e11d48,#fb7185)',
-    'linear-gradient(135deg,#0284c7,#38bdf8)',
-    'linear-gradient(135deg,#7c3aed,#a78bfa)',
-    'linear-gradient(135deg,#0d9488,#2dd4bf)',
-    'linear-gradient(135deg,#c026d3,#e879f9)',
-    'linear-gradient(135deg,#d97706,#fbbf24)'
+  const googlePalette = [
+    '#1565c0', '#7b1fa2', '#00897b', '#ef6c00', '#2e7d32', '#6a1b9a', '#1976d2', '#388e3c'
   ];
-  const rowEmojis = ['🎮', '🔥', '⚡', '🏆', '💎', '👑'];
 
   let savedAccounts = [];
   try {
@@ -2133,20 +2131,37 @@ async function openGoogleAccountBottomSheet() {
   } catch(e) {}
   if (!Array.isArray(savedAccounts)) savedAccounts = [];
 
+  let deviceAccounts = [];
+  const nativeGoogleAuth = window.Capacitor?.Plugins?.NativeGoogleAuth;
+  if (nativeGoogleAuth && typeof nativeGoogleAuth.getDeviceAccounts === 'function') {
+    try {
+      const devRes = await Promise.race([
+        nativeGoogleAuth.getDeviceAccounts(),
+        new Promise(res => setTimeout(() => res({ accounts: [] }), 450))
+      ]);
+      if (devRes && Array.isArray(devRes.accounts)) deviceAccounts = devRes.accounts;
+    } catch(e) {}
+  }
+
   const mergedMap = new Map();
-  const addCandidate = (email, name, color) => {
+  const addCandidate = (email, name, color, photoUrl) => {
     const clean = String(email || '').trim().toLowerCase();
     if (!clean || !clean.includes('@')) return;
+    const cachedPhoto = photoUrl || getCachedAvatarForEmail(clean);
     if (!mergedMap.has(clean)) {
       mergedMap.set(clean, {
         email: clean,
         name: (name && name.trim()) ? name.trim() : clean.split('@')[0],
-        color: color || avatarColors[mergedMap.size % avatarColors.length]
+        color: color || googlePalette[mergedMap.size % googlePalette.length],
+        photoUrl: cachedPhoto || ''
       });
+    } else if (cachedPhoto && !mergedMap.get(clean).photoUrl) {
+      mergedMap.get(clean).photoUrl = cachedPhoto;
     }
   };
 
-  savedAccounts.forEach(a => addCandidate(a?.email, a?.name, a?.color));
+  deviceAccounts.forEach((a, i) => addCandidate(a?.email, a?.name, googlePalette[i % googlePalette.length], a?.photoUrl));
+  savedAccounts.forEach((a, i) => addCandidate(a?.email, a?.name, a?.color || googlePalette[i % googlePalette.length], a?.photoUrl));
   try {
     const savedMail = (localStorage.getItem('pe_saved_email') || '').trim();
     if (savedMail) addCandidate(savedMail, savedMail.split('@')[0]);
@@ -2157,66 +2172,63 @@ async function openGoogleAccountBottomSheet() {
   backdrop.id = 'peAccountSheetBackdrop';
   backdrop.className = 'pe-account-sheet-backdrop';
 
-  const accountsHTML = accounts.length
-    ? `
-      <div class="pe-accounts-section-label">
-        <span>📬 Your Gmail Accounts</span>
-        <span>${accounts.length} ready ⚡</span>
-      </div>
-      ${accounts.map((acc, i) => `
-        <div class="pe-account-row" data-saved-email="${esc(acc.email)}" data-saved-name="${esc(acc.name || '')}">
-          <div class="pe-account-avatar" style="background:${acc.color || avatarColors[i % avatarColors.length]};">
-            ${esc((acc.name || acc.email).charAt(0).toUpperCase())}
-            <span class="pe-account-emoji-tag">${rowEmojis[i % rowEmojis.length]}</span>
-          </div>
-          <div style="flex:1;min-width:0;">
-            <div class="pe-account-name">
-              <span>${esc(acc.name || acc.email.split('@')[0])}</span>
-              <span class="pe-gmail-chip">📧 Gmail</span>
-            </div>
-            <div class="pe-account-email"><span>✉️</span><span>${esc(acc.email)}</span></div>
-          </div>
-          <div class="pe-account-go"><i class="fa-solid fa-arrow-right"></i></div>
+  const accountRowsHTML = accounts.map((acc, i) => {
+    const initial = esc((acc.email || acc.name || 'G').charAt(0).toUpperCase());
+    const bg = acc.color && !String(acc.color).includes('gradient') ? acc.color : googlePalette[i % googlePalette.length];
+    const hasPhoto = acc.photoUrl && (acc.photoUrl.startsWith('data:image') || /^https?:\/\//i.test(acc.photoUrl));
+    const avatarInner = hasPhoto
+      ? `<img src="${esc(acc.photoUrl)}" alt="${initial}">`
+      : initial;
+    return `
+      <div class="pe-account-row" data-saved-email="${esc(acc.email)}" data-saved-name="${esc(acc.name || '')}">
+        <div class="pe-account-avatar" style="background:${hasPhoto ? '#f1f5f9' : bg};">
+          ${avatarInner}
         </div>
-      `).join('')}
-    `
-    : '';
+        <div class="pe-account-info">
+          <div class="pe-account-email">${esc(acc.email)}</div>
+        </div>
+        <div class="pe-account-radio"></div>
+      </div>
+    `;
+  }).join('');
 
-  const pickFromDeviceRow = `
-    <div class="pe-account-row pe-sheet-device-btn" id="peTriggerRealGoogle">
-      <div class="pe-account-avatar" style="background:#ffffff;border:1.5px solid var(--bd2,#cbd5e1);width:46px;height:46px;">
-        <svg class="google-svg" viewBox="0 0 24 24" style="width:24px;height:24px;">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        <span class="pe-account-emoji-tag">📱</span>
+  const addAnotherRow = `
+    <div class="pe-account-row" id="peTriggerRealGoogle">
+      <div class="pe-account-avatar" style="background:#f1f5f9;color:#111827;border:1px solid #e2e8f0;font-size:1.05rem;">
+        <i class="fa-solid fa-user-plus" style="font-size:0.85rem;"></i>
       </div>
-      <div style="flex:1;min-width:0;">
-        <div class="pe-account-name">${accounts.length ? 'Add or Switch Gmail Account' : 'Select Gmail from Phone'}</div>
-        <div class="pe-account-email"><span>🔐</span><span>Pick any Google email saved on this device</span></div>
+      <div class="pe-account-info">
+        <div class="pe-account-email" style="font-weight:600;">${accounts.length ? 'Use another Google account' : 'Select Google account'}</div>
+        ${!accounts.length ? '<div class="pe-account-sub">Pick from device or sign in with Gmail</div>' : ''}
       </div>
-      <div class="pe-account-go"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="pe-account-radio"></div>
     </div>
   `;
 
   backdrop.innerHTML = `
     <div class="pe-account-sheet">
       <div class="pe-sheet-handle"></div>
-      <span class="pe-theme-logo pe-sheet-logo" role="img" aria-label="Punjab Esports Logo"></span>
-      <div style="text-align:center;">
-        <span class="pe-sheet-badge">📧 Gmail Sign-In</span>
+      <svg class="pe-sheet-google-mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+      </svg>
+      <h2 class="pe-sheet-title">Choose your account</h2>
+      <div class="pe-sheet-brand-divider">
+        <span class="pe-sheet-brand-line"></span>
+        <span class="pe-sheet-brand-pill">
+          <img src="assets/aistudio/41120_logo_black.png" alt="Punjab Esports">
+          <span>Punjab Esports</span>
+        </span>
+        <span class="pe-sheet-brand-line"></span>
       </div>
-      <h2 class="pe-sheet-title">🎮 Choose Your Account</h2>
-      <p class="pe-sheet-sub">✨ Continue to Punjab Esports securely</p>
 
       <div class="pe-accounts-container">
-        ${accountsHTML}
-        ${pickFromDeviceRow}
+        ${accountRowsHTML}
+        ${addAnotherRow}
       </div>
 
-      <button type="button" class="pe-sheet-manual-link" id="peManualEmailBtn">✉️ Enter another Gmail address manually</button>
       <button type="button" class="pe-sheet-cancel-btn" id="peSheetCancelBtn">Cancel</button>
     </div>
   `;
@@ -2225,7 +2237,7 @@ async function openGoogleAccountBottomSheet() {
 
   const closeSheet = () => {
     backdrop.style.opacity = '0';
-    setTimeout(() => backdrop.remove(), 200);
+    setTimeout(() => backdrop.remove(), 180);
   };
 
   backdrop.querySelector('#peSheetCancelBtn').onclick = closeSheet;
@@ -2238,17 +2250,15 @@ async function openGoogleAccountBottomSheet() {
     await executeGoogleOAuthFlow();
   };
 
-  backdrop.querySelector('#peManualEmailBtn').onclick = () => {
-    closeSheet();
-    promptGoogleEmailFallback();
-  };
-
   backdrop.querySelectorAll('.pe-account-row[data-saved-email]').forEach(row => {
     row.onclick = async () => {
+      row.classList.add('selected');
       const email = row.dataset.savedEmail;
       const name = row.dataset.savedName;
-      closeSheet();
-      await onGoogleUserAuthenticated(null, email, name);
+      setTimeout(async () => {
+        closeSheet();
+        await onGoogleUserAuthenticated(null, email, name);
+      }, 90);
     };
   });
 }
@@ -2294,7 +2304,7 @@ async function executeGoogleOAuthFlow() {
   try {
     const cred = await signInWithPopup(auth, googleProvider);
     if (cred && cred.user) {
-      addVerifiedDeviceGoogleAccount(cred.user.email, cred.user.displayName);
+      addVerifiedDeviceGoogleAccount(cred.user.email, cred.user.displayName, cred.user.photoURL || '');
       await onGoogleUserAuthenticated(cred.user);
       return;
     }
@@ -2377,20 +2387,28 @@ function promptGoogleEmailFallback() {
   });
 }
 
-function addVerifiedDeviceGoogleAccount(email, name) {
+function addVerifiedDeviceGoogleAccount(email, name, photoUrl = '') {
   if (!email) return;
   try {
+    const clean = email.trim().toLowerCase();
     let list = JSON.parse(localStorage.getItem('pe_verified_google_accounts') || '[]');
     if (!Array.isArray(list)) list = [];
-    if (!list.some(a => a.email.toLowerCase() === email.toLowerCase())) {
-      const avatarColors = ['#e11d48', '#0284c7', '#334155', '#7c3aed', '#0d9488', '#c026d3'];
+    const idx = list.findIndex(a => String(a?.email || '').toLowerCase() === clean);
+    const cached = photoUrl || getCachedAvatarForEmail(clean);
+    if (idx < 0) {
+      const avatarColors = ['#1565c0', '#7b1fa2', '#00897b', '#ef6c00', '#2e7d32', '#6a1b9a'];
       list.push({
-        name: name || email.split('@')[0],
-        email: email.toLowerCase(),
-        color: avatarColors[list.length % avatarColors.length]
+        name: name || clean.split('@')[0],
+        email: clean,
+        color: avatarColors[list.length % avatarColors.length],
+        photoUrl: cached || ''
       });
-      localStorage.setItem('pe_verified_google_accounts', JSON.stringify(list));
+    } else {
+      if (name) list[idx].name = name;
+      if (cached) list[idx].photoUrl = cached;
     }
+    localStorage.setItem('pe_verified_google_accounts', JSON.stringify(list));
+    if (cached) localStorage.setItem('pe_avatar_' + clean, cached);
   } catch(e) {}
 }
 
@@ -2454,6 +2472,7 @@ async function onGoogleUserAuthenticated(user, explicitEmail = null, explicitNam
   if (existingUser && existingUser.freeFireUid) {
     State.user = user || auth.currentUser || { uid: existingUser.uid, email: existingUser.email, displayName: existingUser.displayName };
     State.profile = existingUser;
+    addVerifiedDeviceGoogleAccount(email, existingUser.displayName || displayName, existingUser.photoUrl || user?.photoURL || '');
     try { localStorage.setItem('pe_saved_email', email); } catch(e) {}
     $('#authScreen').style.display = 'none';
     $('#appShell').classList.add('active');
@@ -2762,6 +2781,7 @@ function openGoogleRegistrationModal(email, defaultName, authUser) {
             localStorage.setItem('pe_saved_email', email);
             localStorage.setItem('pe_pwd_' + email, pass);
           } catch(e) {}
+          addVerifiedDeviceGoogleAccount(email, ffName, currentAuthUser?.photoURL || '');
 
           State.user = currentAuthUser || { uid, email, displayName: ffName };
           State.profile = newProfile;
@@ -3220,8 +3240,9 @@ function loadProfileUI() {
   $('#refCode').textContent = p.referralCode || '—';
   
   const av = $('#profileAvatar');
-  if (p.photoUrl && p.photoUrl.startsWith('data:image')) {
-    av.innerHTML = `<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+  if (p.photoUrl && (p.photoUrl.startsWith('data:image') || /^https?:\/\//i.test(p.photoUrl))) {
+    av.innerHTML = `<img src="${esc(p.photoUrl)}" style="width:100%;height:100%;object-fit:cover;">`;
+    if (p.email) saveAccountAvatarCache(p.email, p.photoUrl);
   } else if (p.profileEmoji) {
     av.innerHTML = `<span style="font-size:2.2rem; line-height:1;">${p.profileEmoji}</span>`;
     av.style.background = 'linear-gradient(135deg,var(--sf3),var(--sf2))'; 
@@ -3615,7 +3636,7 @@ function attachListeners() {
 
   trackListener(ref(db, 'themeSettings'), (snap) => {
     const cfg = snap.exists() ? snap.val() : {};
-    themeState.mode = cfg.mode || 'user'; themeState.globalTheme = cfg.globalTheme || 'gold'; themeState.default = cfg.default || 'gold'; themeState.enabled = cfg.enabled || {};
+    themeState.mode = cfg.mode || 'user'; themeState.globalTheme = cfg.globalTheme || 'mono'; themeState.default = (cfg.default && cfg.default !== 'gold') ? cfg.default : 'mono'; themeState.enabled = cfg.enabled || {};
     refreshTheme();
     if (State.currentPage === 'profile') renderThemeGrid();
   });
@@ -5757,10 +5778,12 @@ function openNotifications() {
     bodyHTML,
     extraClass: 'notif-modal',
     footerHTML: `
-      <div style="display:flex; gap:10px; width:100%; flex-wrap:wrap;">
-        ${list.length > 0 ? `<button class="btn btn-danger" style="flex:1;" id="clearAllNotifsBtn"><i class="fa-solid fa-trash"></i> Clear</button>` : ''}
-        ${unread > 0 ? `<button class="btn btn-success" style="flex:1;" id="markAllReadBtn"><i class="fa-solid fa-check-double"></i> Mark as Read</button>` : ''}
-        <button class="btn btn-primary" style="flex:1;" data-x="close">Close</button>
+      <div style="display:flex; gap:8px; width:100%; flex-direction:column;">
+        ${list.length > 0 || unread > 0 ? `<div style="display:flex; gap:8px; width:100%;">
+          ${list.length > 0 ? `<button class="btn btn-danger" style="flex:1; min-height:36px; font-size:0.78rem; padding:6px 10px;" id="clearAllNotifsBtn"><i class="fa-solid fa-trash"></i> Clear</button>` : ''}
+          ${unread > 0 ? `<button class="btn btn-success" style="flex:1; min-height:36px; font-size:0.78rem; padding:6px 10px;" id="markAllReadBtn"><i class="fa-solid fa-check-double"></i> Mark as Read</button>` : ''}
+        </div>` : ''}
+        <button class="btn btn-primary" style="width:100%; min-height:38px; font-size:0.84rem;" data-x="close">Close</button>
       </div>
     `,
     onMount: (el, close) => {
@@ -5849,23 +5872,23 @@ function openVipStore() {
   const userDiamonds = Number(State.profile?.diamonds || 0);
 
   let html = `
-    <div style="text-align:center; margin-bottom:16px;">
-      <i class="fa-solid fa-crown" style="font-size:3rem; color:#fbbf24; margin-bottom:8px;"></i>
-      <h2 style="margin:0; color:#fbbf24;">VIP & Premium Store</h2>
-      ${vipActive ? `<p style="color:var(--ok);font-size:0.8rem;margin-top:4px;"><i class="fa-solid fa-circle-check"></i> Active till ${expiryTxt}</p>` : ''}
+    <div style="text-align:center; margin-bottom:10px;">
+      <i class="fa-solid fa-crown" style="font-size:2rem; color:#fbbf24; margin-bottom:4px;"></i>
+      <h2 style="margin:0; font-size:1.08rem; color:#fbbf24;">VIP & Premium Store</h2>
+      ${vipActive ? `<p style="color:var(--ok);font-size:0.74rem;margin:3px 0 0;"><i class="fa-solid fa-circle-check"></i> Active till ${expiryTxt}</p>` : ''}
     </div>
     <div class="admin-note">
       <i class="fa-solid fa-gem"></i>
       <span>You have <b>${userDiamonds.toLocaleString('en-IN')}</b> diamonds. Buy VIP with diamonds or rupees.</span>
     </div>
     <ul class="vip-feature-list">
-      <li><i class="fa-solid fa-check"></i> <b>Blue Tick</b> in Chat & Profile</li>
-      <li><i class="fa-solid fa-check"></i> <b>World Chat</b> Access (Globe Icon)</li>
-      <li><i class="fa-solid fa-check"></i> <b>Direct Message to Admin</b></li>
-      <li><i class="fa-solid fa-check"></i> Unlock All App Themes</li>
-      <li><i class="fa-solid fa-check"></i> Custom Image Upload (Profile & Team)</li>
+      <li><i class="fa-solid fa-check"></i> <span><b>Blue Tick</b> in Chat & Profile</span></li>
+      <li><i class="fa-solid fa-check"></i> <span><b>World Chat</b> Access (Globe Icon)</span></li>
+      <li><i class="fa-solid fa-check"></i> <span><b>Direct Message to Admin</b></span></li>
+      <li><i class="fa-solid fa-check"></i> <span>Unlock All App Themes</span></li>
+      <li><i class="fa-solid fa-check"></i> <span>Custom Image Upload (Profile & Team)</span></li>
     </ul>
-    <h4 style="font-size:0.9rem; margin-bottom:8px;">Select Plan</h4>
+    <h4 style="font-size:0.82rem; font-weight:700; margin-bottom:7px;">Select Plan</h4>
   `;
 
   const plans = State.vipSettings?.plans || {};
@@ -5888,8 +5911,10 @@ function openVipStore() {
   openModal({
     title: 'Premium Store',
     bodyHTML: html,
-    footerHTML: `<button class="btn btn-ghost" data-x="c">Cancel</button><button class="btn btn-primary" data-x="buy" disabled>Continue</button>`,
+    footerHTML: `<button class="btn btn-ghost" style="flex:1;" data-x="c">Cancel</button><button class="btn btn-primary" style="flex:1;" data-x="buy" disabled>Continue</button>`,
     onMount: (el, close) => {
+      const mfoot = el.querySelector('.mfoot');
+      if (mfoot) mfoot.classList.add('mfoot-row');
       let selectedPlan = null;
 
       el.querySelector('[data-x="c"]').onclick = close;
@@ -6065,7 +6090,7 @@ function renderThemeGrid() {
 
   const available = THEME_DEFS.filter(t => themeState.enabled[t.id] !== false);
   host.innerHTML = available.map(t => {
-    const isVipOnly = t.id !== 'gold' && t.id !== 'amoled';
+    const isVipOnly = t.id !== 'gold' && t.id !== 'amoled' && t.id !== 'mono';
     const locked = isVipOnly && !vip;
     
     return `
@@ -6079,7 +6104,7 @@ function renderThemeGrid() {
   host.querySelectorAll('[data-theme-pick]').forEach(el => {
     el.onclick = async () => {
       const picked = el.dataset.themePick;
-      const isVipOnly = picked !== 'gold' && picked !== 'amoled';
+      const isVipOnly = picked !== 'gold' && picked !== 'amoled' && picked !== 'mono';
       
       if (isVipOnly && !isVipActive()) {
         toast('warning', 'VIP Feature', 'Buy Premium to unlock themes.');
@@ -6281,6 +6306,7 @@ function openEditProfile() {
           await update(ref(db, 'publicProfiles/' + State.user.uid), { displayName: name, freeFireUid: ff, photoUrl: finalPhotoUrl, profileEmoji: finalEmoji });
           
           State.profile = { ...State.profile, displayName: name, freeFireUid: ff, photoUrl: finalPhotoUrl, profileEmoji: finalEmoji };
+          if (State.profile.email && finalPhotoUrl) saveAccountAvatarCache(State.profile.email, finalPhotoUrl);
           loadProfileUI(); updateGreeting();
           toast('success','Saved','Profile updated.');
           close();
@@ -6293,7 +6319,7 @@ function openEditProfile() {
 function openRules() {
   openModal({
     title: 'Terms & Fair Play Policy',
-    bodyHTML: `<h4>1. Fair Play</h4><p>No hacking, cheating, teaming, or unauthorized tools.</p><h4>2. Entry & Rewards</h4><p>Entry fees deducted on confirmed registration. Rewards credited after admin verification.</p><h4>3. Refunds</h4><p>Cancelled matches refunded per admin policy. If admin cancels a match, the entry fee is auto-refunded to the payer.</p><h4>4. Withdrawals</h4><p>Minimum withdrawal set by admin. Manual UPI payout.</p><h4>5. VIP & Premium</h4><p>VIP features are time-bound. Once expired, access to themes, chat, blue tick, and Direct Admin DM will be revoked automatically. Diamonds are non-refundable once spent.</p><h4>6. Teams</h4><p>Squads can be created for free. Duo & Squad matches require an active ₹5/month Maintenance Pass. First-time users get a 7-day free trial. Pass payments are non-refundable.</p><h4>7. Account</h4><p>You are responsible for your account credentials.</p>`,
+    bodyHTML: `<div class="rules-body"><h4>1. Fair Play</h4><p>No hacking, cheating, teaming, or unauthorized tools.</p><h4>2. Entry & Rewards</h4><p>Entry fees deducted on confirmed registration. Rewards credited after admin verification.</p><h4>3. Refunds</h4><p>Cancelled matches refunded per admin policy. If admin cancels a match, the entry fee is auto-refunded to the payer.</p><h4>4. Withdrawals</h4><p>Minimum withdrawal set by admin. Manual UPI payout.</p><h4>5. VIP & Premium</h4><p>VIP features are time-bound. Once expired, access to themes, chat, blue tick, and Direct Admin DM will be revoked automatically. Diamonds are non-refundable once spent.</p><h4>6. Teams</h4><p>Squads can be created for free. Duo & Squad matches require an active ₹5/month Maintenance Pass. First-time users get a 7-day free trial. Pass payments are non-refundable.</p><h4>7. Account</h4><p>You are responsible for your account credentials.</p></div>`,
     footerHTML: `<button class="btn btn-primary w-100" data-x="close">Close</button>`,
     onMount: (el, close) => { el.querySelector('[data-x="close"]').onclick = close; }
   });
@@ -6304,7 +6330,7 @@ function initSpinWheel() {
 }
 
 window.PE = { State, toast, openModal, confirmDialog, playNotifSound, openVipStore, openAdminDM, loadMyTeam, renderMyTeam, switchMyTab };
-console.log('%cPunjab Esports v1.0.0 — Royal Gold', 'color:#d4af37;font-weight:bold;font-size:14px');
+console.log('%cPunjab Esports v1.0.0 — Stealth Black', 'color:#111111;font-weight:bold;font-size:14px');
 </script>
 </body>
 </html>

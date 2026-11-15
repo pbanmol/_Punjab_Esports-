@@ -1,9 +1,12 @@
 package com.punjab.esports;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import androidx.activity.result.ActivityResult;
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -13,6 +16,30 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 @CapacitorPlugin(name = "NativeGoogleAuth")
 public class NativeGoogleAuthPlugin extends Plugin {
+
+    @SuppressLint("MissingPermission")
+    @PluginMethod
+    public void getDeviceAccounts(PluginCall call) {
+        JSArray list = new JSArray();
+        try {
+            AccountManager am = AccountManager.get(getContext());
+            Account[] accounts = am.getAccountsByType("com.google");
+            if (accounts != null) {
+                for (Account acc : accounts) {
+                    if (acc != null && acc.name != null && acc.name.contains("@")) {
+                        JSObject item = new JSObject();
+                        item.put("email", acc.name.trim());
+                        item.put("name", acc.name.trim().split("@")[0]);
+                        list.put(item);
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        JSObject ret = new JSObject();
+        ret.put("accounts", list);
+        call.resolve(ret);
+    }
 
     @PluginMethod
     public void pickAccount(PluginCall call) {
