@@ -2,6 +2,7 @@ package com.punjab.esports;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import androidx.activity.result.ActivityResult;
@@ -16,6 +17,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 @CapacitorPlugin(name = "NativeGoogleAuth")
 public class NativeGoogleAuthPlugin extends Plugin {
 
+    @SuppressLint("MissingPermission")
     @PluginMethod
     public void getDeviceAccounts(PluginCall call) {
         try {

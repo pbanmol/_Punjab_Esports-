@@ -1,6 +1,7 @@
 package com.punjab.esports;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -19,6 +20,7 @@ import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.os.Build;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import java.io.BufferedReader;
@@ -72,6 +74,7 @@ public class BackgroundNotificationJobService extends JobService {
         }
     }
 
+    @SuppressLint("MissingPermission")
     public static void schedulePeriodic(Context ctx) {
         try {
             JobScheduler scheduler = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
@@ -123,8 +126,13 @@ public class BackgroundNotificationJobService extends JobService {
         return NotificationManagerCompat.from(ctx).areNotificationsEnabled();
     }
 
+    @SuppressLint("MissingPermission")
     public static void postSystemNotification(Context ctx, String notifId, String title, String body) {
         if (!canPostNotifications(ctx)) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ActivityCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         ensureNotificationChannel(ctx);
 
         String cleanId = (notifId == null || notifId.trim().isEmpty())
@@ -181,7 +189,10 @@ public class BackgroundNotificationJobService extends JobService {
             builder.setLargeIcon(largeIcon);
         }
 
-        NotificationManagerCompat.from(ctx).notify(cleanId.hashCode(), builder.build());
+        try {
+            NotificationManagerCompat.from(ctx).notify(cleanId.hashCode(), builder.build());
+        } catch (SecurityException ignored) {
+        }
     }
 
     @Override
