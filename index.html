@@ -39,7 +39,7 @@
 <meta property="og:image" content="assets/aistudio/41120_logo_transparent_d86f7d93.png">
 <link rel="manifest" href="/manifest.json">
 <script>
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator && !window.Capacitor?.isNativePlatform?.()) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
     });
@@ -161,8 +161,9 @@ button:active:not(:disabled){filter:brightness(.94)}
 #appShell{display:none}
 #appShell.active{display:block}
 .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:14px 18px;padding-top:calc(14px + var(--safe-t));background:var(--nav);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);transition:background var(--t),border-color var(--t)}
+.pe-theme-logo{display:inline-block;background:linear-gradient(135deg,var(--ac,#d4af37),var(--ac2,#f0cf6b));-webkit-mask-image:url('assets/aistudio/41120_logo_mask.png');mask-image:url('assets/aistudio/41120_logo_mask.png');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;flex-shrink:0}
 .topbar .tb-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.topbar .tb-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:grid;place-items:center;color:var(--onac);font-size:1rem;flex-shrink:0}
+.topbar .tb-logo{width:38px;height:38px;border-radius:0;background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important;display:grid;place-items:center;flex-shrink:0}
 .topbar .tb-brand b{font-size:.95rem;display:-webkit-box;white-space:normal;line-height:1.2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .topbar .tb-brand small{font-size:.68rem;color:var(--txm);text-transform:uppercase;letter-spacing:1.2px}
 .icon-btn{width:42px;height:42px;display:grid;place-items:center;border-radius:var(--rm);border:1px solid var(--bd);background:var(--sf);color:var(--txd);cursor:pointer;transition:all var(--t);position:relative;flex-shrink:0}
@@ -361,6 +362,7 @@ button:active:not(:disabled){filter:brightness(.94)}
 .share-btn.telegram{background:linear-gradient(135deg,#0088cc,#229ed9)}
 .share-btn.instagram{background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)}
 .share-btn.sms{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+.share-btn.gmail{background:linear-gradient(135deg,#ea4335,#c5221f)}
 
 .channel-btn{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;text-decoration:none;color:#fff;font-weight:600;transition:all var(--t);margin-bottom:12px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
 .channel-btn:active{transform:scale(.98)}
@@ -558,48 +560,48 @@ button:active:not(:disabled){filter:brightness(.94)}
 #splash {
   position: fixed;
   inset: 0;
-  background: #ffffff;
-  color: #1e293b;
+  background: var(--bg, #ffffff);
+  color: var(--tx, #1e293b);
   display: grid;
   place-items: center;
   z-index: 2000;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.18s ease;
 }
 #splash.hide { opacity: 0; pointer-events: none; }
 #splash .sp-card {
   width: 104px;
   height: 104px;
-  border-radius: 26px;
-  background: #ffffff;
+  border-radius: 0;
+  background: transparent;
   display: grid;
   place-items: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-  border: 1px solid rgba(0,0,0,0.04);
-  padding: 14px;
-  animation: spPulse 1.8s ease infinite;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  animation: spPulse 1.6s ease infinite;
 }
 #splash .sp-logo-img {
-  width: 76px;
-  height: 76px;
-  object-fit: contain;
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(135deg, var(--splash-ac, var(--ac, #d4af37)), var(--splash-ac2, var(--ac2, #f0cf6b)));
 }
 #splash .sp-name {
-  margin-top: 18px;
+  margin-top: 16px;
   font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: 0.2px;
   text-align: center;
-  color: #e2a926;
+  color: var(--splash-ac, var(--ac, #d4af37));
   font-family: 'Poppins', sans-serif;
 }
 #splash .sp-loader {
-  margin-top: 22px;
-  width: 44px;
-  height: 44px;
+  margin-top: 20px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 4px solid #fef3c7;
-  border-top-color: #e2a926;
-  animation: spSpin 0.85s cubic-bezier(.65,.05,.36,1) infinite;
+  border: 4px solid color-mix(in srgb, var(--splash-ac, var(--ac, #d4af37)) 22%, transparent);
+  border-top-color: var(--splash-ac, var(--ac, #d4af37));
+  animation: spSpin 0.8s cubic-bezier(.65,.05,.36,1) infinite;
 }
 
 /* AUTH SCREEN - FIXED VIEWPORT, NO SCROLL, MOBILE OPTIMIZED */
@@ -651,14 +653,12 @@ button:active:not(:disabled){filter:brightness(.94)}
 .auth-logo-img {
   width: 120px;
   height: 120px;
-  object-fit: contain;
   margin-bottom: 8px;
-  filter: drop-shadow(0 4px 14px rgba(226,169,38,0.18));
 }
 .auth-brand-title {
   font-size: 2.1rem;
   font-weight: 800;
-  color: #e2a926;
+  color: var(--ac, #d4af37);
   margin: 0;
   letter-spacing: -0.5px;
   font-family: 'Poppins', sans-serif;
@@ -1093,14 +1093,13 @@ button:active:not(:disabled){filter:brightness(.94)}
 }
 
 </style>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
 <div id="splash">
   <div style="display:flex;flex-direction:column;align-items:center">
     <div class="sp-card">
-      <img src="assets/aistudio/41120_logo_transparent_d86f7d93.png" alt="Punjab Esports" class="sp-logo-img">
+      <span class="pe-theme-logo sp-logo-img" role="img" aria-label="Punjab Esports"></span>
     </div>
     <div class="sp-name">Punjab Esports</div>
     <div class="sp-loader"></div>
@@ -1115,7 +1114,7 @@ button:active:not(:disabled){filter:brightness(.94)}
   </div>
 
   <div class="auth-center-brand">
-    <img src="assets/aistudio/41120_logo_transparent_d86f7d93.png" alt="Punjab Esports Logo" class="auth-logo-img">
+    <span class="pe-theme-logo auth-logo-img" role="img" aria-label="Punjab Esports Logo"></span>
     <h1 class="auth-brand-title">Punjab Esports</h1>
   </div>
 
@@ -1155,7 +1154,7 @@ button:active:not(:disabled){filter:brightness(.94)}
     <div id="appShell">
   <header class="topbar">
     <div class="tb-brand">
-      <div class="tb-logo" style="background:#ffffff;border:1px solid var(--bd);box-shadow:0 2px 6px rgba(0,0,0,0.06);padding:3px;"><img src="assets/aistudio/41120_logo_transparent_d86f7d93.png" alt="PE" style="width:100%;height:100%;object-fit:contain;"></div>
+      <div class="tb-logo"><span class="pe-theme-logo" style="width:36px;height:36px;" role="img" aria-label="PE"></span></div>
       <div style="min-width:0;flex:1;padding-right:10px;">
         <b id="userGreeting">Hey, Player <span id="topBlueTick"></span></b>
         <small>Punjab Esports</small>
@@ -1401,14 +1400,31 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getDatabase(app);
 
+let cachedSupportConfig = {
+  whatsapp: '+919876543210',
+  telegram: 'PunjabEsports',
+  instagram: 'punjab_esports',
+  youtube: 'https://www.youtube.com/@PunjabEsports',
+  gmail: 'pbanmol025@gmail.com'
+};
+try {
+  const rawSup = localStorage.getItem('pe_support_config');
+  if (rawSup) {
+    const parsed = JSON.parse(rawSup);
+    if (parsed && typeof parsed === 'object') cachedSupportConfig = { ...cachedSupportConfig, ...parsed };
+  }
+} catch(e) {}
+
 const State = {
   user: null, profile: null, wallet: { balance: 0, reserved: 0 },
-  tournaments: [], myRegistrations: [], transactions: [], notifications: [], chatMessages: [],
+  tournaments: [], myRegistrations: [], transactions: [], notifications: [], rawNotifications: [], chatMessages: [],
   matchResultsCache: {}, settings: {}, currentPage: 'home', vipSettings: {},
   filters: { status: 'upcoming', mode: '', type: 'all', search: '' },
-  listeners: [], lastNotifTs: 0,
+  listeners: [], lastNotifTs: 0, notifInitialized: false, notifSeenIds: new Set(),
+  lastKnownBalance: null, localWalletActionTs: 0,
   cleanupDays: 7, retentionMs: 7 * 24 * 60 * 60 * 1000,
   shownStartupNotification: false,
+  supportConfig: cachedSupportConfig,
   localDeletedChats: JSON.parse(localStorage.getItem('deleted_chats') || '[]'),
   localDeletedTxs: JSON.parse(localStorage.getItem('deleted_txs') || '[]'),
   referrals: [],
@@ -1663,9 +1679,19 @@ const THEME_DEFS = [
 
 let themeState = { mode: 'user', globalTheme: 'gold', default: 'gold', enabled: {}, userTheme: null, darkMode: true };
 
+const SPLASH_THEME_COLORS = {
+  amoled: ['#8b5cf6', '#a78bfa'], cyber: ['#00a3ff', '#4dc4ff'],
+  fire: ['#ff4d2e', '#ff8566'], neon: ['#c026d3', '#e879f9'],
+  emerald: ['#10b981', '#34d399'], gold: ['#d4af37', '#f0cf6b'],
+  ocean: ['#06b6d4', '#67e8f9'], light: ['#6d28d9', '#7c3aed']
+};
+
 function applyTheme(id) {
   if (!THEME_DEFS.find(t => t.id === id)) id = 'gold';
   document.documentElement.setAttribute('data-theme', id);
+  const colors = SPLASH_THEME_COLORS[id] || SPLASH_THEME_COLORS.gold;
+  document.documentElement.style.setProperty('--splash-ac', colors[0]);
+  document.documentElement.style.setProperty('--splash-ac2', colors[1]);
   try { localStorage.setItem('pe_theme', id); } catch(e) {}
 }
 
@@ -1714,18 +1740,27 @@ async function loadUserTheme() { if (!State.user) { refreshTheme(); return; } tr
 
 const splashEl = $('#splash');
 
+function isNativeAndroidApp() {
+  return !!(window.Capacitor?.isNativePlatform?.() || window.Capacitor?.Plugins?.NativeGoogleAuth);
+}
+
 // ============================================================
-// DEVICE PHOTOS & MEDIA ACCESS PERMISSION PROMPT
+// DEVICE PHOTOS & MEDIA ACCESS PERMISSION PROMPT (SINGLE PROMPT)
 // ============================================================
 function promptMediaPermissionDialog(force = false, onGranted = null) {
+  if (isNativeAndroidApp()) {
+    try { localStorage.setItem('pe_media_permission', 'granted'); } catch(e) {}
+    if (onGranted) onGranted();
+    return;
+  }
+
   const currentStatus = localStorage.getItem('pe_media_permission');
   if (!force && currentStatus) {
     if (onGranted && currentStatus === 'granted') onGranted();
     return;
   }
 
-  const existing = document.getElementById('mediaPermModal');
-  if (existing) existing.remove();
+  if (document.getElementById('mediaPermModal')) return;
 
   const div = document.createElement('div');
   div.id = 'mediaPermModal';
@@ -1736,7 +1771,7 @@ function promptMediaPermissionDialog(force = false, onGranted = null) {
         <i class="fa-solid fa-images"></i>
       </div>
       <h3 class="perm-title">Allow Punjab Esports to access photos and media on your device?</h3>
-      <p class="perm-desc">Punjab Esports requires access to your photos so you can choose and upload your profile picture, player avatar, and match proof screenshots.</p>
+      <p class="perm-desc">Punjab Esports needs photo access so you can upload your profile picture, team logo, and match proof screenshots.</p>
       <div class="perm-actions-col">
         <button type="button" class="perm-btn perm-btn-allow" id="btnAllowMedia">Allow</button>
         <button type="button" class="perm-btn perm-btn-deny" id="btnDenyMedia">Don't allow</button>
@@ -1749,36 +1784,37 @@ function promptMediaPermissionDialog(force = false, onGranted = null) {
   const btnDeny = div.querySelector('#btnDenyMedia');
 
   btnAllow.onclick = () => {
-    localStorage.setItem('pe_media_permission', 'granted');
+    try { localStorage.setItem('pe_media_permission', 'granted'); } catch(e) {}
     div.remove();
     toast('success', 'Permission Granted', 'Photos & media access allowed.');
     if (onGranted) onGranted();
   };
 
   btnDeny.onclick = () => {
-    localStorage.setItem('pe_media_permission', 'denied');
+    try { localStorage.setItem('pe_media_permission', 'denied'); } catch(e) {}
     div.remove();
     toast('info', 'Permission Denied', 'Media permission is required to upload photos.');
   };
 }
 
-// Automatically check on app open:
-setTimeout(() => {
-  if (!localStorage.getItem('pe_media_permission')) {
-    promptMediaPermissionDialog(false);
-  }
-}, 800);
-
-function hideSplash() {
-  splashEl.classList.add('hide');
-  setTimeout(() => { splashEl.style.display = 'none'; }, 400);
+// Automatically check once on web browsers (Android APK already prompts natively once in MainActivity)
+if (!isNativeAndroidApp()) {
   setTimeout(() => {
     if (!localStorage.getItem('pe_media_permission')) {
       promptMediaPermissionDialog(false);
     }
-  }, 450);
+  }, 500);
+} else {
+  try { localStorage.setItem('pe_media_permission', 'granted'); } catch(e) {}
 }
-setTimeout(() => { if (splashEl && !splashEl.classList.contains('hide')) hideSplash(); }, 10000);
+
+function hideSplash() {
+  if (!splashEl || splashEl.dataset.hiding === '1') return;
+  splashEl.dataset.hiding = '1';
+  splashEl.classList.add('hide');
+  setTimeout(() => { splashEl.style.display = 'none'; }, 190);
+}
+setTimeout(() => { if (splashEl && !splashEl.classList.contains('hide')) hideSplash(); }, 4000);
 
 // ============================================================
 // PUNJAB ESPORTS AUTH & LOGIN LOGIC (GOOGLE, PASSWORD, SIGN UP)
@@ -1961,7 +1997,7 @@ function openGoogleAccountBottomSheet() {
 
   backdrop.innerHTML = `
     <div class="pe-account-sheet">
-      <img src="assets/aistudio/41120_logo_transparent_d86f7d93.png" alt="Punjab Esports Logo" class="pe-sheet-logo" style="width:62px;height:62px;object-fit:contain;margin:0 auto 14px;display:block;background:transparent;">
+      <span class="pe-theme-logo pe-sheet-logo" style="width:62px;height:62px;margin:0 auto 14px;display:block;" role="img" aria-label="Punjab Esports Logo"></span>
       <h2 class="pe-sheet-title">Choose an account</h2>
       <p class="pe-sheet-sub">to continue to Punjab Esports</p>
 
@@ -2247,7 +2283,7 @@ function openGoogleRegistrationModal(email, defaultName, authUser) {
     bodyHTML: `
       <div id="gRegModalAlert"></div>
       <div style="text-align:center;margin-bottom:16px;">
-        <img src="assets/aistudio/41120_logo_transparent_d86f7d93.png" alt="Punjab Esports" style="width:52px;height:52px;object-fit:contain;margin:0 auto 8px;display:block;">
+        <span class="pe-theme-logo" style="width:52px;height:52px;margin:0 auto 8px;display:block;" role="img" aria-label="Punjab Esports"></span>
         <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:2px;color:var(--tx,#0f172a);">Complete Profile / Register</h3>
         <p style="font-size:.82rem;color:var(--txm,#64748b);margin:0;">Fill in your Free Fire details to finish setup</p>
       </div>
@@ -2644,40 +2680,77 @@ function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
   });
 }
 
+async function fetchSupportConfig() {
+  try {
+    const [supSnap, linksSnap] = await Promise.all([
+      get(ref(db, 'appSettings/supportiveLinks')).catch(() => null),
+      get(ref(db, 'appSettings/support')).catch(() => null)
+    ]);
+    const v1 = supSnap?.exists() ? supSnap.val() : {};
+    const v2 = linksSnap?.exists() ? linksSnap.val() : {};
+    const cfg = {
+      telegram: v1.telegram || v2.telegram || State.supportConfig.telegram || 'PunjabEsports',
+      whatsapp: v1.whatsapp || v2.whatsapp || State.supportConfig.whatsapp || '+919876543210',
+      instagram: v1.instagram || v2.instagram || State.supportConfig.instagram || 'punjab_esports',
+      youtube: v1.youtube || State.supportConfig.youtube || 'https://www.youtube.com/@PunjabEsports',
+      gmail: v1.gmail || v2.gmail || v2.email || State.supportConfig.gmail || 'pbanmol025@gmail.com'
+    };
+    State.supportConfig = cfg;
+    try { localStorage.setItem('pe_support_config', JSON.stringify(cfg)); } catch(e) {}
+    return cfg;
+  } catch (e) {
+    return State.supportConfig;
+  }
+}
+
+function buildSupportLinksHTML(cfg, compact = false) {
+  const c = cfg || State.supportConfig;
+  const mb = compact ? 'margin-bottom:0' : '';
+  const waNum = String(c.whatsapp || '').trim();
+  const tgUser = String(c.telegram || '').trim();
+  const igUser = String(c.instagram || '').trim();
+  const ytLink = String(c.youtube || '').trim();
+  const email = String(c.gmail || '').trim();
+  let html = '';
+  if (waNum) {
+    const cleanWa = waNum.replace(/[^0-9]/g, '');
+    const link = waNum.startsWith('http') ? waNum : `https://wa.me/${cleanWa}`;
+    html += `<a href="${esc(link)}" target="_blank" rel="noopener" class="channel-btn whatsapp" style="${mb}"><div class="channel-btn-icon"><i class="fa-brands fa-whatsapp"></i></div><div class="cb-text"><b>${compact ? 'WhatsApp Support' : 'WhatsApp'}</b><small>${compact ? 'Direct chat with Punjab Esports team' : 'Get updates & chat directly on WhatsApp'}</small></div><i class="fa-solid fa-arrow-right"></i></a>`;
+  }
+  if (tgUser) {
+    const cleanTg = tgUser.replace(/^@/, '').replace(/^https?:\/\/t\.me\//, '').replace(/\/$/, '');
+    const link = tgUser.startsWith('http') ? tgUser : `https://t.me/${cleanTg}`;
+    html += `<a href="${esc(link)}" target="_blank" rel="noopener" class="channel-btn telegram" style="${mb}"><div class="channel-btn-icon"><i class="fa-brands fa-telegram"></i></div><div class="cb-text"><b>${compact ? 'Telegram Channel' : 'Telegram'}</b><small>Join official channel for announcements</small></div><i class="fa-solid fa-arrow-right"></i></a>`;
+  }
+  if (igUser) {
+    const cleanIg = igUser.replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/$/, '');
+    const link = igUser.startsWith('http') ? igUser : `https://instagram.com/${cleanIg}`;
+    html += `<a href="${esc(link)}" target="_blank" rel="noopener" class="channel-btn instagram" style="${mb}"><div class="channel-btn-icon"><i class="fa-brands fa-instagram"></i></div><div class="cb-text"><b>Instagram</b><small>Follow for highlights & updates</small></div><i class="fa-solid fa-arrow-right"></i></a>`;
+  }
+  if (ytLink) {
+    const ytUrl = ytLink.startsWith('http') ? ytLink : ('https://www.youtube.com/' + (ytLink.startsWith('@') ? ytLink : '@' + ytLink));
+    html += `<a href="${esc(ytUrl)}" target="_blank" rel="noopener" class="channel-btn youtube" style="${mb}"><div class="channel-btn-icon"><i class="fa-brands fa-youtube"></i></div><div class="cb-text"><b>${compact ? 'YouTube Channel' : 'YouTube'}</b><small>Live tournament streams & gameplay</small></div><i class="fa-solid fa-arrow-right"></i></a>`;
+  }
+  if (email) {
+    html += `<a href="mailto:${esc(email)}?subject=${encodeURIComponent('Punjab Esports Support')}" class="channel-btn email" style="${mb}"><div class="channel-btn-icon"><i class="fa-solid fa-envelope"></i></div><div class="cb-text"><b>Email Support</b><small>${esc(email)}</small></div><i class="fa-solid fa-arrow-right"></i></a>`;
+  }
+  return html;
+}
+
+fetchSupportConfig();
+
 function openContactUsModal() {
   openModal({
     title: 'Contact Us & Official Channels',
-    bodyHTML: `
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <a href="https://wa.me/919876543210" target="_blank" rel="noopener" class="channel-btn whatsapp" style="margin-bottom:0">
-          <div class="channel-btn-icon"><i class="fa-brands fa-whatsapp"></i></div>
-          <div class="cb-text"><b>WhatsApp Support</b><small>Direct chat with Punjab Esports team</small></div>
-          <i class="fa-solid fa-arrow-right"></i>
-        </a>
-        <a href="https://t.me/PunjabEsports" target="_blank" rel="noopener" class="channel-btn telegram" style="margin-bottom:0">
-          <div class="channel-btn-icon"><i class="fa-brands fa-telegram"></i></div>
-          <div class="cb-text"><b>Telegram Channel</b><small>Join official channel for announcements</small></div>
-          <i class="fa-solid fa-arrow-right"></i>
-        </a>
-        <a href="https://instagram.com/punjab_esports" target="_blank" rel="noopener" class="channel-btn instagram" style="margin-bottom:0">
-          <div class="channel-btn-icon"><i class="fa-brands fa-instagram"></i></div>
-          <div class="cb-text"><b>Instagram</b><small>Follow for highlights & updates</small></div>
-          <i class="fa-solid fa-arrow-right"></i>
-        </a>
-        <a href="https://www.youtube.com/@PunjabEsports" target="_blank" rel="noopener" class="channel-btn youtube" style="margin-bottom:0">
-          <div class="channel-btn-icon"><i class="fa-brands fa-youtube"></i></div>
-          <div class="cb-text"><b>YouTube Channel</b><small>Live tournament streams & gameplay</small></div>
-          <i class="fa-solid fa-arrow-right"></i>
-        </a>
-        <a href="mailto:pbanmol025@gmail.com" class="channel-btn email" style="margin-bottom:0">
-          <div class="channel-btn-icon"><i class="fa-solid fa-envelope"></i></div>
-          <div class="cb-text"><b>Email Support</b><small>pbanmol025@gmail.com</small></div>
-          <i class="fa-solid fa-arrow-right"></i>
-        </a>
-      </div>
-    `,
+    bodyHTML: `<div id="contactChannelsWrap" style="display:flex;flex-direction:column;gap:10px;">${buildSupportLinksHTML(State.supportConfig, true)}</div>`,
     footerHTML: '<button class="btn btn-primary w-100" data-x="close">Close</button>',
-    onMount: (el, close) => { el.querySelector('[data-x="close"]').onclick = close; }
+    onMount: (el, close) => {
+      el.querySelector('[data-x="close"]').onclick = close;
+      fetchSupportConfig().then((cfg) => {
+        const wrap = el.querySelector('#contactChannelsWrap');
+        if (wrap) wrap.innerHTML = buildSupportLinksHTML(cfg, true);
+      });
+    }
   });
 }
 
@@ -2777,7 +2850,6 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   let snap = await get(ref(db, 'users/' + user.uid)).catch(() => null);
-  // Also check if registered under email query
   if ((!snap || !snap.exists() || !snap.val()?.freeFireUid) && user.email) {
     try {
       const emailQuerySnap = await get(query(ref(db, 'users'), orderByChild('email'), equalTo(user.email)));
@@ -2791,7 +2863,6 @@ onAuthStateChanged(auth, async (user) => {
     } catch(e) {}
   }
 
-  // If user is new (profile does not exist or freeFireUid missing), open Register / Complete Profile screen directly!
   if (!snap || !snap.exists() || !snap.val()?.freeFireUid) {
     openGoogleRegistrationModal(user.email || '', user.displayName || '', user);
     hideSplash();
@@ -2809,64 +2880,66 @@ onAuthStateChanged(auth, async (user) => {
   
   State.user = user;
 
-  // One-time 7-day VIP welcome trial. The transaction prevents repeat claims
-  // across logins/devices for the same Firebase account UID.
-  try {
-    const vipTrialRef = ref(db, 'users/' + user.uid);
-    const vipTrialResult = await runTransaction(vipTrialRef, (current) => {
-      if (!current) return current;
-      if (current.hasUsedVipTrial || Number(current.vipExpiry || 0) > 0) return current;
-      return { ...current, hasUsedVipTrial: true, vipExpiry: Date.now() + VIP_TRIAL_DURATION_MS };
-    });
-    if (vipTrialResult.committed && vipTrialResult.snapshot.exists()) {
-      State.profile = vipTrialResult.snapshot.val();
-      if (State.profile.hasUsedVipTrial && Number(State.profile.vipExpiry || 0) > Date.now() && !snap?.val()?.hasUsedVipTrial && !Number(snap?.val()?.vipExpiry || 0)) {
-        toast('success', '7-Day Free VIP Activated!', 'Your welcome VIP trial is now active.');
-      }
-    }
-  } catch (vipTrialError) {
-    console.warn('VIP trial activation failed:', vipTrialError);
-  }
-
+  // Render dashboard & hide splash immediately for fast app opening!
   $('#authScreen').style.display = 'none';
-  
-  splashEl.style.display = 'grid';
-  splashEl.classList.remove('hide');
-
-  await loadThemeSettings();
-  await loadUserTheme();
-  
-  const activeTheme = computeActiveTheme();
-  applyTheme(activeTheme);
-  try { localStorage.setItem('pe_theme', activeTheme); } catch(e) {}
-  
   $('#appShell').classList.add('active');
-  
+  hideSplash();
+
   initApp();
-  
-  setTimeout(() => hideSplash(), 200);
+
+  // Only run VIP welcome trial transaction if not yet used/active (saves network round-trip on every open)
+  if (!State.profile.hasUsedVipTrial && !(Number(State.profile.vipExpiry || 0) > 0)) {
+    try {
+      const vipTrialRef = ref(db, 'users/' + user.uid);
+      const vipTrialResult = await runTransaction(vipTrialRef, (current) => {
+        if (!current) return current;
+        if (current.hasUsedVipTrial || Number(current.vipExpiry || 0) > 0) return current;
+        return { ...current, hasUsedVipTrial: true, vipExpiry: Date.now() + VIP_TRIAL_DURATION_MS };
+      });
+      if (vipTrialResult.committed && vipTrialResult.snapshot.exists()) {
+        State.profile = vipTrialResult.snapshot.val();
+        if (State.profile.hasUsedVipTrial && Number(State.profile.vipExpiry || 0) > Date.now()) {
+          loadProfileUI();
+          toast('success', '7-Day Free VIP Activated!', 'Your welcome VIP trial is now active.');
+        }
+      }
+    } catch (vipTrialError) {
+      console.warn('VIP trial activation failed:', vipTrialError);
+    }
+  }
 });
 
 function trackListener(r, cb) { onValue(r, cb, (e) => console.warn('listen err', e)); State.listeners.push({ ref: r, cb }); }
-function detachAll() { State.listeners.forEach(({ ref, cb }) => { try { off(ref,'value',cb); } catch {} }); State.listeners = []; if(State.dmListener){State.dmListener();State.dmListener=null;} }
+function detachAll() {
+  State.listeners.forEach(({ ref, cb }) => { try { off(ref,'value',cb); } catch {} });
+  State.listeners = [];
+  if(State.dmListener){State.dmListener();State.dmListener=null;}
+  State.lastNotifTs = 0;
+  State.notifInitialized = false;
+  State.notifSeenIds = new Set();
+  State.rawNotifications = [];
+  State.lastKnownBalance = null;
+}
 
 async function initApp() {
   updateGreeting();
-  await loadCleanupSettings();
-  await loadVipSettings();
-  await loadReferralSettings();
   loadProfileUI();
-  await loadChannels();
   attachListeners();
   navigate('home');
   initSpinWheel();
-  
-  setTimeout(() => {
-    if (State.notifications && State.notifications.some(n => !n.read)) {
-      playNotifSound();
-      openNotifications();
-    }
-  }, 2500);
+
+  // Fetch theme & config settings in parallel without blocking initial render
+  Promise.all([
+    loadThemeSettings().then(() => loadUserTheme()).then(() => {
+      const activeTheme = computeActiveTheme();
+      applyTheme(activeTheme);
+      if (State.currentPage === 'profile') renderThemeGrid();
+    }).catch(() => {}),
+    loadCleanupSettings().catch(() => {}),
+    loadVipSettings().catch(() => {}),
+    loadReferralSettings().catch(() => {}),
+    loadChannels().catch(() => {})
+  ]);
 }
 
 async function loadVipSettings() {
@@ -2986,26 +3059,110 @@ function loadProfileUI() {
 
 async function loadChannels() {
   try {
-    const [supSnap, linksSnap] = await Promise.all([ get(ref(db, 'appSettings/supportiveLinks')).catch(()=>null), get(ref(db, 'appSettings/support')).catch(()=>null) ]);
-    const card = $('#channelsCard'); const host = $('#channelsHost');
-    const v1 = supSnap?.exists() ? supSnap.val() : {}; const v2 = linksSnap?.exists() ? linksSnap.val() : {};
-    let tgUser = v1.telegram || v2.telegram || 'PunjabEsports';
-    let waNum  = v1.whatsapp || v2.whatsapp || '+919876543210';
-    let igUser = v1.instagram || v2.instagram || 'punjab_esports';
-    let ytLink = v1.youtube || 'https://www.youtube.com/@PunjabEsports';
-    let email  = v1.gmail || v2.email || 'support@punjabesports.com';
-    let html = '';
-    if (waNum) { const cleanWa = waNum.replace(/[^0-9]/g, ''); const link = waNum.startsWith('http') ? waNum : `https://wa.me/${cleanWa}`; html += `<a href="${esc(link)}" target="_blank" rel="noopener" class="channel-btn whatsapp"><div class="channel-btn-icon"><i class="fa-brands fa-whatsapp"></i></div><div class="cb-text"><b>WhatsApp</b><small>Get updates & chat directly on WhatsApp</small></div><i class="fa-solid fa-arrow-right"></i></a>`; }
-    if (tgUser) { const cleanTg = tgUser.replace(/^@/, '').replace(/^https?:\/\/t\.me\//,'').replace(/\/$/,''); const link = tgUser.startsWith('http') ? tgUser : `https://t.me/${cleanTg}`; html += `<a href="${esc(link)}" target="_blank" rel="noopener" class="channel-btn telegram"><div class="channel-btn-icon"><i class="fa-brands fa-telegram"></i></div><div class="cb-text"><b>Telegram</b><small>Join our official channel for latest announcements</small></div><i class="fa-solid fa-arrow-right"></i></a>`; }
-    if (igUser) { const cleanIg = igUser.replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/\/$/,''); const link = igUser.startsWith('http') ? igUser : `https://instagram.com/${cleanIg}`; html += `<a href="${esc(link)}" target="_blank" rel="noopener" class="channel-btn instagram"><div class="channel-btn-icon"><i class="fa-brands fa-instagram"></i></div><div class="cb-text"><b>Instagram</b><small>Follow for match highlights & stories</small></div><i class="fa-solid fa-arrow-right"></i></a>`; }
-    if (ytLink) { let ytUrl = ytLink; if (!ytUrl.startsWith('http')) { ytUrl = 'https://www.youtube.com/' + (ytUrl.startsWith('@') ? ytUrl : '@' + ytUrl); } html += `<a href="${esc(ytUrl)}" target="_blank" rel="noopener" class="channel-btn youtube"><div class="channel-btn-icon"><i class="fa-brands fa-youtube"></i></div><div class="cb-text"><b>YouTube</b><small>Watch live streams & match highlights</small></div><i class="fa-solid fa-arrow-right"></i></a>`; }
-    if (email) { html += `<a href="mailto:${esc(email)}" class="channel-btn email"><div class="channel-btn-icon"><i class="fa-solid fa-envelope"></i></div><div class="cb-text"><b>Email Support</b><small>${esc(email)}</small></div><i class="fa-solid fa-arrow-right"></i></a>`; }
-    host.innerHTML = html; card.hidden = false;
-  } catch(e) { $('#channelsCard').hidden = false; }
+    const cfg = await fetchSupportConfig();
+    const card = $('#channelsCard');
+    const host = $('#channelsHost');
+    if (host) host.innerHTML = buildSupportLinksHTML(cfg, false);
+    if (card) card.hidden = false;
+  } catch(e) {
+    const card = $('#channelsCard');
+    if (card) card.hidden = false;
+  }
+}
+
+function triggerBellRing(shouldOpenModal = false) {
+  playNotifSound();
+  const bell = $('#notifBtn');
+  if (bell) {
+    bell.classList.remove('bell-ring');
+    void bell.offsetWidth;
+    bell.classList.add('bell-ring');
+  }
+  const existingModal = $('.notif-modal');
+  if (existingModal) {
+    existingModal.remove();
+    openNotifications();
+  } else if (shouldOpenModal) {
+    openNotifications();
+  }
+}
+
+async function ensureSyntheticNotification(uid, key, payload) {
+  if (!uid || !key) return;
+  try {
+    const targetRef = ref(db, `notifications/${uid}/${key}`);
+    const snap = await get(targetRef).catch(() => null);
+    if (snap && snap.exists()) return;
+    await set(targetRef, { id: key, ...payload, read: false, createdAt: payload.createdAt || Date.now() });
+  } catch(e) {}
+}
+
+function recomputeNotificationsFromState() {
+  const arr = State.rawNotifications || [];
+  const filteredArr = arr.filter(n => {
+    if (n.type === 'announcement') return false;
+    if (n.type === 'match_result' && n.matchId) {
+      const res = State.matchResultsCache[n.matchId];
+      if (!res || res.status !== 'approved') return false;
+    }
+    return true;
+  });
+
+  State.notifications = filteredArr;
+  const unread = filteredArr.filter(n => !n.read).length;
+  const dot = $('#notifDot');
+  if (dot) {
+    if (unread > 0) {
+      dot.hidden = false;
+      dot.textContent = unread > 99 ? '99+' : unread;
+    } else {
+      dot.hidden = true;
+    }
+  }
+
+  let maxTs = 0;
+  filteredArr.forEach(n => {
+    const ts = Number(n.createdAt || 0);
+    if (ts > maxTs) maxTs = ts;
+  });
+
+  const newlyArrivedUnread = [];
+  filteredArr.forEach(n => {
+    if (!State.notifSeenIds.has(n.id)) {
+      State.notifSeenIds.add(n.id);
+      if (!n.read) newlyArrivedUnread.push(n);
+    }
+  });
+
+  if (!State.notifInitialized) {
+    State.notifInitialized = true;
+    State.lastNotifTs = maxTs;
+    if (unread > 0 && !State.shownStartupNotification) {
+      State.shownStartupNotification = true;
+      triggerBellRing(true);
+    }
+  } else if (newlyArrivedUnread.length > 0) {
+    const newest = newlyArrivedUnread[0];
+    toast('info', newest.title || 'New Notification', newest.body || '');
+    triggerBellRing(true);
+  }
+
+  if (maxTs > State.lastNotifTs) State.lastNotifTs = maxTs;
 }
 
 function attachListeners() {
   const uid = State.user.uid;
+  const balStorageKey = 'pe_last_bal_' + uid;
+  const depStorageKey = 'pe_seen_dep_' + uid;
+  const wdStorageKey = 'pe_seen_wd_' + uid;
+  const txStorageKey = 'pe_seen_tx_' + uid;
+
+  let savedBal = null;
+  try {
+    const rawB = localStorage.getItem(balStorageKey);
+    if (rawB !== null && !isNaN(Number(rawB))) savedBal = Number(rawB);
+  } catch(e) {}
+  State.lastKnownBalance = savedBal;
 
   trackListener(ref(db, 'users/' + uid), (snap) => {
     if (snap.exists()) {
@@ -3017,9 +3174,37 @@ function attachListeners() {
   trackListener(ref(db, 'wallets/' + uid), (snap) => {
     const w = snap.val() || { balance: 0, reserved: 0 };
     State.wallet = isObj(w) ? w : { balance: 0, reserved: 0 };
-    const balanceStr = fmtMoney(State.wallet.balance || 0);
+    const newBal = Number(State.wallet.balance || 0);
+    const balanceStr = fmtMoney(newBal);
     $('#homeBalance').textContent = balanceStr;
     $('#walletBalance').textContent = balanceStr;
+
+    const prevBal = State.lastKnownBalance;
+    State.lastKnownBalance = newBal;
+    try { localStorage.setItem(balStorageKey, String(newBal)); } catch(e) {}
+
+    if (prevBal !== null && Math.abs(newBal - prevBal) >= 0.01) {
+      const recentLocalAction = (Date.now() - (State.localWalletActionTs || 0)) < 4500;
+      if (!recentLocalAction) {
+        const diff = Math.round((newBal - prevBal) * 100) / 100;
+        const notifCheckTs = Date.now() - 4000;
+        setTimeout(() => {
+          const hasAdminNotif = (State.rawNotifications || []).some(n =>
+            Number(n.createdAt || 0) >= notifCheckTs &&
+            /balance|deposit|withdraw|reward|prize|bonus|admin|refund/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`)
+          );
+          if (!hasAdminNotif) {
+            const actionLabel = diff > 0 ? `+${fmtMoney(diff)} added` : `${fmtMoney(Math.abs(diff))} deducted`;
+            ensureSyntheticNotification(uid, 'auto_bal_' + Math.floor(Date.now() / 3000), {
+              type: 'admin_set',
+              title: 'Wallet Balance Updated',
+              body: `Your wallet was updated by admin (${actionLabel}). New balance: ${fmtMoney(newBal)}.`,
+              createdAt: Date.now()
+            });
+          }
+        }, 1200);
+      }
+    }
   });
 
   trackListener(query(ref(db, 'worldChat'), orderByChild('createdAt'), limitToLast(50)), (snap) => {
@@ -3053,9 +3238,9 @@ function attachListeners() {
       snap.forEach(c => { const v = c.val(); if (isObj(v)) State.matchResultsCache[c.key] = v; });
     }
     renderMyMatches();
-    // Auto refresh leaderboard if on that tab and data changed
+    recomputeNotificationsFromState();
     if (State.currentPage === 'mymatches' && State.myTab === 'leaderboard') {
-        State.lbCache = { data: null, ts: 0 }; // Clear cache to force reload
+        State.lbCache = { data: null, ts: 0 };
         loadLeaderboardData(); 
     }
   });
@@ -3074,49 +3259,143 @@ function attachListeners() {
     renderMyMatches(); updateStats(); updateWalletStats();
   });
 
+  let seenTxMap = {};
+  try { seenTxMap = JSON.parse(localStorage.getItem(txStorageKey) || '{}') || {}; } catch(e) {}
+  let txFirstLoad = Object.keys(seenTxMap).length === 0;
+
   trackListener(query(ref(db, 'walletTransactions'), orderByChild('userId'), equalTo(uid)), (snap) => {
-    const arr = []; snap.forEach(c => { const v = c.val(); if (!isObj(v)) return; if (isWithinRetention(v.createdAt)) arr.push(v); });
+    const arr = [];
+    snap.forEach(c => {
+      const v = c.val();
+      if (!isObj(v)) return;
+      v.id = v.id || c.key;
+      if (isWithinRetention(v.createdAt)) arr.push(v);
+    });
     arr.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     State.transactions = arr;
     renderTransactions(); updateWalletStats();
+
+    const adminTxTypes = new Set(['admin_set', 'admin_diamond_gift', 'admin_diamond_set', 'deposit', 'match_reward', 'prize', 'kill_reward', 'referral', 'withdrawal_refund']);
+    arr.forEach(tx => {
+      const prevStatus = seenTxMap[tx.id];
+      const curStatus = tx.status || 'completed';
+      const isNewOrUpdated = !prevStatus || prevStatus !== curStatus;
+      seenTxMap[tx.id] = curStatus;
+
+      if (!txFirstLoad && isNewOrUpdated && adminTxTypes.has(tx.type)) {
+        const snapCheckTs = Date.now() - 5000;
+        setTimeout(() => {
+          const hasAdminNotif = (State.rawNotifications || []).some(n =>
+            Number(n.createdAt || 0) >= snapCheckTs &&
+            (n.relatedId === tx.id || /balance|deposit|withdraw|reward|prize|diamond|admin|refund/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`))
+          );
+          if (!hasAdminNotif) {
+            const amt = Number(tx.diamonds || tx.amount || 0);
+            const isDia = tx.currency === 'DIAMONDS' || String(tx.type || '').includes('diamond');
+            const valStr = isDia ? `${Math.abs(amt)} Diamonds` : fmtMoney(Math.abs(amt));
+            let title = 'Wallet Updated by Admin';
+            let body = `${valStr} updated in your account.`;
+            if (tx.type === 'deposit') { title = 'Deposit Approved'; body = `Your deposit of ${valStr} has been credited to your wallet.`; }
+            else if (tx.type === 'admin_set') { title = 'Balance Updated by Admin'; body = `Admin ${amt >= 0 ? 'added' : 'deducted'} ${valStr}.`; }
+            else if (tx.type === 'admin_diamond_gift' || tx.type === 'admin_diamond_set') { title = 'Diamonds Updated by Admin'; body = `Admin ${amt >= 0 ? 'credited' : 'deducted'} ${valStr}.`; }
+            else if (tx.type === 'withdrawal_refund') { title = 'Withdrawal Refunded'; body = `${valStr} has been refunded to your wallet.`; }
+            else if (tx.type === 'match_reward' || tx.type === 'prize' || tx.type === 'kill_reward') { title = 'Match Reward Credited'; body = `${valStr} credited for ${tx.matchTitle || 'your match'}.`; }
+            ensureSyntheticNotification(uid, `auto_tx_${tx.id}_${curStatus}`, {
+              type: tx.type,
+              title,
+              body,
+              createdAt: Number(tx.updatedAt || tx.createdAt || Date.now())
+            });
+          }
+        }, 1200);
+      }
+    });
+    txFirstLoad = false;
+    try { localStorage.setItem(txStorageKey, JSON.stringify(seenTxMap)); } catch(e) {}
   });
 
-  trackListener(query(ref(db, 'notifications/' + uid), orderByChild('createdAt'), limitToLast(50)), (snap) => {
-    const arr = []; snap.forEach(c => { const v = c.val(); if (!isObj(v)) return; if (isWithinRetention(v.createdAt)) { v.id = c.key; arr.push(v); } });
-    arr.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-    
-    const filteredArr = arr.filter(n => {
-      if (n.type === 'announcement' || n.type === 'custom_message') return false;
-      if (n.type === 'match_result' && n.matchId) {
-         const res = State.matchResultsCache[n.matchId];
-         if (!res || res.status !== 'approved') return false; 
+  // Watch Deposit Requests status transitions (approved / rejected by Admin)
+  let seenDepMap = {};
+  try { seenDepMap = JSON.parse(localStorage.getItem(depStorageKey) || '{}') || {}; } catch(e) {}
+  trackListener(query(ref(db, 'depositRequests'), orderByChild('userId'), equalTo(uid)), (snap) => {
+    snap.forEach(c => {
+      const d = c.val();
+      if (!isObj(d)) return;
+      const id = c.key;
+      const st = String(d.status || 'pending').toLowerCase();
+      const prevSt = seenDepMap[id];
+      seenDepMap[id] = st;
+      if ((st === 'approved' || st === 'completed' || st === 'rejected') && prevSt && prevSt !== st) {
+        const snapCheckTs = Date.now() - 5000;
+        setTimeout(() => {
+          const hasAdminNotif = (State.rawNotifications || []).some(n =>
+            Number(n.createdAt || 0) >= snapCheckTs && /deposit/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`)
+          );
+          if (!hasAdminNotif) {
+            const approved = st === 'approved' || st === 'completed';
+            ensureSyntheticNotification(uid, `auto_dep_${id}_${st}`, {
+              type: approved ? 'deposit' : 'deposit_rejected',
+              title: approved ? 'Deposit Approved' : 'Deposit Rejected',
+              body: approved
+                ? `Your deposit request of ${fmtMoney(d.amount || 0)} has been approved and added to your wallet.`
+                : `Your deposit request of ${fmtMoney(d.amount || 0)} was rejected${d.reason ? ': ' + d.reason : '.'}`,
+              createdAt: Date.now()
+            });
+          }
+        }, 1200);
       }
-      return true;
     });
+    try { localStorage.setItem(depStorageKey, JSON.stringify(seenDepMap)); } catch(e) {}
+  });
 
-    State.notifications = filteredArr;
-    const unread = filteredArr.filter(n => !n.read).length;
-    const dot = $('#notifDot');
-    if (dot) { if (unread > 0) { dot.hidden = false; dot.textContent = unread > 99 ? '99+' : unread; } else { dot.hidden = true; } }
-
-    let maxTs = 0;
-    filteredArr.forEach(n => { if (n.createdAt > maxTs) maxTs = n.createdAt; });
-    
-    if (State.lastNotifTs && maxTs > State.lastNotifTs) {
-      const newest = filteredArr[0];
-      if (newest && newest.createdAt > State.lastNotifTs && !newest.read) {
-        playNotifSound();
-        const bell = $('#notifBtn');
-        bell.classList.remove('bell-ring');
-        void bell.offsetWidth;
-        bell.classList.add('bell-ring');
-        
-        if (!$('.notif-modal')) {
-          openNotifications();
-        }
+  // Watch Withdrawal Requests status transitions (approved / completed / rejected by Admin)
+  let seenWdMap = {};
+  try { seenWdMap = JSON.parse(localStorage.getItem(wdStorageKey) || '{}') || {}; } catch(e) {}
+  trackListener(query(ref(db, 'withdrawalRequests'), orderByChild('userId'), equalTo(uid)), (snap) => {
+    snap.forEach(c => {
+      const w = c.val();
+      if (!isObj(w)) return;
+      const id = c.key;
+      const st = String(w.status || 'pending').toLowerCase();
+      const prevSt = seenWdMap[id];
+      seenWdMap[id] = st;
+      if ((st === 'approved' || st === 'completed' || st === 'rejected') && prevSt && prevSt !== st) {
+        const snapCheckTs = Date.now() - 5000;
+        setTimeout(() => {
+          const hasAdminNotif = (State.rawNotifications || []).some(n =>
+            Number(n.createdAt || 0) >= snapCheckTs && /withdraw/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`)
+          );
+          if (!hasAdminNotif) {
+            const approved = st === 'approved' || st === 'completed';
+            ensureSyntheticNotification(uid, `auto_wd_${id}_${st}`, {
+              type: approved ? 'withdraw' : 'withdraw_rejected',
+              title: approved ? 'Withdrawal Approved' : 'Withdrawal Rejected',
+              body: approved
+                ? `Your withdrawal of ${fmtMoney(w.amount || 0)} has been processed to ${w.payoutDetail || 'your UPI'}.`
+                : `Your withdrawal request of ${fmtMoney(w.amount || 0)} was rejected${w.reason ? ': ' + w.reason : '.'}`,
+              createdAt: Date.now()
+            });
+          }
+        }, 1200);
       }
-    }
-    State.lastNotifTs = maxTs;
+    });
+    try { localStorage.setItem(wdStorageKey, JSON.stringify(seenWdMap)); } catch(e) {}
+  });
+
+  // Direct listener on notifications/{uid} so items missing createdAt/index are never dropped
+  trackListener(ref(db, 'notifications/' + uid), (snap) => {
+    const arr = [];
+    snap.forEach(c => {
+      const v = c.val();
+      if (!isObj(v)) return;
+      if (isWithinRetention(v.createdAt)) {
+        v.id = c.key;
+        arr.push(v);
+      }
+    });
+    arr.sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+    State.rawNotifications = arr.slice(0, 60);
+    recomputeNotificationsFromState();
   });
 
   trackListener(query(ref(db, 'announcements'), orderByChild('createdAt'), limitToLast(5)), (snap) => {
@@ -3650,6 +3929,7 @@ async function executeJoin(matchId, m, fee) {
     if (!capResult.committed) { toast('error','Match Full',''); return; }
 
     if (fee > 0) {
+      State.localWalletActionTs = Date.now();
       const wResult = await runTransaction(ref(db, 'wallets/' + uid + '/balance'), (cur) => {
         const curr = Number(cur) || 0;
         if (curr < fee) return;
@@ -3814,6 +4094,7 @@ async function executeTeamJoin(matchId, m, teamSize, teamId, team, allPlayers, f
     const assignedTeamSlot = Number(slotResult.snapshot.val());
 
     if (fee > 0) {
+      State.localWalletActionTs = Date.now();
       const wResult = await runTransaction(ref(db, 'wallets/' + uid + '/balance'), cur => {
         const curr = Number(cur) || 0;
         if (curr < fee) return;
@@ -4321,6 +4602,7 @@ async function buyTeamMaintenancePass(teamId) {
   if (!confirmed) return;
 
   try {
+    State.localWalletActionTs = Date.now();
     const res = await runTransaction(ref(db, 'wallets/' + State.user.uid + '/balance'), (cur) => {
       const c = Number(cur) || 0;
       if (c < TEAM_PASS_PRICE) return;
@@ -4865,6 +5147,7 @@ async function openWithdraw() {
         if (amt > balance) { toast('error','Insufficient','Not enough balance'); return; }
         if (!detail) { toast('error','Required','Enter your UPI ID'); return; }
         try {
+          State.localWalletActionTs = Date.now();
           const wResult = await runTransaction(ref(db, 'wallets/' + State.user.uid + '/balance'), (cur) => { const curr = Number(cur) || 0; if (curr < amt) return; return curr - amt; });
           if (!wResult.committed) { toast('error','Failed','Could not process'); return; }
           await runTransaction(ref(db, 'wallets/' + State.user.uid + '/reserved'), (cur) => (Number(cur)||0) + amt);
@@ -5473,7 +5756,7 @@ window.payVip = async (planKey, method, p) => {
     if (method === 'rupees') {
       const bal = Number(State.wallet.balance || 0);
       if (bal < p.rupees) { toast('error', 'Insufficient Balance', 'Add money to your wallet.'); return; }
-      
+      State.localWalletActionTs = Date.now();
       const res = await runTransaction(ref(db, 'wallets/' + State.user.uid + '/balance'), (cur) => {
         const c = Number(cur) || 0;
         if (c < p.rupees) return;
@@ -5630,7 +5913,10 @@ async function shareReferral() {
 function openShareSheet(text, link) {
   const encText = encodeURIComponent(text);
   const encLink = encodeURIComponent(link);
+  const encSubject = encodeURIComponent('Join Punjab Esports & Win Real Cash!');
   const shortLink = link.startsWith('http') ? link : 'https://' + link;
+  const supportGmail = String(State.supportConfig?.gmail || 'pbanmol025@gmail.com').trim();
+  const gmailHref = `mailto:?subject=${encSubject}&body=${encText}`;
 
   openModal({
     title: 'Share Punjab Esports',
@@ -5640,12 +5926,13 @@ function openShareSheet(text, link) {
         <a class="share-btn whatsapp" href="https://wa.me/?text=${encText}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></a>
         <a class="share-btn telegram" href="https://t.me/share/url?url=${encLink}&text=${encText}" target="_blank" rel="noopener"><i class="fa-brands fa-telegram"></i><span>Telegram</span></a>
         <a class="share-btn instagram" href="https://www.instagram.com/" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i><span>Instagram</span></a>
-        <a class="share-btn sms" href="sms:?body=${encText}"><i class="fa-solid fa-comment-sms"></i><span>SMS</span></a>
+        <a class="share-btn gmail" id="shareGmailBtn" href="${gmailHref}"><i class="fa-solid fa-envelope"></i><span>Gmail</span></a>
       </div>
       <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--txm);margin-bottom:6px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-eye"></i> Preview Message</div>
       <div class="share-preview">${esc(text)}</div>
       <button class="btn btn-primary btn-block" id="copyFullText" style="margin-bottom:8px;"><i class="fa-solid fa-copy"></i> Copy Full Message</button>
       <button class="btn btn-outline btn-block" id="copyLinkOnly"><i class="fa-solid fa-link"></i> Copy Link Only</button>
+      ${supportGmail ? `<div style="text-align:center;font-size:.72rem;color:var(--txm);margin-top:10px;">Official Support Gmail: <a href="mailto:${esc(supportGmail)}?subject=${encodeURIComponent('Punjab Esports Support')}" style="color:var(--ac2);font-weight:600;">${esc(supportGmail)}</a></div>` : ''}
     `,
     footerHTML: `<button class="btn btn-ghost w-100" data-x="close">Close</button>`,
     onMount: (el, close) => {
@@ -5696,7 +5983,7 @@ function openEditProfile() {
       const triggerBtn = el.querySelector('#btnTriggerPhotoUpload');
       if (triggerBtn && fileInput) {
         triggerBtn.onclick = () => {
-          if (localStorage.getItem('pe_media_permission') !== 'granted') {
+          if (!isNativeAndroidApp() && localStorage.getItem('pe_media_permission') !== 'granted') {
             promptMediaPermissionDialog(true, () => fileInput.click());
           } else {
             fileInput.click();

@@ -80,8 +80,8 @@ public class MainActivity extends BridgeActivity {
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Images Permission Required")
-                .setMessage("Punjab Esports requires access to Photos/Images to continue. Please allow permission in Settings.")
+                .setTitle("Photos & Media Access Needed")
+                .setMessage("Punjab Esports needs access to your device photos so you can set your profile picture, team logo, and upload match result screenshots. Please allow Photos access in Settings to continue.")
                 .setCancelable(false)
                 .setPositiveButton("Open Settings", (d, w) -> {
                     openedSettingsForPermission = true;
