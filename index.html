@@ -2152,17 +2152,6 @@ async function openGoogleAccountBottomSheet() {
     if (savedMail) addCandidate(savedMail, savedMail.split('@')[0]);
   } catch(e) {}
 
-  // Also load any Google accounts currently visible on this Android device
-  const nativeGoogleAuth = window.Capacitor?.Plugins?.NativeGoogleAuth;
-  if (nativeGoogleAuth && typeof nativeGoogleAuth.getDeviceAccounts === 'function') {
-    try {
-      const devRes = await nativeGoogleAuth.getDeviceAccounts();
-      if (Array.isArray(devRes?.accounts)) {
-        devRes.accounts.forEach(acc => addCandidate(acc.email, acc.name));
-      }
-    } catch(e) {}
-  }
-
   const accounts = Array.from(mergedMap.values());
   const backdrop = document.createElement('div');
   backdrop.id = 'peAccountSheetBackdrop';
@@ -3144,55 +3133,10 @@ function detachAll() {
   State.lastKnownBalance = null;
 }
 
-function syncNativeNotificationSession(balanceVal = null) {
-  try {
-    const nn = window.Capacitor?.Plugins?.NativeNotifications;
-    const curUser = auth.currentUser || State.user;
-    if (!nn || typeof nn.saveSession !== 'function' || !curUser?.uid) return;
-    const rToken = curUser.refreshToken || auth.currentUser?.refreshToken || '';
-    if (!rToken) return;
-    const payload = {
-      uid: curUser.uid,
-      refreshToken: rToken,
-      apiKey: firebaseConfig.apiKey,
-      dbUrl: firebaseConfig.databaseURL
-    };
-    if (balanceVal !== null && !isNaN(Number(balanceVal))) {
-      payload.lastBalance = Number(balanceVal);
-    } else if (State.wallet && !isNaN(Number(State.wallet.balance))) {
-      payload.lastBalance = Number(State.wallet.balance);
-    }
-    nn.saveSession(payload).catch(() => {});
-  } catch(e) {}
-}
-
-function clearNativeNotificationSession() {
-  try {
-    const nn = window.Capacitor?.Plugins?.NativeNotifications;
-    if (nn && typeof nn.clearSession === 'function') {
-      nn.clearSession().catch(() => {});
-    }
-  } catch(e) {}
-}
-
-function pushNativeSystemNotification(n) {
-  try {
-    const nn = window.Capacitor?.Plugins?.NativeNotifications;
-    if (!nn || typeof nn.showNotification !== 'function' || !n) return;
-    nn.showNotification({
-      id: String(n.id || Date.now()),
-      title: String(n.title || 'Punjab Esports'),
-      body: String(n.body || ''),
-      type: String(n.type || 'info')
-    }).catch(() => {});
-  } catch(e) {}
-}
-
 async function initApp() {
   updateGreeting();
   loadProfileUI();
   attachListeners();
-  syncNativeNotificationSession();
   navigate('home');
   initSpinWheel();
 
@@ -3403,12 +3347,6 @@ function recomputeNotificationsFromState() {
   if (!State.notifInitialized) {
     State.notifInitialized = true;
     State.lastNotifTs = maxTs;
-    try {
-      const nn = window.Capacitor?.Plugins?.NativeNotifications;
-      if (nn && typeof nn.markSeenIds === 'function' && filteredArr.length) {
-        nn.markSeenIds({ ids: filteredArr.map(x => String(x.id || '')).filter(Boolean) }).catch(() => {});
-      }
-    } catch(e) {}
     if (unread > 0 && !State.shownStartupNotification) {
       State.shownStartupNotification = true;
       triggerBellRing(true);
@@ -3416,7 +3354,6 @@ function recomputeNotificationsFromState() {
   } else if (newlyArrivedUnread.length > 0) {
     const newest = newlyArrivedUnread[0];
     toast('info', newest.title || 'New Notification', newest.body || '');
-    newlyArrivedUnread.slice(0, 3).forEach(pushNativeSystemNotification);
     triggerBellRing(true);
   }
 
@@ -3455,12 +3392,6 @@ function attachListeners() {
     const prevBal = State.lastKnownBalance;
     State.lastKnownBalance = newBal;
     try { localStorage.setItem(balStorageKey, String(newBal)); } catch(e) {}
-    try {
-      const nn = window.Capacitor?.Plugins?.NativeNotifications;
-      if (nn && typeof nn.updateLastBalance === 'function') {
-        nn.updateLastBalance({ balance: newBal }).catch(() => {});
-      }
-    } catch(e) {}
 
     if (prevBal !== null && Math.abs(newBal - prevBal) >= 0.01) {
       const recentLocalAction = (Date.now() - (State.localWalletActionTs || 0)) < 4500;
@@ -3832,7 +3763,6 @@ updateClickSoundToggle();
 $('#logoutBtn').onclick = async () => {
   if (!await confirmDialog('Logout','End your session?')) return;
   detachAll();
-  clearNativeNotificationSession();
   await signOut(auth);
   toast('success','Logged out','');
 };
