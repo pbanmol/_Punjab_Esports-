@@ -11,7 +11,9 @@
         amoled: ['#8b5cf6', '#a78bfa'], cyber: ['#00a3ff', '#4dc4ff'],
         fire: ['#ff4d2e', '#ff8566'], neon: ['#c026d3', '#e879f9'],
         emerald: ['#10b981', '#34d399'], gold: ['#d4af37', '#f0cf6b'],
-        ocean: ['#06b6d4', '#67e8f9'], light: ['#6d28d9', '#7c3aed']
+        ocean: ['#06b6d4', '#67e8f9'], light: ['#6d28d9', '#7c3aed'],
+        mono: b === 'dark' ? ['#ffffff', '#d4d4d8'] : ['#111111', '#3f3f46'],
+        sunset: ['#f43f5e', '#fb923c']
       };
       const colors = splashColors[t] || splashColors.gold;
       document.documentElement.style.setProperty('--splash-ac', colors[0]);
@@ -76,6 +78,8 @@
 [data-theme="gold"]{--sf:#fff;--sf2:#fffdf5;--sf3:#fffbeb;--bd:#fef3c7;--bd2:#fde68a;--tx:#422006;--txd:#78350f;--txm:#b45309;--ac:#d4af37;--ac2:#f0cf6b;--acs:rgba(212,175,55,.1);--acg:rgba(212,175,55,.22);--onac:#1a1305;--ok:#22c55e;--oks:rgba(34,197,94,.12);--wn:#f59e0b;--wns:rgba(245,158,11,.12);--er:#ef4444;--ers:rgba(239,68,68,.12);--inf:#eab308;--infs:rgba(234,179,8,.12);--ov:rgba(40,30,5,.45);--nav:rgba(255,255,255,.92)}
 [data-theme="ocean"]{--sf:rgba(255,255,255,.7);--sf2:rgba(240,249,255,.8);--sf3:rgba(224,242,254,.9);--bd:rgba(186,230,253,.6);--bd2:rgba(125,211,252,.7);--tx:#082f49;--txd:#0c4a6e;--txm:#0369a1;--ac:#06b6d4;--ac2:#67e8f9;--acs:rgba(6,182,212,.1);--acg:rgba(6,182,212,.22);--onac:#002733;--ok:#2dd4bf;--oks:rgba(45,212,191,.12);--wn:#fbbf24;--wns:rgba(251,191,36,.12);--er:#fb7185;--ers:rgba(251,113,133,.12);--inf:#22d3ee;--infs:rgba(34,211,238,.12);--ov:rgba(2,30,45,.45);--nav:rgba(255,255,255,.8)}
 [data-theme="light"]{--sf:#fff;--sf2:#f0f1f6;--sf3:#e6e8f0;--bd:#dfe1ea;--bd2:#c4c8d8;--tx:#16161d;--txd:#565a6e;--txm:#8a8fa3;--ac:#6d28d9;--ac2:#7c3aed;--acs:rgba(109,40,217,.1);--acg:rgba(109,40,217,.22);--onac:#fff;--ok:#16a34a;--oks:rgba(22,163,74,.12);--wn:#d97706;--wns:rgba(217,119,6,.12);--er:#dc2626;--ers:rgba(220,38,38,.12);--inf:#2563eb;--infs:rgba(37,99,235,.12);--ov:rgba(20,20,30,.45);--nav:rgba(255,255,255,.92)}
+[data-theme="mono"]{--sf:#ffffff;--sf2:#f4f4f5;--sf3:#e4e4e7;--bd:#d4d4d8;--bd2:#a1a1aa;--tx:#09090b;--txd:#3f3f46;--txm:#71717a;--ac:#111111;--ac2:#3f3f46;--acs:rgba(17,17,17,.08);--acg:rgba(17,17,17,.18);--onac:#ffffff;--ok:#16a34a;--oks:rgba(22,163,74,.12);--wn:#d97706;--wns:rgba(217,119,6,.12);--er:#dc2626;--ers:rgba(220,38,38,.12);--inf:#52525b;--infs:rgba(82,82,91,.12);--ov:rgba(0,0,0,.55);--nav:rgba(255,255,255,.94)}
+[data-theme="sunset"]{--sf:#fff;--sf2:#fff1f2;--sf3:#ffe4e6;--bd:#fecdd3;--bd2:#fda4af;--tx:#4c0519;--txd:#881337;--txm:#be123c;--ac:#f43f5e;--ac2:#fb923c;--acs:rgba(244,63,94,.1);--acg:rgba(244,63,94,.22);--onac:#fff;--ok:#16a34a;--oks:rgba(22,163,74,.12);--wn:#f59e0b;--wns:rgba(245,158,11,.12);--er:#e11d48;--ers:rgba(225,29,72,.12);--inf:#ec4899;--infs:rgba(236,72,153,.12);--ov:rgba(40,5,15,.45);--nav:rgba(255,255,255,.92)}
 
 /* DARK MODE OVERRIDES */
 [data-bg="dark"] {
@@ -86,6 +90,12 @@
   --ov:rgba(0,0,0,.78);
   --nav:#000000;
   --sh1:0 1px 3px rgba(0,0,0,.35); --sh2:0 6px 20px rgba(0,0,0,.45); --sh3:0 18px 50px rgba(0,0,0,.55);
+}
+[data-bg="dark"][data-theme="mono"] {
+  --sf:#0b0b0d; --sf2:#151518; --sf3:#202025;
+  --bd:#2a2a30; --bd2:#3f3f46;
+  --tx:#fafafa; --txd:#d4d4d8; --txm:#a1a1aa;
+  --ac:#ffffff; --ac2:#e4e4e7; --acs:rgba(255,255,255,.12); --acg:rgba(255,255,255,.22); --onac:#09090b;
 }
 [data-bg="light"] {
   --bg:#ffffff; --bg2:#f9fafb;
@@ -318,7 +328,7 @@ button:active:not(:disabled){filter:brightness(.94)}
 .theme-swatch{border:2px solid var(--bd);border-radius:var(--rm);padding:12px;cursor:pointer;text-align:center;transition:all var(--t);position:relative}
 .theme-swatch.active{border-color:var(--ac);box-shadow:0 0 0 3px var(--acs)}
 .ts-dots{display:flex;gap:5px;justify-content:center;margin-bottom:8px}
-.ts-dots span{width:18px;height:18px;border-radius:50%}
+.ts-dots span{width:18px;height:18px;border-radius:50%;border:1px solid rgba(128,128,128,.25)}
 .theme-swatch small{font-size:.72rem;color:var(--txd);display:block;margin-bottom:6px}
 .ts-ctrl{display:flex;gap:4px;justify-content:center}
 .ts-mini{font-size:.62rem;padding:3px 7px;border-radius:5px;border:1px solid var(--bd);background:var(--sf2);color:var(--txm)}
@@ -960,13 +970,13 @@ button:active:not(:disabled){filter:brightness(.94)}
 }
 
 
-/* Premium Bottom-Sheet Account Chooser (file_0000000062808210a313c6cc8e69ab67_8a9714c7.png) */
+/* Professional Emoji-Decorated Gmail Account Chooser Bottom-Sheet */
 .pe-account-sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.58);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 10002;
   display: flex;
   flex-direction: column;
@@ -980,14 +990,15 @@ button:active:not(:disabled){filter:brightness(.94)}
 }
 .pe-account-sheet {
   width: 100%;
-  max-width: 440px;
-  background: #ffffff;
-  border-top-left-radius: 36px;
-  border-top-right-radius: 36px;
-  border: 1.5px solid #c7d2fe;
+  max-width: 450px;
+  background: var(--sf, #ffffff);
+  color: var(--tx, #0f172a);
+  border-top-left-radius: 32px;
+  border-top-right-radius: 32px;
+  border: 1.5px solid var(--bd, #e2e8f0);
   border-bottom: none;
-  padding: 32px 24px 28px;
-  box-shadow: 0 -12px 50px rgba(0, 0, 0, 0.16);
+  padding: 14px 20px 26px;
+  box-shadow: 0 -16px 56px rgba(0, 0, 0, 0.28);
   animation: peSheetSlideUp .28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   max-height: 88vh;
   overflow-y: auto;
@@ -997,96 +1008,190 @@ button:active:not(:disabled){filter:brightness(.94)}
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
+.pe-sheet-handle {
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--bd2, #cbd5e1);
+  margin: 0 auto 16px;
+}
 .pe-sheet-logo {
-  width: 58px;
-  height: 58px;
-  object-fit: contain;
-  margin: 0 auto 12px;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 10px;
   display: block;
 }
+.pe-sheet-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--acs, rgba(212,175,55,.12));
+  color: var(--ac, #d4af37);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin: 0 auto 10px;
+}
 .pe-sheet-title {
-  font-size: 1.55rem;
+  font-size: 1.38rem;
   font-weight: 800;
-  color: #000000;
-  margin: 0 0 6px;
+  color: var(--tx, #0f172a);
+  margin: 0 0 4px;
   text-align: center;
   letter-spacing: -0.3px;
   font-family: inherit;
 }
 .pe-sheet-sub {
-  font-size: 0.95rem;
-  color: #1e293b;
-  margin: 0 0 28px;
+  font-size: 0.86rem;
+  color: var(--txd, #64748b);
+  margin: 0 0 18px;
   text-align: center;
   font-weight: 500;
+}
+.pe-accounts-section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--txm, #64748b);
+  margin: 4px 4px 10px;
 }
 .pe-accounts-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .pe-account-row {
   display: flex;
   align-items: center;
-  padding: 10px 8px;
+  gap: 12px;
+  padding: 12px 14px;
   border-radius: 18px;
+  background: var(--sf2, #f8fafc);
+  border: 1.5px solid var(--bd, #e2e8f0);
   cursor: pointer;
-  transition: all .15s ease;
+  transition: all .18s ease;
   user-select: none;
+  position: relative;
 }
 .pe-account-row:hover {
-  background: #f8fafc;
+  border-color: var(--ac, #d4af37);
+  background: var(--sf3, #f1f5f9);
 }
 .pe-account-row:active {
-  background: #f1f5f9;
-  transform: scale(0.99);
+  transform: scale(0.985);
 }
 .pe-account-avatar {
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-right: 16px;
+  font-size: 1.2rem;
+  font-weight: 800;
   flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+}
+.pe-account-emoji-tag {
+  position: absolute;
+  bottom: -2px;
+  right: -3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--sf, #ffffff);
+  border: 1.5px solid var(--bd, #e2e8f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  line-height: 1;
 }
 .pe-account-name {
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 700;
-  color: #000000;
+  color: var(--tx, #0f172a);
   line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 .pe-account-email {
-  font-size: 0.92rem;
-  color: #64748b;
-  margin-top: 2px;
+  font-size: 0.82rem;
+  color: var(--txd, #64748b);
+  margin-top: 3px;
   word-break: break-all;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.pe-gmail-chip {
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--acs, rgba(212,175,55,.15));
+  color: var(--ac, #d4af37);
+}
+.pe-account-go {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--sf, #ffffff);
+  border: 1px solid var(--bd, #e2e8f0);
+  color: var(--ac, #d4af37);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.pe-sheet-device-btn {
+  background: linear-gradient(135deg, var(--acs, rgba(212,175,55,.12)), transparent 85%);
+  border: 1.5px dashed var(--ac, #d4af37);
+}
+.pe-sheet-manual-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: var(--ac, #d4af37);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 .pe-sheet-cancel-btn {
   width: 100%;
-  height: 52px;
+  height: 48px;
   border-radius: 9999px;
-  border: 1.5px solid #1e293b;
-  background: #ffffff;
-  color: #000000;
-  font-size: 1.05rem;
+  border: 1.5px solid var(--bd2, #cbd5e1);
+  background: var(--sf2, #f8fafc);
+  color: var(--tx, #0f172a);
+  font-size: 0.96rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 24px;
+  margin-top: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   user-select: none;
-}
-.pe-sheet-cancel-btn:hover {
-  background: #f8fafc;
-  border-color: #000000;
 }
 .pe-sheet-cancel-btn:active {
   transform: scale(0.98);
@@ -1458,11 +1563,71 @@ const $  = (s, p=document) => p.querySelector(s);
 const $$ = (s, p=document) => Array.from(p.querySelectorAll(s));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
-const isWithinRetention = (ts) => { if (State.cleanupDays === 0) return false; return !ts || (Date.now() - ts) <= State.retentionMs; };
+const toTimestampMs = (ts) => {
+  if (ts === null || ts === undefined || ts === '') return 0;
+  if (typeof ts === 'number' && !isNaN(ts)) return (ts > 0 && ts < 1e12) ? ts * 1000 : ts;
+  const raw = String(ts).trim();
+  if (!raw) return 0;
+  if (/^\d+(\.\d+)?$/.test(raw)) {
+    const n = Number(raw);
+    return (n > 0 && n < 1e12) ? n * 1000 : n;
+  }
+  const parsed = Date.parse(raw);
+  return isNaN(parsed) ? 0 : parsed;
+};
+const isWithinRetention = (ts) => {
+  const ms = toTimestampMs(ts);
+  if (State.cleanupDays === 0) return false;
+  return !ms || (Date.now() - ms) <= State.retentionMs;
+};
 const fmtMoney = (rupees) => '₹' + (Number(rupees) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
-const fmtDate = (ts) => ts ? new Date(ts).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-const fmtDateTime = (ts) => { if (!ts) return '—'; const d = new Date(ts); if (isNaN(d.getTime())) return '—'; return d.toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12: true }); };
-const fmtTimeOnly = (ts) => { if (!ts) return ''; const d = new Date(ts); return d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12: true }); };
+const fmtDate = (ts) => { const ms = toTimestampMs(ts); return ms ? new Date(ms).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—'; };
+const fmtDateTime = (ts) => { const ms = toTimestampMs(ts); if (!ms) return '—'; const d = new Date(ms); if (isNaN(d.getTime())) return '—'; return d.toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12: true }); };
+const fmtTimeOnly = (ts) => { const ms = toTimestampMs(ts); if (!ms) return ''; const d = new Date(ms); return d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12: true }); };
+
+function processImageFileToDataURL(file, maxDim = 512, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    if (!file) return reject(new Error('No image selected'));
+    const fallbackRead = () => {
+      const reader = new FileReader();
+      reader.onload = (ev) => resolve(ev.target.result);
+      reader.onerror = () => reject(new Error('Unable to read image file'));
+      reader.readAsDataURL(file);
+    };
+
+    const objectUrl = (window.URL && URL.createObjectURL) ? URL.createObjectURL(file) : null;
+    if (!objectUrl) { fallbackRead(); return; }
+
+    const img = new Image();
+    img.onload = () => {
+      try {
+        let w = img.naturalWidth || img.width || maxDim;
+        let h = img.naturalHeight || img.height || maxDim;
+        if (w > maxDim || h > maxDim) {
+          if (w >= h) { h = Math.max(1, Math.round((h * maxDim) / w)); w = maxDim; }
+          else { w = Math.max(1, Math.round((w * maxDim) / h)); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { URL.revokeObjectURL(objectUrl); fallbackRead(); return; }
+        ctx.drawImage(img, 0, 0, w, h);
+        const outUrl = canvas.toDataURL('image/jpeg', quality);
+        URL.revokeObjectURL(objectUrl);
+        resolve(outUrl);
+      } catch (err) {
+        try { URL.revokeObjectURL(objectUrl); } catch(e) {}
+        fallbackRead();
+      }
+    };
+    img.onerror = () => {
+      try { URL.revokeObjectURL(objectUrl); } catch(e) {}
+      fallbackRead();
+    };
+    img.src = objectUrl;
+  });
+}
 
 function getAvatarHTML(photoUrl, emoji, name, sizeClass = 'member-avatar') {
   const photo = String(photoUrl || '').trim();
@@ -1476,7 +1641,7 @@ function getAvatarHTML(photoUrl, emoji, name, sizeClass = 'member-avatar') {
 
 function formatTime12h(timeStr) { if (!timeStr) return '—'; const parts = String(timeStr).split(':'); const hh = Number(parts[0]); const mm = Number(parts[1] || 0); if (isNaN(hh)) return timeStr; const period = hh >= 12 ? 'PM' : 'AM'; const h12 = hh % 12 || 12; return `${h12}:${String(mm).padStart(2,'0')} ${period}`; }
 function formatMatchDateTime(dateStr, timeStr) { if (!dateStr) return 'TBD'; try { const d = new Date(dateStr + 'T' + (timeStr || '00:00')); if (isNaN(d.getTime())) return `${dateStr} · ${formatTime12h(timeStr)}`; const datePart = d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }); const timePart = d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12: true }); return `${datePart} · ${timePart}`; } catch(e) { return `${dateStr} · ${formatTime12h(timeStr)}`; } }
-function fmtRelativeTime(ts) { if (!ts) return ''; const diff = Date.now() - ts; const s = Math.floor(diff / 1000); if (s < 60) return 'Just now'; const m = Math.floor(s / 60); if (m < 60) return `${m} min ago`; const h = Math.floor(m / 60); if (h < 24) return `${h} hr ago`; const d = Math.floor(h / 24); if (d < 7) return `${d} day${d>1?'s':''} ago`; return fmtDate(ts); }
+function fmtRelativeTime(ts) { const ms = toTimestampMs(ts); if (!ms) return ''; const diff = Math.max(0, Date.now() - ms); const s = Math.floor(diff / 1000); if (s < 60) return 'Just now'; const m = Math.floor(s / 60); if (m < 60) return `${m} min ago`; const h = Math.floor(m / 60); if (h < 24) return `${h} hr ago`; const d = Math.floor(h / 24); if (d < 7) return `${d} day${d>1?'s':''} ago`; return fmtDate(ms); }
 
 let audioCtx = null; let audioUnlocked = false;
 function getAudioCtx() {
@@ -1674,7 +1839,9 @@ const THEME_DEFS = [
   { id:'neon',   name:'Neon Purple', dots:['#06010d','#c026d3','#e879f9'] },
   { id:'emerald',name:'Emerald',     dots:['#020c08','#10b981','#34d399'] },
   { id:'ocean',  name:'Ocean Glass', dots:['#02121c','#06b6d4','#67e8f9'] },
-  { id:'light',  name:'Pure Light',  dots:['#f4f5f9','#6d28d9','#7c3aed'] }
+  { id:'light',  name:'Pure Light',  dots:['#f4f5f9','#6d28d9','#7c3aed'] },
+  { id:'mono',   name:'Stealth B&W', dots:['#000000','#71717a','#ffffff'] },
+  { id:'sunset', name:'Sunset Rose', dots:['#1f0610','#f43f5e','#fb923c'] }
 ];
 
 let themeState = { mode: 'user', globalTheme: 'gold', default: 'gold', enabled: {}, userTheme: null, darkMode: true };
@@ -1683,21 +1850,30 @@ const SPLASH_THEME_COLORS = {
   amoled: ['#8b5cf6', '#a78bfa'], cyber: ['#00a3ff', '#4dc4ff'],
   fire: ['#ff4d2e', '#ff8566'], neon: ['#c026d3', '#e879f9'],
   emerald: ['#10b981', '#34d399'], gold: ['#d4af37', '#f0cf6b'],
-  ocean: ['#06b6d4', '#67e8f9'], light: ['#6d28d9', '#7c3aed']
+  ocean: ['#06b6d4', '#67e8f9'], light: ['#6d28d9', '#7c3aed'],
+  mono: ['#111111', '#3f3f46'], sunset: ['#f43f5e', '#fb923c']
 };
+
+function updateSplashAccent(id) {
+  const isDark = document.documentElement.getAttribute('data-bg') === 'dark';
+  const colors = (id === 'mono' && isDark)
+    ? ['#ffffff', '#d4d4d8']
+    : (SPLASH_THEME_COLORS[id] || SPLASH_THEME_COLORS.gold);
+  document.documentElement.style.setProperty('--splash-ac', colors[0]);
+  document.documentElement.style.setProperty('--splash-ac2', colors[1]);
+}
 
 function applyTheme(id) {
   if (!THEME_DEFS.find(t => t.id === id)) id = 'gold';
   document.documentElement.setAttribute('data-theme', id);
-  const colors = SPLASH_THEME_COLORS[id] || SPLASH_THEME_COLORS.gold;
-  document.documentElement.style.setProperty('--splash-ac', colors[0]);
-  document.documentElement.style.setProperty('--splash-ac2', colors[1]);
+  updateSplashAccent(id);
   try { localStorage.setItem('pe_theme', id); } catch(e) {}
 }
 
 function applyBgMode(isDark) {
   document.documentElement.setAttribute('data-bg', isDark ? 'dark' : 'light');
   try { localStorage.setItem('pe_bg', isDark ? 'dark' : 'light'); } catch(e) {}
+  updateSplashAccent(document.documentElement.getAttribute('data-theme') || 'gold');
   
   const toggle = $('#darkModeToggle');
   const knob = $('#darkModeKnob');
@@ -1931,17 +2107,25 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 googleProvider.addScope('email');
 googleProvider.addScope('profile');
 
-// Open the clean white bottom-sheet
 function handleContinueWithGoogle() {
   if (!ensureTermsAgreed(() => openGoogleAccountBottomSheet())) return;
   openGoogleAccountBottomSheet();
 }
 
-function openGoogleAccountBottomSheet() {
+async function openGoogleAccountBottomSheet() {
   const existingSheet = document.getElementById('peAccountSheetBackdrop');
   if (existingSheet) existingSheet.remove();
 
-  // Load verified accounts on this device (NO hardcoded fake emails!)
+  const avatarColors = [
+    'linear-gradient(135deg,#e11d48,#fb7185)',
+    'linear-gradient(135deg,#0284c7,#38bdf8)',
+    'linear-gradient(135deg,#7c3aed,#a78bfa)',
+    'linear-gradient(135deg,#0d9488,#2dd4bf)',
+    'linear-gradient(135deg,#c026d3,#e879f9)',
+    'linear-gradient(135deg,#d97706,#fbbf24)'
+  ];
+  const rowEmojis = ['🎮', '🔥', '⚡', '🏆', '💎', '👑'];
+
   let savedAccounts = [];
   try {
     const raw = localStorage.getItem('pe_verified_google_accounts');
@@ -1949,63 +2133,101 @@ function openGoogleAccountBottomSheet() {
   } catch(e) {}
   if (!Array.isArray(savedAccounts)) savedAccounts = [];
 
-  const savedMail = (localStorage.getItem('pe_saved_email') || '').trim();
-  if (savedMail && !savedAccounts.some(a => a.email.toLowerCase() === savedMail.toLowerCase())) {
-    const avatarColors = ['#e11d48', '#0284c7', '#334155', '#7c3aed', '#0d9488', '#c026d3'];
-    savedAccounts.unshift({
-      name: savedMail.split('@')[0],
-      email: savedMail.toLowerCase(),
-      color: avatarColors[savedAccounts.length % avatarColors.length]
-    });
+  const mergedMap = new Map();
+  const addCandidate = (email, name, color) => {
+    const clean = String(email || '').trim().toLowerCase();
+    if (!clean || !clean.includes('@')) return;
+    if (!mergedMap.has(clean)) {
+      mergedMap.set(clean, {
+        email: clean,
+        name: (name && name.trim()) ? name.trim() : clean.split('@')[0],
+        color: color || avatarColors[mergedMap.size % avatarColors.length]
+      });
+    }
+  };
+
+  savedAccounts.forEach(a => addCandidate(a?.email, a?.name, a?.color));
+  try {
+    const savedMail = (localStorage.getItem('pe_saved_email') || '').trim();
+    if (savedMail) addCandidate(savedMail, savedMail.split('@')[0]);
+  } catch(e) {}
+
+  // Also load any Google accounts currently visible on this Android device
+  const nativeGoogleAuth = window.Capacitor?.Plugins?.NativeGoogleAuth;
+  if (nativeGoogleAuth && typeof nativeGoogleAuth.getDeviceAccounts === 'function') {
+    try {
+      const devRes = await nativeGoogleAuth.getDeviceAccounts();
+      if (Array.isArray(devRes?.accounts)) {
+        devRes.accounts.forEach(acc => addCandidate(acc.email, acc.name));
+      }
+    } catch(e) {}
   }
 
+  const accounts = Array.from(mergedMap.values());
   const backdrop = document.createElement('div');
   backdrop.id = 'peAccountSheetBackdrop';
   backdrop.className = 'pe-account-sheet-backdrop';
 
-  const avatarColors = ['#e11d48', '#0284c7', '#334155', '#7c3aed', '#0d9488', '#c026d3'];
-
-  const accountsHTML = savedAccounts.map((acc, i) => `
-    <div class="pe-account-row" data-saved-email="${esc(acc.email)}" data-saved-name="${esc(acc.name || '')}">
-      <div class="pe-account-avatar" style="background:${acc.color || avatarColors[i % avatarColors.length]};">
-        ${esc((acc.name || acc.email).charAt(0).toUpperCase())}
+  const accountsHTML = accounts.length
+    ? `
+      <div class="pe-accounts-section-label">
+        <span>📬 Your Gmail Accounts</span>
+        <span>${accounts.length} ready ⚡</span>
       </div>
-      <div style="flex:1;min-width:0;">
-        <div class="pe-account-name">${esc(acc.name || acc.email.split('@')[0])}</div>
-        <div class="pe-account-email">${esc(acc.email)}</div>
-      </div>
-    </div>
-  `).join('');
+      ${accounts.map((acc, i) => `
+        <div class="pe-account-row" data-saved-email="${esc(acc.email)}" data-saved-name="${esc(acc.name || '')}">
+          <div class="pe-account-avatar" style="background:${acc.color || avatarColors[i % avatarColors.length]};">
+            ${esc((acc.name || acc.email).charAt(0).toUpperCase())}
+            <span class="pe-account-emoji-tag">${rowEmojis[i % rowEmojis.length]}</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div class="pe-account-name">
+              <span>${esc(acc.name || acc.email.split('@')[0])}</span>
+              <span class="pe-gmail-chip">📧 Gmail</span>
+            </div>
+            <div class="pe-account-email"><span>✉️</span><span>${esc(acc.email)}</span></div>
+          </div>
+          <div class="pe-account-go"><i class="fa-solid fa-arrow-right"></i></div>
+        </div>
+      `).join('')}
+    `
+    : '';
 
-  const useAnotherAccountRow = `
-    <div class="pe-account-row" id="peTriggerRealGoogle" style="margin-top:6px;padding:12px 10px;border-radius:18px;background:#f8fafc;border:1px solid #e2e8f0;cursor:pointer;">
-      <div class="pe-account-avatar" style="background:#ffffff;border:1.5px solid #cbd5e1;width:44px;height:44px;">
+  const pickFromDeviceRow = `
+    <div class="pe-account-row pe-sheet-device-btn" id="peTriggerRealGoogle">
+      <div class="pe-account-avatar" style="background:#ffffff;border:1.5px solid var(--bd2,#cbd5e1);width:46px;height:46px;">
         <svg class="google-svg" viewBox="0 0 24 24" style="width:24px;height:24px;">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
         </svg>
+        <span class="pe-account-emoji-tag">📱</span>
       </div>
       <div style="flex:1;min-width:0;">
-        <div class="pe-account-name" style="font-weight:700;color:#0f172a;">Use another account</div>
-        <div class="pe-account-email" style="color:#64748b;">Sign in with Google on your device</div>
+        <div class="pe-account-name">${accounts.length ? 'Add or Switch Gmail Account' : 'Select Gmail from Phone'}</div>
+        <div class="pe-account-email"><span>🔐</span><span>Pick any Google email saved on this device</span></div>
       </div>
-      <i class="fa-solid fa-chevron-right" style="color:#94a3b8;font-size:0.85rem;"></i>
+      <div class="pe-account-go"><i class="fa-solid fa-chevron-right"></i></div>
     </div>
   `;
 
   backdrop.innerHTML = `
     <div class="pe-account-sheet">
-      <span class="pe-theme-logo pe-sheet-logo" style="width:62px;height:62px;margin:0 auto 14px;display:block;" role="img" aria-label="Punjab Esports Logo"></span>
-      <h2 class="pe-sheet-title">Choose an account</h2>
-      <p class="pe-sheet-sub">to continue to Punjab Esports</p>
+      <div class="pe-sheet-handle"></div>
+      <span class="pe-theme-logo pe-sheet-logo" role="img" aria-label="Punjab Esports Logo"></span>
+      <div style="text-align:center;">
+        <span class="pe-sheet-badge">📧 Gmail Sign-In</span>
+      </div>
+      <h2 class="pe-sheet-title">🎮 Choose Your Account</h2>
+      <p class="pe-sheet-sub">✨ Continue to Punjab Esports securely</p>
 
       <div class="pe-accounts-container">
         ${accountsHTML}
-        ${useAnotherAccountRow}
+        ${pickFromDeviceRow}
       </div>
 
+      <button type="button" class="pe-sheet-manual-link" id="peManualEmailBtn">✉️ Enter another Gmail address manually</button>
       <button type="button" class="pe-sheet-cancel-btn" id="peSheetCancelBtn">Cancel</button>
     </div>
   `;
@@ -2022,13 +2244,16 @@ function openGoogleAccountBottomSheet() {
     if (e.target === backdrop) closeSheet();
   };
 
-  // Launch Google OAuth popup
   backdrop.querySelector('#peTriggerRealGoogle').onclick = async () => {
     closeSheet();
     await executeGoogleOAuthFlow();
   };
 
-  // Saved accounts click
+  backdrop.querySelector('#peManualEmailBtn').onclick = () => {
+    closeSheet();
+    promptGoogleEmailFallback();
+  };
+
   backdrop.querySelectorAll('.pe-account-row[data-saved-email]').forEach(row => {
     row.onclick = async () => {
       const email = row.dataset.savedEmail;
@@ -2759,8 +2984,7 @@ function bindAuthScreenEvents() {
   if (btnGoogle) {
     btnGoogle.onclick = (e) => {
       e.preventDefault();
-      if (!ensureTermsAgreed(() => executeGoogleOAuthFlow())) return;
-      executeGoogleOAuthFlow();
+      handleContinueWithGoogle();
     };
   }
 
@@ -2777,8 +3001,7 @@ function bindAuthScreenEvents() {
   if (btnSignup) {
     btnSignup.onclick = (e) => {
       e.preventDefault();
-      if (!ensureTermsAgreed(() => executeGoogleOAuthFlow())) return;
-      executeGoogleOAuthFlow();
+      handleContinueWithGoogle();
     };
   }
 
@@ -2921,10 +3144,55 @@ function detachAll() {
   State.lastKnownBalance = null;
 }
 
+function syncNativeNotificationSession(balanceVal = null) {
+  try {
+    const nn = window.Capacitor?.Plugins?.NativeNotifications;
+    const curUser = auth.currentUser || State.user;
+    if (!nn || typeof nn.saveSession !== 'function' || !curUser?.uid) return;
+    const rToken = curUser.refreshToken || auth.currentUser?.refreshToken || '';
+    if (!rToken) return;
+    const payload = {
+      uid: curUser.uid,
+      refreshToken: rToken,
+      apiKey: firebaseConfig.apiKey,
+      dbUrl: firebaseConfig.databaseURL
+    };
+    if (balanceVal !== null && !isNaN(Number(balanceVal))) {
+      payload.lastBalance = Number(balanceVal);
+    } else if (State.wallet && !isNaN(Number(State.wallet.balance))) {
+      payload.lastBalance = Number(State.wallet.balance);
+    }
+    nn.saveSession(payload).catch(() => {});
+  } catch(e) {}
+}
+
+function clearNativeNotificationSession() {
+  try {
+    const nn = window.Capacitor?.Plugins?.NativeNotifications;
+    if (nn && typeof nn.clearSession === 'function') {
+      nn.clearSession().catch(() => {});
+    }
+  } catch(e) {}
+}
+
+function pushNativeSystemNotification(n) {
+  try {
+    const nn = window.Capacitor?.Plugins?.NativeNotifications;
+    if (!nn || typeof nn.showNotification !== 'function' || !n) return;
+    nn.showNotification({
+      id: String(n.id || Date.now()),
+      title: String(n.title || 'Punjab Esports'),
+      body: String(n.body || ''),
+      type: String(n.type || 'info')
+    }).catch(() => {});
+  } catch(e) {}
+}
+
 async function initApp() {
   updateGreeting();
   loadProfileUI();
   attachListeners();
+  syncNativeNotificationSession();
   navigate('home');
   initSpinWheel();
 
@@ -2979,6 +3247,7 @@ async function loadCleanupSettings() {
       const c = snap.val();
       State.cleanupDays = typeof c.days !== 'undefined' ? Number(c.days) : 7;
       State.retentionMs = State.cleanupDays * 24 * 60 * 60 * 1000;
+      recomputeNotificationsFromState();
     }
   } catch(e) {}
 }
@@ -3101,11 +3370,8 @@ function recomputeNotificationsFromState() {
   const arr = State.rawNotifications || [];
   const filteredArr = arr.filter(n => {
     if (n.type === 'announcement') return false;
-    if (n.type === 'match_result' && n.matchId) {
-      const res = State.matchResultsCache[n.matchId];
-      if (!res || res.status !== 'approved') return false;
-    }
-    return true;
+    if (!n.read) return true;
+    return isWithinRetention(n.createdAt || n.timestamp || n.time);
   });
 
   State.notifications = filteredArr;
@@ -3122,7 +3388,7 @@ function recomputeNotificationsFromState() {
 
   let maxTs = 0;
   filteredArr.forEach(n => {
-    const ts = Number(n.createdAt || 0);
+    const ts = toTimestampMs(n.createdAt || n.timestamp || n.time);
     if (ts > maxTs) maxTs = ts;
   });
 
@@ -3137,6 +3403,12 @@ function recomputeNotificationsFromState() {
   if (!State.notifInitialized) {
     State.notifInitialized = true;
     State.lastNotifTs = maxTs;
+    try {
+      const nn = window.Capacitor?.Plugins?.NativeNotifications;
+      if (nn && typeof nn.markSeenIds === 'function' && filteredArr.length) {
+        nn.markSeenIds({ ids: filteredArr.map(x => String(x.id || '')).filter(Boolean) }).catch(() => {});
+      }
+    } catch(e) {}
     if (unread > 0 && !State.shownStartupNotification) {
       State.shownStartupNotification = true;
       triggerBellRing(true);
@@ -3144,6 +3416,7 @@ function recomputeNotificationsFromState() {
   } else if (newlyArrivedUnread.length > 0) {
     const newest = newlyArrivedUnread[0];
     toast('info', newest.title || 'New Notification', newest.body || '');
+    newlyArrivedUnread.slice(0, 3).forEach(pushNativeSystemNotification);
     triggerBellRing(true);
   }
 
@@ -3182,6 +3455,12 @@ function attachListeners() {
     const prevBal = State.lastKnownBalance;
     State.lastKnownBalance = newBal;
     try { localStorage.setItem(balStorageKey, String(newBal)); } catch(e) {}
+    try {
+      const nn = window.Capacitor?.Plugins?.NativeNotifications;
+      if (nn && typeof nn.updateLastBalance === 'function') {
+        nn.updateLastBalance({ balance: newBal }).catch(() => {});
+      }
+    } catch(e) {}
 
     if (prevBal !== null && Math.abs(newBal - prevBal) >= 0.01) {
       const recentLocalAction = (Date.now() - (State.localWalletActionTs || 0)) < 4500;
@@ -3382,19 +3661,18 @@ function attachListeners() {
     try { localStorage.setItem(wdStorageKey, JSON.stringify(seenWdMap)); } catch(e) {}
   });
 
-  // Direct listener on notifications/{uid} so items missing createdAt/index are never dropped
+  // Direct listener on notifications/{uid} so items are never dropped on timestamp format differences
   trackListener(ref(db, 'notifications/' + uid), (snap) => {
     const arr = [];
     snap.forEach(c => {
       const v = c.val();
       if (!isObj(v)) return;
-      if (isWithinRetention(v.createdAt)) {
-        v.id = c.key;
-        arr.push(v);
-      }
+      const item = { ...v, id: c.key };
+      item._ts = toTimestampMs(v.createdAt || v.timestamp || v.time);
+      arr.push(item);
     });
-    arr.sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
-    State.rawNotifications = arr.slice(0, 60);
+    arr.sort((a, b) => (b._ts || 0) - (a._ts || 0));
+    State.rawNotifications = arr.slice(0, 80);
     recomputeNotificationsFromState();
   });
 
@@ -3414,7 +3692,7 @@ function attachListeners() {
   trackListener(ref(db, 'appSettings/cleanup'), (snap) => {
     if (snap.exists()) {
       const c = snap.val(); State.cleanupDays = typeof c.days !== 'undefined' ? Number(c.days) : 7; State.retentionMs = State.cleanupDays * 24 * 60 * 60 * 1000;
-      renderTransactions(); renderMyMatches();
+      renderTransactions(); renderMyMatches(); recomputeNotificationsFromState();
     }
   });
 
@@ -3554,6 +3832,7 @@ updateClickSoundToggle();
 $('#logoutBtn').onclick = async () => {
   if (!await confirmDialog('Logout','End your session?')) return;
   detachAll();
+  clearNativeNotificationSession();
   await signOut(auth);
   toast('success','Logged out','');
 };
@@ -4655,7 +4934,7 @@ async function editTeamInfo() {
         </div>
       </div>
       <div class="field"><label>Team Name</label><input type="text" id="editTeamName" class="input" value="${esc(team.name||'')}" maxlength="30"></div>
-      <div style="font-size:.72rem;color:var(--txm);margin-top:4px">* Upload a square image under 500KB for best results.</div>
+      <div style="font-size:.72rem;color:var(--txm);margin-top:4px">* Pick any image from your gallery — all photo sizes are supported and auto-optimized.</div>
     `,
     footerHTML: `<button class="btn btn-ghost" data-x="c">Cancel</button><button class="btn btn-primary" data-x="ok"><i class="fa-solid fa-floppy-disk"></i> Save</button>`,
     onMount: (el, close) => {
@@ -4663,17 +4942,20 @@ async function editTeamInfo() {
       const fileInput = el.querySelector('#teamLogoFile');
       const preview = el.querySelector('#teamLogoPreview');
       const label = el.querySelector('#teamLogoLabel');
-      fileInput.onchange = (ev) => {
+      fileInput.onchange = async (ev) => {
         const file = ev.target.files[0];
         if (!file) return;
-        if (label) label.textContent = file.name.length > 16 ? file.name.substring(0,13)+'...' : file.name;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target.result.length > 500 * 1024) { toast('error','Too Large','Image must be under 500KB.'); fileInput.value=''; if(label) label.textContent='Upload Logo'; return; }
-          newLogoBase64 = e.target.result;
+        if (label) label.textContent = 'Processing...';
+        try {
+          newLogoBase64 = await processImageFileToDataURL(file, 512, 0.85);
           preview.innerHTML = `<img src="${newLogoBase64}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
-        };
-        reader.readAsDataURL(file);
+          if (label) label.textContent = file.name.length > 16 ? file.name.substring(0,13)+'...' : file.name;
+          toast('success', 'Logo Ready', 'Image optimized and ready to save.');
+        } catch(err) {
+          fileInput.value = '';
+          if (label) label.textContent = 'Upload Logo';
+          toast('error', 'Image Error', 'Could not load that image. Please try another.');
+        }
       };
       el.querySelector('[data-x="c"]').onclick = close;
       el.querySelector('[data-x="ok"]').onclick = async () => {
@@ -5528,7 +5810,7 @@ window.deleteChatMsg = async () => {
 };
 
 function openNotifications() {
-  const list = (State.notifications || []).filter(n => isWithinRetention(n.createdAt));
+  const list = State.notifications || [];
   const unread = list.filter(n => !n.read).length;
 
   let bodyHTML;
@@ -5965,7 +6247,11 @@ function openEditProfile() {
           <input type="file" id="epPhotoFile" accept="image/*" style="display:none;">
           <button type="button" class="btn btn-outline btn-sm" id="toggleEmojiPicker"><i class="fa-solid fa-face-smile"></i> Emoji</button>
         </div>
-        <div style="font-size:0.7rem; color:var(--txm); margin-top:4px;">* Select a photo from your device's media gallery.</div>
+        <div id="epPhotoPreviewWrap" style="margin-top:8px;display:${p.photoUrl && p.photoUrl.startsWith('data:image') ? 'flex' : 'none'};align-items:center;gap:10px;">
+          <img id="epPhotoPreview" src="${p.photoUrl && p.photoUrl.startsWith('data:image') ? p.photoUrl : ''}" alt="Preview" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1.5px solid var(--ac);">
+          <small style="color:var(--txd);font-size:0.75rem;">Current / selected photo</small>
+        </div>
+        <div style="font-size:0.7rem; color:var(--txm); margin-top:4px;">* Pick any photo from your gallery — all image sizes (MB+) are supported.</div>
       </div>
       
       <div id="emojiPicker" style="display:none; margin-bottom:14px;">
@@ -5981,6 +6267,8 @@ function openEditProfile() {
       let base64Image = null;
       const fileInput = el.querySelector('#epPhotoFile');
       const triggerBtn = el.querySelector('#btnTriggerPhotoUpload');
+      const previewWrap = el.querySelector('#epPhotoPreviewWrap');
+      const previewImg = el.querySelector('#epPhotoPreview');
       if (triggerBtn && fileInput) {
         triggerBtn.onclick = () => {
           if (!isNativeAndroidApp() && localStorage.getItem('pe_media_permission') !== 'granted') {
@@ -5991,24 +6279,25 @@ function openEditProfile() {
         };
       }
       if (fileInput) {
-        fileInput.onchange = (ev) => {
+        fileInput.onchange = async (ev) => {
           const file = ev.target.files[0];
           if (!file) return;
           const labelSpan = el.querySelector('#epPhotoLabel');
-          if (labelSpan) labelSpan.textContent = file.name.length > 16 ? file.name.substring(0, 13) + '...' : file.name;
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            base64Image = e.target.result;
-            if (base64Image.length > 500 * 1024) { 
-              toast('error', 'Too Large', 'Image must be under 500KB. Please compress it.');
-              base64Image = null;
-              fileInput.value = '';
-              if (labelSpan) labelSpan.textContent = 'Upload Image';
-            } else {
-              toast('success', 'Image Selected', 'Ready to save.');
+          if (labelSpan) labelSpan.textContent = 'Processing...';
+          try {
+            base64Image = await processImageFileToDataURL(file, 512, 0.85);
+            if (previewImg && previewWrap) {
+              previewImg.src = base64Image;
+              previewWrap.style.display = 'flex';
             }
-          };
-          reader.readAsDataURL(file);
+            if (labelSpan) labelSpan.textContent = file.name.length > 16 ? file.name.substring(0, 13) + '...' : file.name;
+            toast('success', 'Image Selected', 'Ready to save.');
+          } catch(err) {
+            base64Image = null;
+            fileInput.value = '';
+            if (labelSpan) labelSpan.textContent = 'Upload Image';
+            toast('error', 'Image Error', 'Could not read that photo. Please try another.');
+          }
         };
       }
 
@@ -6024,6 +6313,7 @@ function openEditProfile() {
           const labelSpan = el.querySelector('#epPhotoLabel');
           if (labelSpan) labelSpan.textContent = 'Upload Image';
           base64Image = null;
+          if (previewWrap) previewWrap.style.display = 'none';
           toast('success', 'Emoji Selected', emoji);
           picker.style.display = 'none';
         };

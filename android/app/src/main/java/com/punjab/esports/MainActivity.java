@@ -2,16 +2,22 @@ package com.punjab.esports;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import com.getcapacitor.BridgeActivity;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends BridgeActivity {
-    private static final int IMAGE_PERMISSION_REQUEST_CODE = 1001;
+    private static final int STARTUP_PERMISSIONS_REQUEST_CODE = 1001;
+    private static final int NOTIF_PERMISSION_REQUEST_CODE = 1002;
+    private static final String PREF_NOTIF_PROMPTED = "notif_perm_prompted";
 
     private boolean isRequestingPermission = false;
     private boolean openedSettingsForPermission = false;
@@ -20,8 +26,10 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(NativeGoogleAuthPlugin.class);
+        registerPlugin(NativeNotificationsPlugin.class);
         super.onCreate(savedInstanceState);
-        checkAndEnforceImagePermission();
+        BackgroundNotificationJobService.ensureNotificationChannel(this);
+        checkAndRequestStartupPermissions();
     }
 
     @Override
@@ -31,8 +39,16 @@ public class MainActivity extends BridgeActivity {
             openedSettingsForPermission = false;
             if (!hasImagePermission()) {
                 closeAppImmediately();
+            } else {
+                maybeRequestNotificationPermission();
             }
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        BackgroundNotificationJobService.scheduleQuickCheck(this, 20000L);
     }
 
     private String getRequiredImagePermission() {
@@ -45,13 +61,51 @@ public class MainActivity extends BridgeActivity {
         return checkSelfPermission(getRequiredImagePermission()) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void checkAndEnforceImagePermission() {
-        if (hasImagePermission() || isRequestingPermission) {
+    private boolean hasNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
+    }
+
+    private boolean hasAlreadyPromptedNotification() {
+        SharedPreferences prefs = getSharedPreferences(BackgroundNotificationJobService.PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(PREF_NOTIF_PROMPTED, false);
+    }
+
+    private void markNotificationPrompted() {
+        SharedPreferences prefs = getSharedPreferences(BackgroundNotificationJobService.PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(PREF_NOTIF_PROMPTED, true).apply();
+    }
+
+    private void checkAndRequestStartupPermissions() {
+        if (isRequestingPermission) return;
+
+        if (!hasImagePermission()) {
+            List<String> perms = new ArrayList<>();
+            perms.add(getRequiredImagePermission());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !hasNotificationPermission()) {
+                perms.add(Manifest.permission.POST_NOTIFICATIONS);
+                markNotificationPrompted();
+            }
+            isRequestingPermission = true;
+            permissionPromptStartedAt = System.currentTimeMillis();
+            requestPermissions(perms.toArray(new String[0]), STARTUP_PERMISSIONS_REQUEST_CODE);
             return;
         }
-        isRequestingPermission = true;
-        permissionPromptStartedAt = System.currentTimeMillis();
-        requestPermissions(new String[]{getRequiredImagePermission()}, IMAGE_PERMISSION_REQUEST_CODE);
+
+        maybeRequestNotificationPermission();
+    }
+
+    private void maybeRequestNotificationPermission() {
+        if (isRequestingPermission) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && !hasNotificationPermission()
+                && !hasAlreadyPromptedNotification()) {
+            markNotificationPrompted();
+            isRequestingPermission = true;
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIF_PERMISSION_REQUEST_CODE);
+        }
     }
 
     private void closeAppImmediately() {
@@ -62,12 +116,27 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode != IMAGE_PERMISSION_REQUEST_CODE) {
-            return;
-        }
         isRequestingPermission = false;
 
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == NOTIF_PERMISSION_REQUEST_CODE) {
+            return;
+        }
+        if (requestCode != STARTUP_PERMISSIONS_REQUEST_CODE) {
+            return;
+        }
+
+        boolean imageGranted = hasImagePermission();
+        if (!imageGranted && permissions != null && grantResults != null) {
+            String reqImg = getRequiredImagePermission();
+            for (int i = 0; i < permissions.length && i < grantResults.length; i++) {
+                if (reqImg.equals(permissions[i]) && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    imageGranted = true;
+                    break;
+                }
+            }
+        }
+
+        if (imageGranted) {
             return;
         }
 
