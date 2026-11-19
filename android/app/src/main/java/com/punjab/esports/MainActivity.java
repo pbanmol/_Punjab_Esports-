@@ -1,6 +1,7 @@
 package com.punjab.esports;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -73,6 +74,7 @@ public class MainActivity extends BridgeActivity {
         }
     }
 
+    @SuppressLint("InlinedApi")
     private void requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             return;

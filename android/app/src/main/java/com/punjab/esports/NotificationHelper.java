@@ -123,7 +123,12 @@ public final class NotificationHelper {
 
     public static boolean isFirebaseConfigured(Context context) {
         try {
-            return !FirebaseApp.getApps(context.getApplicationContext()).isEmpty();
+            Context appCtx = context.getApplicationContext();
+            int resId = appCtx.getResources().getIdentifier("google_app_id", "string", appCtx.getPackageName());
+            if (resId == 0) {
+                return false;
+            }
+            return !FirebaseApp.getApps(appCtx).isEmpty();
         } catch (Throwable ignored) {
             return false;
         }
@@ -273,7 +278,7 @@ public final class NotificationHelper {
         markKeysSeen(context, single);
     }
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint({"MissingPermission", "NotificationPermission"})
     public static boolean showNotification(
             Context context,
             String dedupeKey,
@@ -302,7 +307,7 @@ public final class NotificationHelper {
         intent.putExtra(EXTRA_OPEN_TARGET, safeTarget);
 
         int notifId = (dedupeKey != null && !dedupeKey.isEmpty())
-                ? Math.abs(dedupeKey.hashCode())
+                ? (dedupeKey.hashCode() & 0x7FFFFFFF)
                 : (int) (System.currentTimeMillis() & 0x7FFFFFFF);
         if (notifId == 0) {
             notifId = 1001;

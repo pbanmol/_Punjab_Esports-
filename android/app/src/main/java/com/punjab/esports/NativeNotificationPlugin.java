@@ -1,6 +1,7 @@
 package com.punjab.esports;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -182,6 +183,7 @@ public class NativeNotificationPlugin extends Plugin {
         call.resolve(ret);
     }
 
+    @SuppressLint("InlinedApi")
     @PluginMethod
     public void requestPermission(PluginCall call) {
         Context ctx = getContext();
