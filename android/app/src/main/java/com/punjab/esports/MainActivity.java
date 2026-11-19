@@ -12,6 +12,7 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     private static final int IMAGE_PERMISSION_REQUEST_CODE = 1001;
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1002;
 
     private boolean isRequestingPermission = false;
     private boolean openedSettingsForPermission = false;
@@ -20,8 +21,21 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(NativeGoogleAuthPlugin.class);
+        registerPlugin(NativeNotificationPlugin.class);
         super.onCreate(savedInstanceState);
+        NotificationHelper.ensureChannel(this);
+        handleNotificationIntent(getIntent());
         checkAndEnforceImagePermission();
+        if (hasImagePermission()) {
+            requestNotificationPermissionIfNeeded();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleNotificationIntent(intent);
     }
 
     @Override
@@ -31,8 +45,46 @@ public class MainActivity extends BridgeActivity {
             openedSettingsForPermission = false;
             if (!hasImagePermission()) {
                 closeAppImmediately();
+            } else {
+                requestNotificationPermissionIfNeeded();
             }
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        NotificationHelper.scheduleQuickBackgroundCheck(this);
+    }
+
+    private void handleNotificationIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+        String target = intent.getStringExtra(NotificationHelper.EXTRA_OPEN_TARGET);
+        if (target == null || target.trim().isEmpty()) {
+            target = intent.getStringExtra("target");
+        }
+        if (target != null && !target.trim().isEmpty()) {
+            NotificationHelper.setPendingOpenTarget(this, target.trim());
+            NativeNotificationPlugin.notifyTapFromActivity(target.trim());
+            intent.removeExtra(NotificationHelper.EXTRA_OPEN_TARGET);
+            intent.removeExtra("target");
+        }
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return;
+        }
+        if (NotificationHelper.hasNotificationPermission(this)) {
+            return;
+        }
+        if (NotificationHelper.hasAskedNotificationPermission(this)) {
+            return;
+        }
+        NotificationHelper.markAskedNotificationPermission(this);
+        requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST_CODE);
     }
 
     private String getRequiredImagePermission() {
@@ -62,12 +114,19 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                NotificationHelper.schedulePeriodicSync(this);
+            }
+            return;
+        }
         if (requestCode != IMAGE_PERMISSION_REQUEST_CODE) {
             return;
         }
         isRequestingPermission = false;
 
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            requestNotificationPermissionIfNeeded();
             return;
         }
 

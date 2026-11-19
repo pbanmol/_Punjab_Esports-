@@ -1,0 +1,12 @@
+{
+  "name": "punjab-esports-fcm-functions",
+  "description": "Instant Firebase Cloud Messaging push triggers for Punjab Esports RTDB",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  }
+}
