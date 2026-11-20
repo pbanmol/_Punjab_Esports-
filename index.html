@@ -3723,8 +3723,13 @@ async function syncNativeNotificationSession(user) {
     }
     const res = await plugin.syncSession(sessionPayload).catch(() => null);
     if (res && typeof res.lastKnownBalance === 'number' && !isNaN(res.lastKnownBalance)) {
+      State.nativeLastKnownBalance = res.lastKnownBalance;
       State.lastKnownBalance = res.lastKnownBalance;
       try { localStorage.setItem('pe_last_bal_' + user.uid, String(res.lastKnownBalance)); } catch (e) {}
+    }
+    if (res && typeof res.bgNotifiedBalance === 'number' && !isNaN(res.bgNotifiedBalance)) {
+      State.nativeBgNotifiedBalance = res.bgNotifiedBalance;
+      State.nativeBgNotifiedBalanceAt = Number(res.bgNotifiedBalanceAt || 0);
     }
     if (State.profile && typeof State.profile.diamonds !== 'undefined') {
       syncNativeNotificationSnapshots({ diamonds: Number(State.profile.diamonds || 0) });
@@ -3881,22 +3886,31 @@ function attachListeners() {
       const recentLocalAction = (Date.now() - (State.localWalletActionTs || 0)) < 4500;
       if (!recentLocalAction) {
         const diff = Math.round((newBal - prevBal) * 100) / 100;
-        const notifCheckTs = Date.now() - 4000;
+        const notifCheckTs = Date.now() - 4500;
+        State.lastWalletSynthAt = Date.now();
         setTimeout(() => {
+          const alreadyNotifiedInBg =
+            typeof State.nativeBgNotifiedBalance === 'number' &&
+            Math.abs(State.nativeBgNotifiedBalance - newBal) < 0.01 &&
+            (Date.now() - (State.nativeBgNotifiedBalanceAt || 0)) < 15 * 60 * 1000;
           const hasAdminNotif = (State.rawNotifications || []).some(n =>
             Number(n.createdAt || 0) >= notifCheckTs &&
             /balance|deposit|withdraw|reward|prize|bonus|admin|refund/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`)
           );
           if (!hasAdminNotif) {
             const actionLabel = diff > 0 ? `+${fmtMoney(diff)} added` : `${fmtMoney(Math.abs(diff))} deducted`;
-            ensureSyntheticNotification(uid, 'auto_bal_' + Math.floor(Date.now() / 3000), {
+            const synthKey = `auto_bal_${Math.round(prevBal * 100)}_${Math.round(newBal * 100)}_${Math.floor(Date.now() / 120000)}`;
+            if (alreadyNotifiedInBg) {
+              markNativeNotifKeysSeen(['notif:' + synthKey]);
+            }
+            ensureSyntheticNotification(uid, synthKey, {
               type: 'admin_set',
               title: 'Wallet Balance Updated',
               body: `Your wallet was updated by admin (${actionLabel}). New balance: ${fmtMoney(newBal)}.`,
               createdAt: Date.now()
             });
           }
-        }, 1200);
+        }, 1500);
       }
     }
   });
@@ -3979,13 +3993,15 @@ function attachListeners() {
       if (!txFirstLoad && isNewOrUpdated && adminTxTypes.has(tx.type)) {
         const snapCheckTs = Date.now() - 5000;
         setTimeout(() => {
+          const recentWalletSynth = (Date.now() - (State.lastWalletSynthAt || 0)) < 6000;
+          const isDia = tx.currency === 'DIAMONDS' || String(tx.type || '').includes('diamond');
+          if (recentWalletSynth && !isDia && tx.type === 'admin_set') return;
           const hasAdminNotif = (State.rawNotifications || []).some(n =>
             Number(n.createdAt || 0) >= snapCheckTs &&
             (n.relatedId === tx.id || /balance|deposit|withdraw|reward|prize|diamond|admin|refund/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`))
           );
           if (!hasAdminNotif) {
             const amt = Number(tx.diamonds || tx.amount || 0);
-            const isDia = tx.currency === 'DIAMONDS' || String(tx.type || '').includes('diamond');
             const valStr = isDia ? `${Math.abs(amt)} Diamonds` : fmtMoney(Math.abs(amt));
             let title = 'Wallet Updated by Admin';
             let body = `${valStr} updated in your account.`;
@@ -4001,7 +4017,7 @@ function attachListeners() {
               createdAt: Number(tx.updatedAt || tx.createdAt || Date.now())
             });
           }
-        }, 1200);
+        }, 1800);
       }
     });
     txFirstLoad = false;

@@ -123,6 +123,9 @@ public class NativeNotificationPlugin extends Plugin {
         double lastBal = NotificationHelper.getLastKnownBalance(ctx);
         boolean hasDia = NotificationHelper.hasKnownDiamonds(ctx);
         long lastDia = NotificationHelper.getLastKnownDiamonds(ctx);
+        boolean hasBgNotifiedBal = NotificationHelper.hasBgNotifiedBalance(ctx);
+        double bgNotifiedBal = NotificationHelper.getBgNotifiedBalance(ctx);
+        long bgNotifiedBalAt = NotificationHelper.getBgNotifiedBalanceAt(ctx);
 
         boolean fcmReady = NotificationHelper.isFirebaseConfigured(ctx);
         if (!fcmReady) {
@@ -145,6 +148,10 @@ public class NativeNotificationPlugin extends Plugin {
                     ret.put("ignoringBatteryOptimizations", NotificationHelper.isIgnoringBatteryOptimizations(ctx));
                     if (hasBal) ret.put("lastKnownBalance", lastBal);
                     if (hasDia) ret.put("lastKnownDiamonds", lastDia);
+                    if (hasBgNotifiedBal) {
+                        ret.put("bgNotifiedBalance", bgNotifiedBal);
+                        ret.put("bgNotifiedBalanceAt", bgNotifiedBalAt);
+                    }
                     if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
                         String token = task.getResult();
                         NotificationHelper.saveFcmToken(ctx, token);
@@ -170,6 +177,10 @@ public class NativeNotificationPlugin extends Plugin {
         ret.put("ignoringBatteryOptimizations", NotificationHelper.isIgnoringBatteryOptimizations(ctx));
         if (hasBal) ret.put("lastKnownBalance", lastBal);
         if (hasDia) ret.put("lastKnownDiamonds", lastDia);
+        if (hasBgNotifiedBal) {
+            ret.put("bgNotifiedBalance", bgNotifiedBal);
+            ret.put("bgNotifiedBalanceAt", bgNotifiedBalAt);
+        }
         call.resolve(ret);
     }
 

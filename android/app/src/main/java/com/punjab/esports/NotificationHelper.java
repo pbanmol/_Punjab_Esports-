@@ -73,12 +73,16 @@ public final class NotificationHelper {
     private static final String KEY_DEP_STATUS_MAP = "dep_status_map";
     private static final String KEY_WD_STATUS_MAP = "wd_status_map";
     private static final String KEY_LAST_BG_RUN_AT = "last_bg_run_at";
+    private static final String KEY_RECENT_SIGS = "recent_notif_sigs";
+    private static final String KEY_BG_NOTIFIED_BAL = "bg_notified_balance";
+    private static final String KEY_BG_NOTIFIED_BAL_AT = "bg_notified_balance_at";
 
     private static final String WORK_PERIODIC_NAME = "pe_bg_notif_periodic";
     private static final String WORK_QUICK_NAME = "pe_bg_notif_quick";
     private static final int ALARM_REQUEST_CODE = 44019;
     private static final int MAX_SEEN_KEYS = 300;
     private static final int MAX_NOTIFS_PER_RUN = 5;
+    private static final long CONTENT_DEDUPE_WINDOW_MS = 5L * 60L * 1000L;
 
     private static final long FIVE_DAYS_MS = 5L * 24L * 60L * 60L * 1000L;
     private static final long TWO_DAYS_MS = 2L * 24L * 60L * 60L * 1000L;
@@ -223,6 +227,9 @@ public final class NotificationHelper {
             ed.remove(KEY_LAST_DIAMONDS);
             ed.remove(KEY_DEP_STATUS_MAP);
             ed.remove(KEY_WD_STATUS_MAP);
+            ed.remove(KEY_RECENT_SIGS);
+            ed.remove(KEY_BG_NOTIFIED_BAL);
+            ed.remove(KEY_BG_NOTIFIED_BAL_AT);
         }
         ed.apply();
     }
@@ -273,8 +280,35 @@ public final class NotificationHelper {
                 .remove(KEY_LAST_DIAMONDS)
                 .remove(KEY_DEP_STATUS_MAP)
                 .remove(KEY_WD_STATUS_MAP)
+                .remove(KEY_RECENT_SIGS)
+                .remove(KEY_BG_NOTIFIED_BAL)
+                .remove(KEY_BG_NOTIFIED_BAL_AT)
                 .apply();
         cancelBackgroundSync(context);
+    }
+
+    public static void recordBgNotifiedBalance(Context context, double balance) {
+        if (Double.isNaN(balance) || Double.isInfinite(balance)) return;
+        prefs(context).edit()
+                .putString(KEY_BG_NOTIFIED_BAL, String.valueOf(balance))
+                .putLong(KEY_BG_NOTIFIED_BAL_AT, System.currentTimeMillis())
+                .apply();
+    }
+
+    public static boolean hasBgNotifiedBalance(Context context) {
+        return prefs(context).getLong(KEY_BG_NOTIFIED_BAL_AT, 0L) > 0L;
+    }
+
+    public static double getBgNotifiedBalance(Context context) {
+        try {
+            return Double.parseDouble(prefs(context).getString(KEY_BG_NOTIFIED_BAL, "0"));
+        } catch (Exception ignored) {
+            return 0.0;
+        }
+    }
+
+    public static long getBgNotifiedBalanceAt(Context context) {
+        return prefs(context).getLong(KEY_BG_NOTIFIED_BAL_AT, 0L);
     }
 
     public static String getUid(Context context) {
@@ -376,6 +410,48 @@ public final class NotificationHelper {
         markKeysSeen(context, single);
     }
 
+    private static String buildContentSignature(String title, String body) {
+        String t = title != null ? title.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT) : "";
+        String b = body != null ? body.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT) : "";
+        return t + "||" + b;
+    }
+
+    private static synchronized boolean checkAndRecordRecentContent(Context context, String title, String body) {
+        String sig = buildContentSignature(title, body);
+        long now = System.currentTimeMillis();
+        SharedPreferences p = prefs(context);
+        JSONObject map;
+        try {
+            map = new JSONObject(p.getString(KEY_RECENT_SIGS, "{}"));
+        } catch (Exception e) {
+            map = new JSONObject();
+        }
+        JSONObject pruned = new JSONObject();
+        boolean isDuplicate = false;
+        Iterator<String> it = map.keys();
+        while (it.hasNext()) {
+            String k = it.next();
+            long ts = map.optLong(k, 0L);
+            if ((now - ts) < CONTENT_DEDUPE_WINDOW_MS) {
+                try {
+                    pruned.put(k, ts);
+                } catch (Exception ignored) {
+                }
+                if (k.equals(sig)) {
+                    isDuplicate = true;
+                }
+            }
+        }
+        if (!isDuplicate) {
+            try {
+                pruned.put(sig, now);
+            } catch (Exception ignored) {
+            }
+        }
+        p.edit().putString(KEY_RECENT_SIGS, pruned.toString()).apply();
+        return isDuplicate;
+    }
+
     @SuppressLint({"MissingPermission", "NotificationPermission"})
     public static boolean showNotification(
             Context context,
@@ -385,6 +461,11 @@ public final class NotificationHelper {
             String target
     ) {
         ensureChannel(context);
+
+        String safeTitle = (title != null && !title.trim().isEmpty()) ? title.trim() : "Punjab Esports";
+        String safeBody = (body != null && !body.trim().isEmpty()) ? body.trim() : "You have a new update.";
+        String safeTarget = (target != null && !target.trim().isEmpty()) ? target.trim() : "notifications";
+
         if (dedupeKey != null && !dedupeKey.trim().isEmpty()) {
             if (isKeySeen(context, dedupeKey)) {
                 return false;
@@ -392,13 +473,13 @@ public final class NotificationHelper {
             markKeySeen(context, dedupeKey);
         }
 
-        if (!canPostNotifications(context)) {
+        if (checkAndRecordRecentContent(context, safeTitle, safeBody)) {
             return false;
         }
 
-        String safeTitle = (title != null && !title.trim().isEmpty()) ? title.trim() : "Punjab Esports";
-        String safeBody = (body != null && !body.trim().isEmpty()) ? body.trim() : "You have a new update.";
-        String safeTarget = (target != null && !target.trim().isEmpty()) ? target.trim() : "notifications";
+        if (!canPostNotifications(context)) {
+            return false;
+        }
 
         Intent intent = new Intent(context.getApplicationContext(), MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -608,6 +689,7 @@ public final class NotificationHelper {
                         if (Math.abs(diff) >= 0.01) {
                             saveSnapshots(ctx, newBal, null);
                             if (!hasFreshWalletNotif) {
+                                recordBgNotifiedBalance(ctx, newBal);
                                 String actionLabel = diff > 0
                                         ? ("+" + formatRupees(diff) + " added")
                                         : (formatRupees(Math.abs(diff)) + " deducted");
