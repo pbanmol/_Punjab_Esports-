@@ -33,6 +33,7 @@ async function getUserTokens(uid) {
 }
 
 async function sendToUser(uid, { title, body, target, dedupeKey, tag, extraData }) {
+  admin.database().ref("appSettings/fcmServerActive").set(true).catch(() => {});
   const tokens = await getUserTokens(uid);
   if (!tokens.length) return;
 

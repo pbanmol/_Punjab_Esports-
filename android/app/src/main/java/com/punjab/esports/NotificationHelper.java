@@ -78,6 +78,7 @@ public final class NotificationHelper {
     private static final String KEY_RECENT_SIGS = "recent_notif_sigs";
     private static final String KEY_BG_NOTIFIED_BAL = "bg_notified_balance";
     private static final String KEY_BG_NOTIFIED_BAL_AT = "bg_notified_balance_at";
+    private static final String KEY_FCM_SERVER_ACTIVE = "fcm_server_active";
 
     private static final String WORK_PERIODIC_NAME = "pe_bg_notif_periodic";
     private static final String WORK_QUICK_NAME = "pe_bg_notif_quick";
@@ -197,6 +198,23 @@ public final class NotificationHelper {
         } catch (Throwable ignored) {
             return false;
         }
+    }
+
+    public static void setFcmServerActive(Context context, boolean active) {
+        prefs(context).edit().putBoolean(KEY_FCM_SERVER_ACTIVE, active).apply();
+        if (active && shouldUseServerFcmOnly(context)) {
+            RealtimePushService.stop(context);
+        }
+    }
+
+    public static boolean isFcmServerActive(Context context) {
+        return prefs(context).getBoolean(KEY_FCM_SERVER_ACTIVE, false);
+    }
+
+    public static boolean shouldUseServerFcmOnly(Context context) {
+        return isFcmServerActive(context)
+                && isFirebaseConfigured(context)
+                && !getFcmToken(context).isEmpty();
     }
 
     public static void refreshFcmTokenIfNeeded(Context context) {

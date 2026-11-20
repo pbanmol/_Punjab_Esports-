@@ -4186,6 +4186,14 @@ function attachListeners() {
     }
   });
 
+  trackListener(ref(db, 'appSettings/fcmServerActive'), (snap) => {
+    const active = snap.exists() && snap.val() === true;
+    const plugin = getNativeNotifPlugin();
+    if (plugin && typeof plugin.setFcmServerActive === 'function') {
+      try { plugin.setFcmServerActive({ active }).catch(() => {}); } catch (e) {}
+    }
+  });
+
   trackListener(ref(db, 'vipSettings'), (snap) => {
     if (snap.exists()) State.vipSettings = snap.val();
   });

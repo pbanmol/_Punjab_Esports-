@@ -63,6 +63,10 @@ public class RealtimePushService extends Service {
         Context appCtx = context.getApplicationContext();
         if (NotificationHelper.getUid(appCtx).isEmpty()) return;
         if (!NotificationHelper.canPostNotifications(appCtx)) return;
+        if (NotificationHelper.shouldUseServerFcmOnly(appCtx)) {
+            stop(appCtx);
+            return;
+        }
         try {
             Intent intent = new Intent(appCtx, RealtimePushService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -97,7 +101,8 @@ public class RealtimePushService extends Service {
         promoteToForeground();
         String uid = NotificationHelper.getUid(this);
         String dbUrl = NotificationHelper.getDatabaseUrl(this);
-        if (uid.isEmpty() || dbUrl.isEmpty() || !NotificationHelper.canPostNotifications(this)) {
+        if (uid.isEmpty() || dbUrl.isEmpty() || !NotificationHelper.canPostNotifications(this)
+                || NotificationHelper.shouldUseServerFcmOnly(this)) {
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -160,6 +165,14 @@ public class RealtimePushService extends Service {
                     launch,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
+            Intent delIntent = new Intent(this, ServiceRestartReceiver.class);
+            delIntent.setAction(ServiceRestartReceiver.ACTION_RESTART_LIVE_SERVICE);
+            PendingIntent deletePi = PendingIntent.getBroadcast(
+                    this,
+                    SERVICE_NOTIF_ID + 1,
+                    delIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
             Notification notif = new NotificationCompat.Builder(this, SERVICE_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_stat_notification)
                     .setColor(ContextCompat.getColor(this, R.color.notification_accent))
@@ -169,9 +182,12 @@ public class RealtimePushService extends Service {
                     .setCategory(NotificationCompat.CATEGORY_SERVICE)
                     .setSilent(true)
                     .setOngoing(true)
+                    .setAutoCancel(false)
                     .setShowWhen(false)
                     .setContentIntent(pi)
+                    .setDeleteIntent(deletePi)
                     .build();
+            notif.flags |= Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 startForeground(SERVICE_NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING);

@@ -208,6 +208,18 @@ public class NativeNotificationPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void setFcmServerActive(PluginCall call) {
+        Boolean active = call.getBoolean("active", false);
+        NotificationHelper.setFcmServerActive(getContext(), Boolean.TRUE.equals(active));
+        if (!Boolean.TRUE.equals(active)) {
+            RealtimePushService.start(getContext());
+        }
+        JSObject ret = new JSObject();
+        ret.put("ok", true);
+        call.resolve(ret);
+    }
+
+    @PluginMethod
     public void clearSession(PluginCall call) {
         NotificationHelper.clearSession(getContext());
         JSObject ret = new JSObject();
