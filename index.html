@@ -3890,7 +3890,7 @@ function attachListeners() {
       const recentLocalAction = (Date.now() - (State.localWalletActionTs || 0)) < 4500;
       if (!recentLocalAction) {
         const diff = Math.round((newBal - prevBal) * 100) / 100;
-        const notifCheckTs = Date.now() - 4500;
+        const notifCheckTs = Date.now() - 15000;
         State.lastWalletSynthAt = Date.now();
         setTimeout(() => {
           const alreadyNotifiedInBg =
@@ -3899,8 +3899,8 @@ function attachListeners() {
               Math.abs(State.nativeBgNotifiedBalance - newBal) < 0.01 &&
               (Date.now() - (State.nativeBgNotifiedBalanceAt || 0)) < 15 * 60 * 1000);
           const hasAdminNotif = (State.rawNotifications || []).some(n =>
-            Number(n.createdAt || 0) >= notifCheckTs &&
-            /balance|deposit|withdraw|reward|prize|bonus|admin|refund/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`)
+            Number(n.createdAt || n._ts || 0) >= notifCheckTs &&
+            /balance|wallet|deposit|withdraw|reward|prize|bonus|admin|refund|₹/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`)
           );
           if (!hasAdminNotif) {
             const actionLabel = diff > 0 ? `+${fmtMoney(diff)} added` : `${fmtMoney(Math.abs(diff))} deducted`;
@@ -3915,7 +3915,7 @@ function attachListeners() {
               createdAt: Date.now()
             });
           }
-        }, 1500);
+        }, 2600);
       }
     }
   });
@@ -3988,7 +3988,7 @@ function attachListeners() {
     State.transactions = arr;
     renderTransactions(); updateWalletStats();
 
-    const adminTxTypes = new Set(['admin_set', 'admin_diamond_gift', 'admin_diamond_set', 'deposit', 'match_reward', 'prize', 'kill_reward', 'referral', 'withdrawal_refund']);
+    const adminTxTypes = new Set(['admin_diamond_gift', 'admin_diamond_set', 'deposit', 'match_reward', 'prize', 'kill_reward', 'referral', 'withdrawal_refund']);
     arr.forEach(tx => {
       const prevStatus = seenTxMap[tx.id];
       const curStatus = tx.status || 'completed';
@@ -3996,14 +3996,14 @@ function attachListeners() {
       seenTxMap[tx.id] = curStatus;
 
       if (!txFirstLoad && isNewOrUpdated && adminTxTypes.has(tx.type)) {
-        const snapCheckTs = Date.now() - 5000;
+        const snapCheckTs = Date.now() - 15000;
         setTimeout(() => {
-          const recentWalletSynth = (Date.now() - (State.lastWalletSynthAt || 0)) < 6000;
+          const recentWalletSynth = (Date.now() - (State.lastWalletSynthAt || 0)) < 10000;
           const isDia = tx.currency === 'DIAMONDS' || String(tx.type || '').includes('diamond');
-          if (recentWalletSynth && !isDia && tx.type === 'admin_set') return;
+          if (recentWalletSynth && !isDia) return;
           const hasAdminNotif = (State.rawNotifications || []).some(n =>
-            Number(n.createdAt || 0) >= snapCheckTs &&
-            (n.relatedId === tx.id || /balance|deposit|withdraw|reward|prize|diamond|admin|refund/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`))
+            Number(n.createdAt || n._ts || 0) >= snapCheckTs &&
+            (n.relatedId === tx.id || /balance|wallet|deposit|withdraw|reward|prize|diamond|admin|refund|₹/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`))
           );
           if (!hasAdminNotif) {
             const amt = Number(tx.diamonds || tx.amount || 0);
@@ -4011,7 +4011,6 @@ function attachListeners() {
             let title = 'Wallet Updated by Admin';
             let body = `${valStr} updated in your account.`;
             if (tx.type === 'deposit') { title = 'Deposit Approved'; body = `Your deposit of ${valStr} has been credited to your wallet.`; }
-            else if (tx.type === 'admin_set') { title = 'Balance Updated by Admin'; body = `Admin ${amt >= 0 ? 'added' : 'deducted'} ${valStr}.`; }
             else if (tx.type === 'admin_diamond_gift' || tx.type === 'admin_diamond_set') { title = 'Diamonds Updated by Admin'; body = `Admin ${amt >= 0 ? 'credited' : 'deducted'} ${valStr}.`; }
             else if (tx.type === 'withdrawal_refund') { title = 'Withdrawal Refunded'; body = `${valStr} has been refunded to your wallet.`; }
             else if (tx.type === 'match_reward' || tx.type === 'prize' || tx.type === 'kill_reward') { title = 'Match Reward Credited'; body = `${valStr} credited for ${tx.matchTitle || 'your match'}.`; }
@@ -4022,7 +4021,7 @@ function attachListeners() {
               createdAt: Number(tx.updatedAt || tx.createdAt || Date.now())
             });
           }
-        }, 1800);
+        }, 3000);
       }
     });
     txFirstLoad = false;
@@ -4183,14 +4182,6 @@ function attachListeners() {
     if (snap.exists()) {
       const c = snap.val(); State.cleanupDays = typeof c.days !== 'undefined' ? Number(c.days) : 7; State.retentionMs = State.cleanupDays * 24 * 60 * 60 * 1000;
       renderTransactions(); renderMyMatches(); recomputeNotificationsFromState();
-    }
-  });
-
-  trackListener(ref(db, 'appSettings/fcmServerActive'), (snap) => {
-    const active = snap.exists() && snap.val() === true;
-    const plugin = getNativeNotifPlugin();
-    if (plugin && typeof plugin.setFcmServerActive === 'function') {
-      try { plugin.setFcmServerActive({ active }).catch(() => {}); } catch (e) {}
     }
   });
 
@@ -6355,9 +6346,12 @@ function formatMailCountdown(expiresAt, nowTs = Date.now()) {
   const days = Math.floor(totalMins / (60 * 24));
   const hours = Math.floor((totalMins % (60 * 24)) / 60);
   const mins = totalMins % 60;
-  if (days >= 1) return { label: `${days}d ${hours}h left`, urgent: false };
-  if (hours >= 1) return { label: `${hours}h ${mins}m left`, urgent: true };
-  return { label: `${Math.max(1, mins)}m left`, urgent: true };
+  if (days >= 1) {
+    const dayWord = days === 1 ? '1 day' : `${days} days`;
+    return { label: hours > 0 ? `Expires in ${dayWord} ${hours}h` : `Expires in ${dayWord}`, urgent: days <= 1 };
+  }
+  if (hours >= 1) return { label: `Expires in ${hours}h ${mins}m`, urgent: true };
+  return { label: `Expires in ${Math.max(1, mins)}m`, urgent: true };
 }
 
 function purgeExpiredMailFromDb(uid, mail) {
@@ -6689,74 +6683,47 @@ async function deleteMailItem(mail) {
 }
 
 function openMailbox() {
-  let activeFilter = 'all';
   let countdownTimer = null;
 
   const renderMailBody = (el, close) => {
-    const allItems = getCombinedMailboxItems();
-    const unclaimedCount = allItems.filter(m => m.status === 'unclaimed').length;
-    const historyCount = allItems.filter(m => m.status !== 'unclaimed').length;
-
-    const filtered = allItems.filter(m => {
-      if (activeFilter === 'unclaimed') return m.status === 'unclaimed';
-      if (activeFilter === 'claimed') return m.status !== 'unclaimed';
-      return true;
-    });
-
+    const pendingItems = getCombinedMailboxItems().filter(m => m.status === 'unclaimed');
     const listHost = el.querySelector('#mailListHost');
-    const clearBtn = el.querySelector('#mailClearHistoryBtn');
     const claimAllBtn = el.querySelector('#mailClaimAllBtn');
-    const summaryPill = el.querySelector('#mailSummaryPill');
-    const ctAll = el.querySelector('#mailCtAll');
-    const ctUn = el.querySelector('#mailCtUn');
-    const ctHist = el.querySelector('#mailCtHist');
 
-    if (summaryPill) {
-      summaryPill.textContent = unclaimedCount > 0 ? `${unclaimedCount} Pending` : 'All Caught Up';
-    }
-    if (ctAll) ctAll.textContent = String(allItems.length);
-    if (ctUn) ctUn.textContent = String(unclaimedCount);
-    if (ctHist) ctHist.textContent = String(historyCount);
-    if (claimAllBtn) claimAllBtn.style.display = unclaimedCount > 1 ? 'inline-flex' : 'none';
-    if (clearBtn) clearBtn.style.display = historyCount > 0 ? 'inline-flex' : 'none';
+    if (claimAllBtn) claimAllBtn.style.display = pendingItems.length > 1 ? 'inline-flex' : 'none';
 
-    if (!filtered.length) {
+    if (!pendingItems.length) {
       listHost.innerHTML = `
         <div class="mail-empty">
-          <i class="fa-solid fa-envelope-open-text"></i>
-          <h4>${activeFilter === 'unclaimed' ? 'No pending gifts right now' : (activeFilter === 'claimed' ? 'No claimed history yet' : 'Your Mailbox is empty')}</h4>
-          <p>VIP passes, Admin Diamond rewards & special gifts arrive here. Unclaimed gifts auto-expire after 7 days.</p>
+          <i class="fa-regular fa-envelope-open"></i>
+          <h4>No pending rewards</h4>
+          <p>Unclaimed gifts and rewards will appear here.</p>
         </div>`;
       return;
     }
 
     const nowTs = Date.now();
-    listHost.innerHTML = `<div class="mail-list">${filtered.map(m => {
+    listHost.innerHTML = `<div class="mail-list">${pendingItems.map(m => {
       const t = String(m.type || '').toLowerCase();
       const icCls = (t === 'vip_trial' || t === 'vip') ? 'vip' : (t === 'diamonds' ? 'dia' : ((t === 'wallet' || t === 'rupees') ? 'wal' : 'msg'));
-      const icFa = icCls === 'vip' ? 'fa-crown' : (icCls === 'dia' ? 'fa-gem' : (icCls === 'wal' ? 'fa-wallet' : 'fa-envelope'));
+      const icFa = icCls === 'vip' ? 'fa-crown' : (icCls === 'dia' ? 'fa-gem' : (icCls === 'wal' ? 'fa-wallet' : 'fa-gift'));
       const rewardTxt = icCls === 'vip'
-        ? `<i class="fa-solid fa-crown"></i> ${Number(m.days || 7)} ${Number(m.days || 7) === 1 ? 'Day' : 'Days'} VIP`
+        ? `${Number(m.days || 7)} ${Number(m.days || 7) === 1 ? 'Day' : 'Days'} VIP`
         : icCls === 'dia'
-          ? `<i class="fa-solid fa-gem"></i> +${Number(m.amount || m.diamonds || 0).toLocaleString('en-IN')} Diamonds`
+          ? `+${Number(m.amount || m.diamonds || 0).toLocaleString('en-IN')} Diamonds`
           : icCls === 'wal'
-            ? `<i class="fa-solid fa-indian-rupee-sign"></i> +${fmtMoney(m.amount || 0)}`
-            : `<i class="fa-solid fa-bell"></i> Notice`;
-      const isUnclaimed = m.status === 'unclaimed';
-      const cd = isUnclaimed ? formatMailCountdown(getMailExpiryTs(m), nowTs) : null;
+            ? `+${fmtMoney(m.amount || 0)}`
+            : 'Gift';
+      const cd = formatMailCountdown(getMailExpiryTs(m), nowTs);
 
       return `
-        <div class="mail-card ${isUnclaimed ? 'unclaimed' : ''}" data-mailid="${esc(m.id)}">
+        <div class="mail-card unclaimed" data-mailid="${esc(m.id)}">
           <div class="mail-card-top">
             <div class="mail-ic ${icCls}"><i class="fa-solid ${icFa}"></i></div>
             <div class="mail-meta">
-              <div class="mail-title-row">
-                <div class="mail-title">${esc(m.title || 'Official Reward')}</div>
-                ${isUnclaimed && cd ? `<span class="mail-expiry-chip ${cd.urgent ? 'urgent' : ''}"><i class="fa-regular fa-clock"></i> ${cd.label}</span>` : ''}
-              </div>
+              <div class="mail-title">${esc(m.title || 'Reward')}</div>
               <div class="mail-from">
-                <span class="mail-sender-tag"><i class="fa-solid fa-shield-halved"></i> ${esc(m.sender || 'Punjab Esports')}</span>
-                <span>· ${fmtRelativeTime(m.createdAt)}</span>
+                <span class="mail-expiry-chip ${cd.urgent ? 'urgent' : ''}"><i class="fa-regular fa-clock"></i> ${cd.label}</span>
               </div>
             </div>
           </div>
@@ -6764,10 +6731,8 @@ function openMailbox() {
           <div class="mail-foot">
             <span class="mail-reward-pill ${icCls}">${rewardTxt}</span>
             <div class="mail-actions">
-              ${isUnclaimed
-                ? `<button type="button" class="mail-claim-btn" data-claim="${esc(m.id)}"><i class="fa-solid fa-gift"></i> Claim</button>`
-                : `<span class="mail-claimed-tag"><i class="fa-solid fa-check"></i> ${m.status === 'received' ? 'Received' : 'Claimed'}</span>`}
-              <button type="button" class="mail-del-btn" data-del="${esc(m.id)}" title="Delete from mailbox"><i class="fa-solid fa-trash"></i></button>
+              <button type="button" class="mail-claim-btn" data-claim="${esc(m.id)}">Claim</button>
+              <button type="button" class="mail-del-btn" data-del="${esc(m.id)}" title="Delete"><i class="fa-solid fa-trash"></i></button>
             </div>
           </div>
         </div>`;
@@ -6775,7 +6740,7 @@ function openMailbox() {
 
     listHost.querySelectorAll('[data-claim]').forEach(btn => {
       btn.onclick = async () => {
-        const target = allItems.find(x => x.id === btn.dataset.claim);
+        const target = pendingItems.find(x => x.id === btn.dataset.claim);
         if (!target) return;
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i>';
@@ -6790,7 +6755,7 @@ function openMailbox() {
 
     listHost.querySelectorAll('[data-del]').forEach(btn => {
       btn.onclick = async () => {
-        const target = allItems.find(x => x.id === btn.dataset.del);
+        const target = pendingItems.find(x => x.id === btn.dataset.del);
         if (!target) return;
         await deleteMailItem(target);
         renderMailBody(el, close);
@@ -6799,29 +6764,11 @@ function openMailbox() {
   };
 
   openModal({
-    title: `<i class="fa-solid fa-envelope-open-text" style="color:var(--ac);"></i><span>Player Mailbox</span>`,
+    title: `<i class="fa-solid fa-envelope" style="color:var(--ac);"></i><span>Mailbox</span>`,
     extraClass: 'mail-modal',
-    bodyHTML: `
-      <div class="mail-summary-strip">
-        <div class="mail-summary-left">
-          <div class="mail-summary-ic"><i class="fa-solid fa-inbox"></i></div>
-          <div style="min-width:0;">
-            <div class="mail-summary-title">Rewards & Official Gifts</div>
-            <div class="mail-summary-sub">Unclaimed items auto-remove after 7 days</div>
-          </div>
-        </div>
-        <span class="mail-summary-pill" id="mailSummaryPill">0 Pending</span>
-      </div>
-      <div class="mail-tabs" id="mailFilterBar">
-        <button type="button" class="mail-tab active" data-mf="all">All <span class="mail-tab-ct" id="mailCtAll">0</span></button>
-        <button type="button" class="mail-tab" data-mf="unclaimed">Pending <span class="mail-tab-ct" id="mailCtUn">0</span></button>
-        <button type="button" class="mail-tab" data-mf="claimed">History <span class="mail-tab-ct" id="mailCtHist">0</span></button>
-      </div>
-      <div id="mailListHost"></div>
-    `,
+    bodyHTML: `<div id="mailListHost"></div>`,
     footerHTML: `
-      <button class="btn btn-outline btn-sm" id="mailClearHistoryBtn" style="display:none;"><i class="fa-solid fa-broom"></i> Clear History</button>
-      <button class="btn btn-primary btn-sm" id="mailClaimAllBtn" style="display:none;"><i class="fa-solid fa-gift"></i> Claim All</button>
+      <button class="btn btn-primary btn-sm" id="mailClaimAllBtn" style="display:none;">Claim All</button>
       <button class="btn btn-ghost btn-sm" data-x="close">Close</button>
     `,
     onMount: (el, close) => {
@@ -6833,15 +6780,6 @@ function openMailbox() {
       };
       el.querySelector('[data-x="close"]').onclick = wrappedClose;
 
-      el.querySelectorAll('[data-mf]').forEach(tab => {
-        tab.onclick = () => {
-          activeFilter = tab.dataset.mf;
-          el.querySelectorAll('[data-mf]').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          renderMailBody(el, wrappedClose);
-        };
-      });
-
       el.querySelector('#mailClaimAllBtn').onclick = async () => {
         const pending = getCombinedMailboxItems().filter(m => m.status === 'unclaimed');
         let claimedVip = false;
@@ -6851,30 +6789,6 @@ function openMailbox() {
         }
         if (claimedVip) wrappedClose();
         else renderMailBody(el, wrappedClose);
-      };
-
-      el.querySelector('#mailClearHistoryBtn').onclick = async () => {
-        const hist = getCombinedMailboxItems().filter(m => m.status !== 'unclaimed');
-        if (!hist.length) return;
-        if (!await confirmDialog('Clear Mailbox History', `Remove ${hist.length} claimed/received item${hist.length > 1 ? 's' : ''} from your mailbox?`, true)) return;
-        const uid = State.user.uid;
-        persistDeletedMailIdsLocally(uid, hist.map(item => item.id));
-        try {
-          const updates = {};
-          const nowTs = Date.now();
-          hist.forEach(item => {
-            const safeKey = String(item.id).replace(/[.#$\[\]\/]/g, '_');
-            updates[`users/${uid}/deletedMailIds/${safeKey}`] = true;
-            if (item.source === 'mailbox') {
-              updates[`users/${uid}/mailbox/${item.id}/deleted`] = true;
-              updates[`users/${uid}/mailbox/${item.id}/deletedAt`] = nowTs;
-            }
-          });
-          await update(ref(db), updates);
-        } catch (e) {}
-        updateMailboxBadge();
-        renderMailBody(el, wrappedClose);
-        toast('success', 'Mailbox History Cleared', 'Pending gifts remain safe.');
       };
 
       renderMailBody(el, wrappedClose);

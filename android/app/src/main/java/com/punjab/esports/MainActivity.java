@@ -43,7 +43,6 @@ public class MainActivity extends BridgeActivity {
     public void onResume() {
         super.onResume();
         NotificationHelper.refreshFcmTokenIfNeeded(this);
-        RealtimePushService.start(this);
         if (openedSettingsForPermission) {
             openedSettingsForPermission = false;
             if (!hasImagePermission()) {
@@ -138,7 +137,6 @@ public class MainActivity extends BridgeActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                RealtimePushService.start(this);
                 NotificationHelper.schedulePeriodicSync(this);
                 NotificationHelper.scheduleAlarmLoop(this, NotificationHelper.ALARM_INTERVAL_MS);
             }

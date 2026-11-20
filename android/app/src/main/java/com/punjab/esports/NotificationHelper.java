@@ -78,7 +78,8 @@ public final class NotificationHelper {
     private static final String KEY_RECENT_SIGS = "recent_notif_sigs";
     private static final String KEY_BG_NOTIFIED_BAL = "bg_notified_balance";
     private static final String KEY_BG_NOTIFIED_BAL_AT = "bg_notified_balance_at";
-    private static final String KEY_FCM_SERVER_ACTIVE = "fcm_server_active";
+    private static final String KEY_LAST_WALLET_ALERT_AT = "last_wallet_alert_at";
+    private static final String KEY_LAST_DIAMOND_ALERT_AT = "last_diamond_alert_at";
 
     private static final String WORK_PERIODIC_NAME = "pe_bg_notif_periodic";
     private static final String WORK_QUICK_NAME = "pe_bg_notif_quick";
@@ -86,6 +87,7 @@ public final class NotificationHelper {
     private static final int MAX_SEEN_KEYS = 300;
     private static final int MAX_NOTIFS_PER_RUN = 5;
     private static final long CONTENT_DEDUPE_WINDOW_MS = 5L * 60L * 1000L;
+    private static final long CATEGORY_DEDUPE_WINDOW_MS = 10_000L;
 
     private static final long FIVE_DAYS_MS = 5L * 24L * 60L * 60L * 1000L;
     private static final long TWO_DAYS_MS = 2L * 24L * 60L * 60L * 1000L;
@@ -198,23 +200,6 @@ public final class NotificationHelper {
         } catch (Throwable ignored) {
             return false;
         }
-    }
-
-    public static void setFcmServerActive(Context context, boolean active) {
-        prefs(context).edit().putBoolean(KEY_FCM_SERVER_ACTIVE, active).apply();
-        if (active && shouldUseServerFcmOnly(context)) {
-            RealtimePushService.stop(context);
-        }
-    }
-
-    public static boolean isFcmServerActive(Context context) {
-        return prefs(context).getBoolean(KEY_FCM_SERVER_ACTIVE, false);
-    }
-
-    public static boolean shouldUseServerFcmOnly(Context context) {
-        return isFcmServerActive(context)
-                && isFirebaseConfigured(context)
-                && !getFcmToken(context).isEmpty();
     }
 
     public static void refreshFcmTokenIfNeeded(Context context) {
@@ -332,8 +317,9 @@ public final class NotificationHelper {
                 .remove(KEY_RECENT_SIGS)
                 .remove(KEY_BG_NOTIFIED_BAL)
                 .remove(KEY_BG_NOTIFIED_BAL_AT)
+                .remove(KEY_LAST_WALLET_ALERT_AT)
+                .remove(KEY_LAST_DIAMOND_ALERT_AT)
                 .apply();
-        RealtimePushService.stop(context);
         cancelBackgroundSync(context);
     }
 
@@ -530,6 +516,30 @@ public final class NotificationHelper {
 
             if (checkAndRecordRecentContent(context, safeTitle, safeBody)) {
                 return false;
+            }
+
+            // Prevent two differently worded alerts (e.g., "Admin changed..." + "+₹50 added...")
+            // from firing back-to-back for the exact same wallet or diamond action.
+            String lowerAll = (safeTitle + " " + safeBody).toLowerCase(Locale.ROOT);
+            long nowMs = System.currentTimeMillis();
+            boolean isDiamondAlert = lowerAll.contains("diamond");
+            boolean isWalletAlert = !isDiamondAlert && (
+                    lowerAll.contains("wallet") || lowerAll.contains("balance")
+                            || lowerAll.contains("deposit") || lowerAll.contains("withdraw")
+                            || lowerAll.contains("refund") || lowerAll.contains("\u20b9")
+            );
+            if (isWalletAlert) {
+                long lastWalletAt = prefs(context).getLong(KEY_LAST_WALLET_ALERT_AT, 0L);
+                if ((nowMs - lastWalletAt) < CATEGORY_DEDUPE_WINDOW_MS) {
+                    return false;
+                }
+                prefs(context).edit().putLong(KEY_LAST_WALLET_ALERT_AT, nowMs).apply();
+            } else if (isDiamondAlert) {
+                long lastDiaAt = prefs(context).getLong(KEY_LAST_DIAMOND_ALERT_AT, 0L);
+                if ((nowMs - lastDiaAt) < CATEGORY_DEDUPE_WINDOW_MS) {
+                    return false;
+                }
+                prefs(context).edit().putLong(KEY_LAST_DIAMOND_ALERT_AT, nowMs).apply();
             }
 
             Intent intent = new Intent(context.getApplicationContext(), MainActivity.class);

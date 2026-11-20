@@ -14,6 +14,30 @@ function fmtRupees(val) {
   return `₹${n.toFixed(2)}`;
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function hasRecentAdminNotification(uid, regex, windowMs = 10000) {
+  try {
+    const snap = await admin.database().ref(`notifications/${uid}`).limitToLast(8).once("value");
+    const map = snap.val();
+    if (!map || typeof map !== "object") return false;
+    const cutoff = Date.now() - windowMs;
+    return Object.entries(map).some(([id, item]) => {
+      if (!item || typeof item !== "object") return false;
+      if (item.synthetic === true || id.startsWith("auto_")) return false;
+      const ts = Number(item.createdAt || item.timestamp || item.time || 0);
+      const tsMs = ts > 0 && ts < 100000000000 ? ts * 1000 : ts;
+      if (tsMs < cutoff) return false;
+      const text = `${item.type || ""} ${item.title || ""} ${item.body || item.message || ""}`;
+      return regex.test(text);
+    });
+  } catch (e) {
+    return false;
+  }
+}
+
 async function getUserTokens(uid) {
   const snap = await admin.database().ref(`users/${uid}`).once("value");
   const user = snap.val();
@@ -33,7 +57,6 @@ async function getUserTokens(uid) {
 }
 
 async function sendToUser(uid, { title, body, target, dedupeKey, tag, extraData }) {
-  admin.database().ref("appSettings/fcmServerActive").set(true).catch(() => {});
   const tokens = await getUserTokens(uid);
   if (!tokens.length) return;
 
@@ -109,12 +132,21 @@ exports.onUserNotificationCreated = onValueCreated(
     const data = event.data.val();
     if (!data || data.read === true || data.type === "announcement") return;
     if (data.synthetic === true || notifId.startsWith("auto_")) return;
+
+    const text = `${data.type || ""} ${data.title || ""} ${data.body || data.message || ""}`;
+    let tag = `notif_${notifId}`;
+    if (/diamond/i.test(text)) {
+      tag = "diamonds_update";
+    } else if (/wallet|balance|deposit|withdraw|refund|₹/i.test(text)) {
+      tag = "wallet_balance";
+    }
+
     await sendToUser(event.params.uid, {
       title: data.title || "New Notification",
       body: data.body || data.message || "Tap to view in Punjab Esports.",
       target: "notifications",
       dedupeKey: `notif:${notifId}`,
-      tag: `notif_${notifId}`
+      tag
     });
   }
 );
@@ -132,6 +164,17 @@ exports.onWalletBalanceUpdated = onValueWritten(
 
     const diff = Math.round((after - before) * 100) / 100;
     if (Math.abs(diff) < 0.01) return;
+
+    // Wait briefly so if Admin already wrote an official notification to notifications/{uid},
+    // we do NOT send a duplicate second notification.
+    await sleep(1200);
+    const alreadySentByAdmin = await hasRecentAdminNotification(
+      event.params.uid,
+      /wallet|balance|deposit|withdraw|reward|prize|bonus|refund|admin|₹/i,
+      10000
+    );
+    if (alreadySentByAdmin) return;
+
     const actionLabel = diff > 0
       ? `+${fmtRupees(diff)} added`
       : `${fmtRupees(Math.abs(diff))} deducted`;
@@ -139,7 +182,7 @@ exports.onWalletBalanceUpdated = onValueWritten(
       title: "Wallet Balance Updated",
       body: `Your wallet was updated by admin (${actionLabel}). New balance: ${fmtRupees(after)}.`,
       target: "notifications",
-      dedupeKey: `fcm_bal:${event.params.uid}:${Math.round(after * 100)}:${Math.floor(Date.now() / 5000)}`,
+      dedupeKey: `fcm_bal:${event.params.uid}:${Math.round(after * 100)}:${Math.floor(Date.now() / 10000)}`,
       tag: "wallet_balance",
       extraData: { newBalance: String(after) }
     });
@@ -159,6 +202,15 @@ exports.onUserDiamondsUpdated = onValueWritten(
 
     const diff = after - before;
     if (diff === 0) return;
+
+    await sleep(1200);
+    const alreadySentByAdmin = await hasRecentAdminNotification(
+      event.params.uid,
+      /diamond/i,
+      10000
+    );
+    if (alreadySentByAdmin) return;
+
     const actionLabel = diff > 0
       ? `+${diff} Diamonds added`
       : `${Math.abs(diff)} Diamonds deducted`;
@@ -166,7 +218,7 @@ exports.onUserDiamondsUpdated = onValueWritten(
       title: "Diamonds Updated by Admin",
       body: `Your diamonds were updated by admin (${actionLabel}). Total: ${after} Diamonds.`,
       target: "notifications",
-      dedupeKey: `fcm_dia:${event.params.uid}:${after}:${Math.floor(Date.now() / 5000)}`,
+      dedupeKey: `fcm_dia:${event.params.uid}:${after}:${Math.floor(Date.now() / 10000)}`,
       tag: "diamonds_update"
     });
   }
@@ -181,6 +233,11 @@ exports.onDepositStatusUpdated = onValueUpdated(
     const reqSnap = await admin.database().ref(`depositRequests/${event.params.reqId}`).once("value");
     const req = reqSnap.val();
     if (!req || !req.userId) return;
+
+    await sleep(1200);
+    const alreadySentByAdmin = await hasRecentAdminNotification(req.userId, /deposit/i, 10000);
+    if (alreadySentByAdmin) return;
+
     const approved = after === "approved" || after === "completed";
     await sendToUser(req.userId, {
       title: approved ? "Deposit Approved" : "Deposit Rejected",
@@ -189,7 +246,7 @@ exports.onDepositStatusUpdated = onValueUpdated(
         : `Your deposit of ${fmtRupees(req.amount)} was rejected${req.reason ? ": " + req.reason : "."}`,
       target: "notifications",
       dedupeKey: `req:depositRequests:${event.params.reqId}:${after}`,
-      tag: `dep_${event.params.reqId}`
+      tag: "wallet_balance"
     });
   }
 );
@@ -203,6 +260,11 @@ exports.onWithdrawalStatusUpdated = onValueUpdated(
     const reqSnap = await admin.database().ref(`withdrawalRequests/${event.params.reqId}`).once("value");
     const req = reqSnap.val();
     if (!req || !req.userId) return;
+
+    await sleep(1200);
+    const alreadySentByAdmin = await hasRecentAdminNotification(req.userId, /withdraw/i, 10000);
+    if (alreadySentByAdmin) return;
+
     const approved = after === "approved" || after === "completed";
     await sendToUser(req.userId, {
       title: approved ? "Withdrawal Approved" : "Withdrawal Rejected",
@@ -211,7 +273,7 @@ exports.onWithdrawalStatusUpdated = onValueUpdated(
         : `Your withdrawal of ${fmtRupees(req.amount)} was rejected${req.reason ? ": " + req.reason : "."}`,
       target: "notifications",
       dedupeKey: `req:withdrawalRequests:${event.params.reqId}:${after}`,
-      tag: `wd_${event.params.reqId}`
+      tag: "wallet_balance"
     });
   }
 );
@@ -245,9 +307,9 @@ exports.onMatchResultWritten = onValueWritten(
       const rankNum = Number(entry.rank || 0);
       const killsNum = Number(entry.kills || 0);
       const rewardNum = Number(entry.reward || 0);
-      const rankLabel = rankNum === 1 ? "🥇 Rank #1"
-        : rankNum === 2 ? "🥈 Rank #2"
-        : rankNum === 3 ? "🥉 Rank #3"
+      const rankLabel = rankNum === 1 ? "Rank #1"
+        : rankNum === 2 ? "Rank #2"
+        : rankNum === 3 ? "Rank #3"
         : (rankNum > 0 ? `Rank #${rankNum}` : "Result Updated");
       const rewardPart = rewardNum > 0 ? ` • Prize: ${fmtRupees(rewardNum)}` : "";
 

@@ -118,7 +118,6 @@ public class NativeNotificationPlugin extends Plugin {
             NotificationHelper.markKeysSeen(ctx, keys);
         }
 
-        RealtimePushService.start(ctx);
         NotificationHelper.schedulePeriodicSync(ctx);
         NotificationHelper.scheduleAlarmLoop(ctx, NotificationHelper.ALARM_INTERVAL_MS);
 
@@ -202,18 +201,6 @@ public class NativeNotificationPlugin extends Plugin {
             }
         }
         NotificationHelper.saveSnapshots(getContext(), bal, dia);
-        JSObject ret = new JSObject();
-        ret.put("ok", true);
-        call.resolve(ret);
-    }
-
-    @PluginMethod
-    public void setFcmServerActive(PluginCall call) {
-        Boolean active = call.getBoolean("active", false);
-        NotificationHelper.setFcmServerActive(getContext(), Boolean.TRUE.equals(active));
-        if (!Boolean.TRUE.equals(active)) {
-            RealtimePushService.start(getContext());
-        }
         JSObject ret = new JSObject();
         ret.put("ok", true);
         call.resolve(ret);
