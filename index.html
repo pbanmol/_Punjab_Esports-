@@ -734,8 +734,26 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
 .profile-vip-card{background:linear-gradient(135deg,var(--ac) 0%,var(--ac2) 100%)!important;color:var(--onac)!important;border:1px solid color-mix(in srgb,var(--ac) 45%,var(--bd))!important;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 8px 24px var(--acg)}
 .profile-vip-card::after{content:'';position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--onac) 20%,transparent),transparent);animation:vipSheenSweep 4.6s cubic-bezier(.4,0,.2,1) infinite;pointer-events:none}
 .profile-vip-open-btn{background:var(--onac)!important;color:var(--ac)!important;border:none!important;font-weight:800!important;flex-shrink:0;padding:7px 14px;border-radius:10px}
-.diamond-display{display:flex;align-items:center;gap:6px;font-weight:700;color:var(--inf)}
-.diamond-display i{font-size:1rem}
+.diamond-display{display:flex;align-items:center;gap:7px;font-weight:800;color:var(--ac);letter-spacing:-.02em}
+.diamond-display i{font-size:1.15rem;color:var(--ac)}
+.wallet-dia-card{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--sf) 0%,color-mix(in srgb,var(--ac) 10%,var(--sf2)) 100%);border:1px solid color-mix(in srgb,var(--ac) 26%,var(--bd));box-shadow:0 6px 20px -10px var(--acg)}
+.wallet-dia-card::after{content:'';position:absolute;top:-36px;right:-36px;width:128px;height:128px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--ac) 18%,transparent) 0%,transparent 70%);pointer-events:none}
+.wallet-dia-top{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wallet-dia-left{display:flex;align-items:center;gap:12px;min-width:0}
+.wallet-dia-emblem{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--acs);border:1px solid color-mix(in srgb,var(--ac) 30%,var(--bd));color:var(--ac);font-size:1.2rem;flex-shrink:0}
+.wallet-dia-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.45px;color:var(--txm);margin-bottom:2px}
+.wallet-dia-sub{font-size:.69rem;color:var(--txm);margin-top:2px;line-height:1.25}
+.wallet-dia-btn{background:linear-gradient(135deg,var(--ac),var(--ac2))!important;color:var(--onac)!important;border:none!important;font-weight:800!important;box-shadow:0 4px 14px var(--acg)!important;padding:8px 14px;border-radius:11px;white-space:nowrap}
+.wallet-vip-exp{display:none;font-size:.7rem;font-weight:700;line-height:1.28;color:var(--ac);background:var(--acs);border:1px solid color-mix(in srgb,var(--ac) 24%,var(--bd));padding:5px 9px;border-radius:10px;text-align:right}
+.wallet-earn-card{position:relative;overflow:hidden;background:var(--sf);border:1px dashed color-mix(in srgb,var(--ac) 32%,var(--bd2))}
+.wallet-earn-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--bd)}
+.wallet-earn-title{display:flex;align-items:center;gap:8px;font-size:.94rem;font-weight:800;color:var(--tx);margin:0;line-height:1.25}
+.wallet-earn-title i{color:var(--ac);font-size:.95rem}
+.wallet-earn-badge{font-size:.66rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ac);background:var(--acs);border:1px solid color-mix(in srgb,var(--ac) 26%,var(--bd));padding:4px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.wallet-earn-body{text-align:center;padding:24px 14px 18px}
+.wallet-earn-lock{width:62px;height:62px;margin:0 auto 12px;border-radius:18px;display:grid;place-items:center;background:var(--acs);border:1px solid color-mix(in srgb,var(--ac) 28%,var(--bd));color:var(--ac);font-size:1.75rem}
+.wallet-earn-body h4{margin:0 0 6px;font-size:1.02rem;font-weight:800;color:var(--tx)}
+.wallet-earn-body p{margin:0 auto;font-size:.8rem;color:var(--txm);max-width:270px;line-height:1.45}
 
 .admin-note{background:var(--wns);border:1px dashed var(--wn);border-radius:10px;padding:8px 11px;font-size:0.72rem;color:var(--wn);margin-bottom:10px;display:flex;gap:7px;align-items:flex-start;line-height:1.35}
 .admin-note i{margin-top:2px}
@@ -1591,30 +1609,36 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
       </div>
     </div>
 
-    <div class="card mb-3" style="background:linear-gradient(135deg,rgba(6,182,212,.15),rgba(139,92,246,.1));border-color:var(--bd2);">
-      <div class="flex-between" style="align-items: flex-start;">
-        <div>
-          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--txm);margin-bottom:4px;">Your Diamonds</div>
-          <div class="diamond-display" style="font-size:1.8rem;"><i class="fa-solid fa-gem"></i> <span id="walletDiamonds">0</span></div>
+    <div class="card mb-3 wallet-dia-card">
+      <div class="wallet-dia-top">
+        <div class="wallet-dia-left">
+          <div class="wallet-dia-emblem"><i class="fa-solid fa-gem"></i></div>
+          <div style="min-width:0;">
+            <div class="wallet-dia-eyebrow">Your Diamonds</div>
+            <div class="diamond-display" style="font-size:1.72rem;"><span id="walletDiamonds">0</span></div>
+            <div class="wallet-dia-sub">Use Diamonds to Unlock VIP Pass</div>
+          </div>
         </div>
         
-        <div id="vipStatusContainer" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-          <button class="btn btn-primary btn-sm" id="homeBuyVipBtn" style="background:linear-gradient(135deg,#06b6d4,#8b5cf6);">
+        <div id="vipStatusContainer" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;">
+          <button class="btn btn-primary btn-sm wallet-dia-btn" id="homeBuyVipBtn">
             <i class="fa-solid fa-crown"></i> Buy VIP
           </button>
-          <div id="vipExpiryText" style="display: none; font-size: 0.75rem; color: #fbbf24; font-weight: 700; line-height: 1.2;">
-          </div>
+          <div id="vipExpiryText" class="wallet-vip-exp"></div>
         </div>
       </div>
     </div>
 
     <!-- LOCKED EARN SECTION -->
-    <div class="card mb-3" id="earnSection" style="position:relative; overflow:hidden; background:var(--sf2); border:1px dashed var(--bd2);">
-      <div class="card-head"><h3>💎 Get free diamonds to buy VIP</h3></div>
-      <div style="text-align:center; padding: 30px 10px;">
-        <i class="fa-solid fa-lock" style="font-size: 3.5rem; color: var(--wn); margin-bottom: 15px;"></i>
-        <h3 style="margin-bottom: 8px; color: var(--tx);">Coming Soon!</h3>
-        <p class="muted" style="font-size: 0.85rem; max-width: 250px; margin: 0 auto;">This feature will be available in the next update. Stay tuned!</p>
+    <div class="card mb-3 wallet-earn-card" id="earnSection">
+      <div class="wallet-earn-head">
+        <h3 class="wallet-earn-title"><i class="fa-solid fa-gem"></i> <span>Get Free Diamonds to Buy VIP</span></h3>
+        <span class="wallet-earn-badge">Soon</span>
+      </div>
+      <div class="wallet-earn-body">
+        <div class="wallet-earn-lock"><i class="fa-solid fa-lock"></i></div>
+        <h4>Coming Soon!</h4>
+        <p>Earn Free Diamonds via Daily Tasks and Rewards in the Next Update. Stay Tuned!</p>
       </div>
     </div>
 
@@ -3079,8 +3103,10 @@ function openRegisterModal(prefilledEmail = '', prefilledName = '') {
 }
 
 function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
+  document.querySelectorAll('#modalHost .auth-login-modal').forEach(m => m.remove());
   openModal({
     title: 'Sign In with Password',
+    extraClass: 'auth-login-modal',
     bodyHTML: `
       <div id="pwdModalAlert">${isExistingNotice ? `<div class="alert info" style="margin-bottom:12px;"><i class="fa-solid fa-circle-info"></i><span>Account found for <b>${esc(prefilledEmail)}</b>. Enter your password to sign in.</span></div>` : ''}</div>
       <form id="pwdLoginForm" novalidate>
@@ -3172,7 +3198,8 @@ function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
             localStorage.setItem('pe_pwd_' + email, pass);
           } catch(e) {}
           await signInWithEmailAndPassword(auth, email, pass);
-          close();
+          close('auth-success');
+          document.querySelectorAll('#modalHost .auth-login-modal').forEach(m => m.remove());
           toast('success', 'Welcome Back!', '');
         } catch(err) {
           alertBox.innerHTML = `<div class="alert error"><i class="fa-solid fa-circle-exclamation"></i><span>${esc(mapAuthError(err))}</span></div>`;
@@ -3383,6 +3410,12 @@ onAuthStateChanged(auth, async (user) => {
   }
   
   State.user = user;
+
+  // Close any open login/auth popups automatically once authentication succeeds
+  document.querySelectorAll('#modalHost .auth-login-modal').forEach(m => m.remove());
+  document.querySelectorAll('#modalHost .mb').forEach(m => {
+    if (m.querySelector('#pwdLoginForm') || m.querySelector('#googleRegForm')) m.remove();
+  });
 
   // Render dashboard & hide splash immediately for fast app opening!
   $('#authScreen').style.display = 'none';
@@ -3650,6 +3683,16 @@ function postNativeSystemNotification(dedupeKey, title, body, target = 'notifica
   } catch (e) {}
 }
 
+function syncNativeNotificationSnapshots({ balance = null, diamonds = null } = {}) {
+  const plugin = getNativeNotifPlugin();
+  if (!plugin || !State.user) return;
+  const payload = {};
+  if (typeof balance === 'number' && !isNaN(balance)) payload.balance = balance;
+  if (typeof diamonds === 'number' && !isNaN(diamonds)) payload.diamonds = Math.max(0, Math.round(diamonds));
+  if (!Object.keys(payload).length) return;
+  try { plugin.updateSnapshots(payload).catch(() => {}); } catch (e) {}
+}
+
 async function syncNativeNotificationSession(user) {
   const plugin = getNativeNotifPlugin();
   if (!plugin || !user) return;
@@ -3672,6 +3715,13 @@ async function syncNativeNotificationSession(user) {
       idToken: idToken || '',
       refreshToken: refreshToken || ''
     }).catch(() => null);
+    if (res && typeof res.lastKnownBalance === 'number' && !isNaN(res.lastKnownBalance)) {
+      State.lastKnownBalance = res.lastKnownBalance;
+      try { localStorage.setItem('pe_last_bal_' + user.uid, String(res.lastKnownBalance)); } catch (e) {}
+    }
+    if (State.profile && typeof State.profile.diamonds !== 'undefined') {
+      syncNativeNotificationSnapshots({ diamonds: Number(State.profile.diamonds || 0) });
+    }
     if (res?.fcmToken) {
       saveFcmTokenToDb(user.uid, res.fcmToken);
     }
@@ -3761,7 +3811,9 @@ function attachListeners() {
         State.chatWallpaper = State.profile.chatWallpaper;
         try { localStorage.setItem('pe_chat_wp_' + uid, JSON.stringify(State.profile.chatWallpaper)); } catch(e) {}
       }
+      syncNativeNotificationSnapshots({ diamonds: Number(State.profile.diamonds || 0) });
       loadProfileUI();
+      updateMailboxBadge();
     }
   });
 
@@ -3772,10 +3824,11 @@ function attachListeners() {
   trackListener(ref(db, 'users/' + uid + '/mailbox'), (snap) => {
     const arr = [];
     const nowTs = Date.now();
+    const deletedSet = getDeletedMailIdSet(uid);
     if (snap.exists()) {
       snap.forEach(c => {
         const v = c.val();
-        if (!isObj(v) || v.deleted) return;
+        if (!isObj(v) || v.deleted || deletedSet.has(c.key)) return;
         const item = { id: c.key, ...v };
         if (item.status === 'unclaimed' && isMailExpired(item, nowTs)) {
           purgeExpiredMailFromDb(uid, item);
@@ -3815,6 +3868,7 @@ function attachListeners() {
     const prevBal = State.lastKnownBalance;
     State.lastKnownBalance = newBal;
     try { localStorage.setItem(balStorageKey, String(newBal)); } catch(e) {}
+    syncNativeNotificationSnapshots({ balance: newBal });
 
     if (prevBal !== null && Math.abs(newBal - prevBal) >= 0.01) {
       const recentLocalAction = (Date.now() - (State.localWalletActionTs || 0)) < 4500;
@@ -6281,12 +6335,52 @@ function purgeExpiredMailFromDb(uid, mail) {
   }
 }
 
+function getDeletedMailIdSet(uid) {
+  const set = new Set(Array.isArray(State.localDeletedMails) ? State.localDeletedMails : []);
+  if (uid) {
+    try {
+      const perUser = JSON.parse(localStorage.getItem('pe_deleted_mails_' + uid) || '[]');
+      if (Array.isArray(perUser)) perUser.forEach(id => { if (id) set.add(String(id)); });
+    } catch (e) {}
+    const dbDeleted = State.profile?.deletedMailIds;
+    if (isObj(dbDeleted)) {
+      Object.keys(dbDeleted).forEach(k => { if (dbDeleted[k]) set.add(String(k)); });
+    }
+    if (State.profile?.welcomeVipMailDeleted || localStorage.getItem('pe_welcome_vip_del_' + uid) === '1') {
+      set.add('welcome_vip_7d');
+    }
+  }
+  return set;
+}
+
+function persistDeletedMailIdsLocally(uid, ids) {
+  if (!Array.isArray(ids) || !ids.length) return;
+  const set = getDeletedMailIdSet(uid);
+  ids.forEach(id => { if (id) set.add(String(id)); });
+  const arr = Array.from(set);
+  State.localDeletedMails = arr;
+  try { localStorage.setItem('deleted_mails', JSON.stringify(arr)); } catch (e) {}
+  if (uid) {
+    try { localStorage.setItem('pe_deleted_mails_' + uid, JSON.stringify(arr)); } catch (e) {}
+    if (set.has('welcome_vip_7d')) {
+      try { localStorage.setItem('pe_welcome_vip_del_' + uid, '1'); } catch (e) {}
+      if (State.profile) State.profile.welcomeVipMailDeleted = true;
+    }
+    if (State.profile) {
+      if (!isObj(State.profile.deletedMailIds)) State.profile.deletedMailIds = {};
+      ids.forEach(id => { if (id) State.profile.deletedMailIds[String(id)] = true; });
+    }
+  }
+  State.mailbox = (State.mailbox || []).filter(m => m && !set.has(m.id));
+  markNativeNotifKeysSeen(ids.map(id => 'mail:' + id));
+}
+
 function getCombinedMailboxItems() {
-  const deletedLocal = new Set(State.localDeletedMails || []);
+  const uid = State.user?.uid;
+  const deletedLocal = getDeletedMailIdSet(uid);
   const items = [];
   const seenKeys = new Set();
   const nowTs = Date.now();
-  const uid = State.user?.uid;
 
   (State.mailbox || []).forEach(m => {
     if (!m || m.deleted || deletedLocal.has(m.id)) return;
@@ -6337,13 +6431,19 @@ function updateMailboxBadge() {
 
 async function ensureWelcomeVipMailbox(uid) {
   if (!uid || !State.profile) return;
+  const deletedSet = getDeletedMailIdSet(uid);
   const alreadyUsed = !!State.profile.hasUsedVipTrial || Number(State.profile.vipExpiry || 0) > 0;
-  if (alreadyUsed) return;
+  if (alreadyUsed || deletedSet.has('welcome_vip_7d') || State.profile.welcomeVipMailDeleted || State.profile.welcomeVipMailExpired) return;
 
   try {
     const mailRef = ref(db, `users/${uid}/mailbox/welcome_vip_7d`);
     const snap = await get(mailRef);
     let mailData = snap.exists() ? snap.val() : null;
+
+    if (mailData && mailData.deleted) {
+      persistDeletedMailIdsLocally(uid, ['welcome_vip_7d']);
+      return;
+    }
 
     if (mailData && mailData.status === 'unclaimed' && isMailExpired(mailData)) {
       purgeExpiredMailFromDb(uid, { id: 'welcome_vip_7d', ...mailData });
@@ -6369,7 +6469,7 @@ async function ensureWelcomeVipMailbox(uid) {
     if (mailData && !mailData.deleted && mailData.status === 'unclaimed' && !isMailExpired(mailData) && !State.shownWelcomeVipModal) {
       State.shownWelcomeVipModal = true;
       setTimeout(() => {
-        if (!isVipActive() && !State.profile?.hasUsedVipTrial) {
+        if (!isVipActive() && !State.profile?.hasUsedVipTrial && !getDeletedMailIdSet(uid).has('welcome_vip_7d')) {
           openWelcomeVipClaimPopup(mailData);
         }
       }, 650);
@@ -6523,24 +6623,33 @@ async function claimMailItem(mail) {
 }
 
 async function deleteMailItem(mail) {
-  if (!State.user || !mail) return;
+  if (!State.user || !mail) return false;
   const uid = State.user.uid;
   if (mail.status === 'unclaimed') {
     const ok = await confirmDialog('Delete Unclaimed Gift?', 'You have not claimed this gift yet. Delete it permanently?', true);
-    if (!ok) return;
+    if (!ok) return false;
   }
-  if (mail.source === 'mailbox') {
-    await update(ref(db, `users/${uid}/mailbox/${mail.id}`), { deleted: true, deletedAt: Date.now() });
-    if (mail.id === 'welcome_vip_7d') {
-      await update(ref(db, 'users/' + uid), { welcomeVipMailDeleted: true });
-    }
-  } else {
-    if (!State.localDeletedMails.includes(mail.id)) {
-      State.localDeletedMails.push(mail.id);
-      try { localStorage.setItem('deleted_mails', JSON.stringify(State.localDeletedMails)); } catch (e) {}
-    }
-  }
+  persistDeletedMailIdsLocally(uid, [mail.id]);
   updateMailboxBadge();
+  try {
+    const safeKey = String(mail.id).replace(/[.#$\[\]\/]/g, '_');
+    const updates = {};
+    updates[`users/${uid}/deletedMailIds/${safeKey}`] = true;
+    if (mail.source === 'mailbox') {
+      updates[`users/${uid}/mailbox/${mail.id}/deleted`] = true;
+      updates[`users/${uid}/mailbox/${mail.id}/deletedAt`] = Date.now();
+    }
+    if (mail.id === 'welcome_vip_7d') {
+      updates[`users/${uid}/welcomeVipMailDeleted`] = true;
+    }
+    await update(ref(db), updates);
+  } catch (e) {
+    if (mail.source === 'mailbox') {
+      try { await update(ref(db, `users/${uid}/mailbox/${mail.id}`), { deleted: true, deletedAt: Date.now() }); } catch (_) {}
+    }
+  }
+  toast('success', 'Deleted', 'Removed from your mailbox permanently.');
+  return true;
 }
 
 function openMailbox() {
@@ -6712,14 +6821,21 @@ function openMailbox() {
         const hist = getCombinedMailboxItems().filter(m => m.status !== 'unclaimed');
         if (!hist.length) return;
         if (!await confirmDialog('Clear Mailbox History', `Remove ${hist.length} claimed/received item${hist.length > 1 ? 's' : ''} from your mailbox?`, true)) return;
-        for (const item of hist) {
-          if (item.source === 'mailbox') {
-            await update(ref(db, `users/${State.user.uid}/mailbox/${item.id}`), { deleted: true, deletedAt: Date.now() });
-          } else if (!State.localDeletedMails.includes(item.id)) {
-            State.localDeletedMails.push(item.id);
-          }
-        }
-        try { localStorage.setItem('deleted_mails', JSON.stringify(State.localDeletedMails)); } catch (e) {}
+        const uid = State.user.uid;
+        persistDeletedMailIdsLocally(uid, hist.map(item => item.id));
+        try {
+          const updates = {};
+          const nowTs = Date.now();
+          hist.forEach(item => {
+            const safeKey = String(item.id).replace(/[.#$\[\]\/]/g, '_');
+            updates[`users/${uid}/deletedMailIds/${safeKey}`] = true;
+            if (item.source === 'mailbox') {
+              updates[`users/${uid}/mailbox/${item.id}/deleted`] = true;
+              updates[`users/${uid}/mailbox/${item.id}/deletedAt`] = nowTs;
+            }
+          });
+          await update(ref(db), updates);
+        } catch (e) {}
         updateMailboxBadge();
         renderMailBody(el, wrappedClose);
         toast('success', 'Mailbox History Cleared', 'Pending gifts remain safe.');
@@ -7159,6 +7275,25 @@ function openNotifications() {
                     toast('success', 'Notifications Enabled', 'You will now receive alerts even when the app is closed.');
                   }
                 }, 800);
+              };
+            }
+          } else if (st && st.notificationsEnabled && st.ignoringBatteryOptimizations === false && localStorage.getItem('pe_hide_bat_tip') !== '1') {
+            permMount.innerHTML = `
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:10px;border-radius:12px;background:var(--sf2);border:1px solid var(--bd);">
+                <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+                  <i class="fa-solid fa-bolt" style="color:var(--ac);font-size:.95rem;flex-shrink:0;"></i>
+                  <div style="min-width:0;">
+                    <div style="font-size:.78rem;font-weight:800;color:var(--tx);line-height:1.2;">Instant Closed-App Alerts</div>
+                    <div style="font-size:.69rem;color:var(--txm);line-height:1.25;">Set Battery to Unrestricted for Punjab Esports so alerts arrive even when screen is off.</div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-primary" id="allowBgBatteryBtn" style="min-height:32px;padding:4px 11px;font-size:.72rem;flex-shrink:0;">Allow</button>
+              </div>
+            `;
+            const batBtn = permMount.querySelector('#allowBgBatteryBtn');
+            if (batBtn) {
+              batBtn.onclick = async () => {
+                await nativePlugin.openBatterySettings().catch(() => {});
               };
             }
           }

@@ -56,6 +56,7 @@ public class MainActivity extends BridgeActivity {
     public void onStop() {
         super.onStop();
         NotificationHelper.scheduleQuickBackgroundCheck(this);
+        NotificationHelper.scheduleAlarmLoop(this, NotificationHelper.ALARM_INTERVAL_MS);
     }
 
     private void handleNotificationIntent(Intent intent) {
@@ -119,6 +120,7 @@ public class MainActivity extends BridgeActivity {
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 NotificationHelper.schedulePeriodicSync(this);
+                NotificationHelper.scheduleAlarmLoop(this, NotificationHelper.ALARM_INTERVAL_MS);
             }
             return;
         }

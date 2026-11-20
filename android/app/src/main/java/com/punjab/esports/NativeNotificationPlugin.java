@@ -98,6 +98,12 @@ public class NativeNotificationPlugin extends Plugin {
         }
 
         NotificationHelper.schedulePeriodicSync(ctx);
+        NotificationHelper.scheduleAlarmLoop(ctx, NotificationHelper.ALARM_INTERVAL_MS);
+
+        boolean hasBal = NotificationHelper.hasKnownBalance(ctx);
+        double lastBal = NotificationHelper.getLastKnownBalance(ctx);
+        boolean hasDia = NotificationHelper.hasKnownDiamonds(ctx);
+        long lastDia = NotificationHelper.getLastKnownDiamonds(ctx);
 
         boolean fcmReady = NotificationHelper.isFirebaseConfigured(ctx);
         if (fcmReady) {
@@ -108,6 +114,9 @@ public class NativeNotificationPlugin extends Plugin {
                     ret.put("synced", true);
                     ret.put("fcmReady", true);
                     ret.put("permissionGranted", NotificationHelper.canPostNotifications(ctx));
+                    ret.put("ignoringBatteryOptimizations", NotificationHelper.isIgnoringBatteryOptimizations(ctx));
+                    if (hasBal) ret.put("lastKnownBalance", lastBal);
+                    if (hasDia) ret.put("lastKnownDiamonds", lastDia);
                     if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
                         String token = task.getResult();
                         NotificationHelper.saveFcmToken(ctx, token);
@@ -127,6 +136,25 @@ public class NativeNotificationPlugin extends Plugin {
         ret.put("fcmReady", false);
         ret.put("fcmToken", "");
         ret.put("permissionGranted", NotificationHelper.canPostNotifications(ctx));
+        ret.put("ignoringBatteryOptimizations", NotificationHelper.isIgnoringBatteryOptimizations(ctx));
+        if (hasBal) ret.put("lastKnownBalance", lastBal);
+        if (hasDia) ret.put("lastKnownDiamonds", lastDia);
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void updateSnapshots(PluginCall call) {
+        Double bal = call.getDouble("balance");
+        Long dia = call.getLong("diamonds");
+        if (dia == null) {
+            Integer diaInt = call.getInt("diamonds");
+            if (diaInt != null) {
+                dia = diaInt.longValue();
+            }
+        }
+        NotificationHelper.saveSnapshots(getContext(), bal, dia);
+        JSObject ret = new JSObject();
+        ret.put("ok", true);
         call.resolve(ret);
     }
 
@@ -178,6 +206,7 @@ public class NativeNotificationPlugin extends Plugin {
         JSObject ret = new JSObject();
         ret.put("permissionGranted", NotificationHelper.hasNotificationPermission(ctx));
         ret.put("notificationsEnabled", NotificationHelper.canPostNotifications(ctx));
+        ret.put("ignoringBatteryOptimizations", NotificationHelper.isIgnoringBatteryOptimizations(ctx));
         ret.put("fcmReady", NotificationHelper.isFirebaseConfigured(ctx));
         ret.put("fcmToken", NotificationHelper.getFcmToken(ctx));
         call.resolve(ret);
@@ -214,6 +243,28 @@ public class NativeNotificationPlugin extends Plugin {
     @PluginMethod
     public void openSettings(PluginCall call) {
         openNotificationSettingsInternal();
+        JSObject ret = new JSObject();
+        ret.put("opened", true);
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void openBatterySettings(PluginCall call) {
+        try {
+            Context ctx = getContext();
+            Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(intent);
+        } catch (Exception e) {
+            try {
+                Context ctx = getContext();
+                Intent fallback = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                fallback.setData(android.net.Uri.fromParts("package", ctx.getPackageName(), null));
+                fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ctx.startActivity(fallback);
+            } catch (Exception ignored) {
+            }
+        }
         JSObject ret = new JSObject();
         ret.put("opened", true);
         call.resolve(ret);
