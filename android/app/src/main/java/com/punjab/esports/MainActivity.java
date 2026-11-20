@@ -63,6 +63,11 @@ public class MainActivity extends BridgeActivity {
         if (intent == null) {
             return;
         }
+        String dedupeKey = intent.getStringExtra("dedupeKey");
+        if (dedupeKey != null && !dedupeKey.trim().isEmpty()) {
+            NotificationHelper.markKeySeen(this, dedupeKey.trim());
+            intent.removeExtra("dedupeKey");
+        }
         String target = intent.getStringExtra(NotificationHelper.EXTRA_OPEN_TARGET);
         if (target == null || target.trim().isEmpty()) {
             target = intent.getStringExtra("target");

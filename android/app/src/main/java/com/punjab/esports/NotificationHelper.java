@@ -215,7 +215,7 @@ public final class NotificationHelper {
         if (refreshToken != null && !refreshToken.trim().isEmpty()) {
             ed.putString(KEY_REFRESH_TOKEN, refreshToken.trim());
         }
-        if (!cleanUid.equals(prevUid)) {
+        if (!prevUid.isEmpty() && !cleanUid.equals(prevUid)) {
             ed.remove(KEY_SEEN_KEYS);
             ed.remove(KEY_HAS_BALANCE);
             ed.remove(KEY_LAST_BALANCE);
@@ -474,7 +474,7 @@ public final class NotificationHelper {
                     .build();
 
             OneTimeWorkRequest quickRequest = new OneTimeWorkRequest.Builder(NotificationSyncWorker.class)
-                    .setInitialDelay(45, TimeUnit.SECONDS)
+                    .setInitialDelay(15, TimeUnit.SECONDS)
                     .setConstraints(constraints)
                     .build();
 

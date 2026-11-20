@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "923158197845",
+    "firebase_url": "https://punjab-turnaments-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "punjab-turnaments",
+    "storage_bucket": "punjab-turnaments.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:923158197845:android:2213bf76c254acad1286dc",
+        "android_client_info": {
+          "package_name": "com.punjab.esports"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "923158197845-lk3o8o5s130rj5hajfo4d6fv8u79ocji.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxNBOXGC9MZWAdUgN662j0zPwU9rXqI78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "923158197845-lk3o8o5s130rj5hajfo4d6fv8u79ocji.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

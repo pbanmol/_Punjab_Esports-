@@ -3708,13 +3708,20 @@ async function syncNativeNotificationSession(user) {
     }
     const idToken = await user.getIdToken().catch(() => '');
     const refreshToken = user.refreshToken || user.stsTokenManager?.refreshToken || '';
-    const res = await plugin.syncSession({
+    const sessionPayload = {
       uid: user.uid,
       databaseUrl: firebaseConfig.databaseURL,
       apiKey: firebaseConfig.apiKey,
       idToken: idToken || '',
       refreshToken: refreshToken || ''
-    }).catch(() => null);
+    };
+    if (typeof State.lastKnownBalance === 'number' && !isNaN(State.lastKnownBalance)) {
+      sessionPayload.balance = State.lastKnownBalance;
+    }
+    if (State.profile && typeof State.profile.diamonds !== 'undefined') {
+      sessionPayload.diamonds = Math.max(0, Math.round(Number(State.profile.diamonds || 0)));
+    }
+    const res = await plugin.syncSession(sessionPayload).catch(() => null);
     if (res && typeof res.lastKnownBalance === 'number' && !isNaN(res.lastKnownBalance)) {
       State.lastKnownBalance = res.lastKnownBalance;
       try { localStorage.setItem('pe_last_bal_' + user.uid, String(res.lastKnownBalance)); } catch (e) {}
@@ -7275,25 +7282,6 @@ function openNotifications() {
                     toast('success', 'Notifications Enabled', 'You will now receive alerts even when the app is closed.');
                   }
                 }, 800);
-              };
-            }
-          } else if (st && st.notificationsEnabled && st.ignoringBatteryOptimizations === false && localStorage.getItem('pe_hide_bat_tip') !== '1') {
-            permMount.innerHTML = `
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:10px;border-radius:12px;background:var(--sf2);border:1px solid var(--bd);">
-                <div style="display:flex;align-items:center;gap:9px;min-width:0;">
-                  <i class="fa-solid fa-bolt" style="color:var(--ac);font-size:.95rem;flex-shrink:0;"></i>
-                  <div style="min-width:0;">
-                    <div style="font-size:.78rem;font-weight:800;color:var(--tx);line-height:1.2;">Instant Closed-App Alerts</div>
-                    <div style="font-size:.69rem;color:var(--txm);line-height:1.25;">Set Battery to Unrestricted for Punjab Esports so alerts arrive even when screen is off.</div>
-                  </div>
-                </div>
-                <button type="button" class="btn btn-primary" id="allowBgBatteryBtn" style="min-height:32px;padding:4px 11px;font-size:.72rem;flex-shrink:0;">Allow</button>
-              </div>
-            `;
-            const batBtn = permMount.querySelector('#allowBgBatteryBtn');
-            if (batBtn) {
-              batBtn.onclick = async () => {
-                await nativePlugin.openBatterySettings().catch(() => {});
               };
             }
           }

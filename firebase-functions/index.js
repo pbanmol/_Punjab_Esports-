@@ -1,10 +1,18 @@
-const { onValueCreated } = require("firebase-functions/v2/database");
+const { onValueCreated, onValueUpdated } = require("firebase-functions/v2/database");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
 
 const DB_INSTANCE = "punjab-turnaments-default-rtdb";
 const REGION = "asia-southeast1";
+
+function fmtRupees(val) {
+  const n = Number(val || 0);
+  if (Math.abs(n - Math.round(n)) < 0.005) {
+    return `₹${Math.round(n)}`;
+  }
+  return `₹${n.toFixed(2)}`;
+}
 
 async function getUserTokens(uid) {
   const snap = await admin.database().ref(`users/${uid}`).once("value");
@@ -51,7 +59,6 @@ async function sendToUser(uid, { title, body, target, dedupeKey }) {
     }
   });
 
-  // Clean up expired/invalid tokens automatically
   const invalidTokens = [];
   response.responses.forEach((res, idx) => {
     if (!res.success) {
@@ -90,6 +97,86 @@ exports.onUserNotificationCreated = onValueCreated(
       body: data.body || data.message || "Tap to view in Punjab Esports.",
       target: "notifications",
       dedupeKey: `notif:${event.params.notifId}`
+    });
+  }
+);
+
+exports.onWalletBalanceUpdated = onValueUpdated(
+  { ref: "/wallets/{uid}/balance", instance: DB_INSTANCE, region: REGION },
+  async (event) => {
+    const before = Number(event.data.before.val() || 0);
+    const after = Number(event.data.after.val() || 0);
+    const diff = Math.round((after - before) * 100) / 100;
+    if (Math.abs(diff) < 0.01) return;
+    const actionLabel = diff > 0
+      ? `+${fmtRupees(diff)} added`
+      : `${fmtRupees(Math.abs(diff))} deducted`;
+    await sendToUser(event.params.uid, {
+      title: "Wallet Balance Updated",
+      body: `Your wallet was updated (${actionLabel}). New balance: ${fmtRupees(after)}.`,
+      target: "notifications",
+      dedupeKey: `fcm_bal:${event.params.uid}:${Math.round(after * 100)}:${Math.floor(Date.now() / 5000)}`
+    });
+  }
+);
+
+exports.onUserDiamondsUpdated = onValueUpdated(
+  { ref: "/users/{uid}/diamonds", instance: DB_INSTANCE, region: REGION },
+  async (event) => {
+    const before = Number(event.data.before.val() || 0);
+    const after = Number(event.data.after.val() || 0);
+    const diff = after - before;
+    if (diff === 0) return;
+    const actionLabel = diff > 0
+      ? `+${diff} Diamonds added`
+      : `${Math.abs(diff)} Diamonds deducted`;
+    await sendToUser(event.params.uid, {
+      title: "Diamonds Updated",
+      body: `Your diamonds were updated (${actionLabel}). Total: ${after} Diamonds.`,
+      target: "notifications",
+      dedupeKey: `fcm_dia:${event.params.uid}:${after}:${Math.floor(Date.now() / 5000)}`
+    });
+  }
+);
+
+exports.onDepositStatusUpdated = onValueUpdated(
+  { ref: "/depositRequests/{reqId}/status", instance: DB_INSTANCE, region: REGION },
+  async (event) => {
+    const before = String(event.data.before.val() || "").toLowerCase();
+    const after = String(event.data.after.val() || "").toLowerCase();
+    if (before === after || !["approved", "completed", "rejected"].includes(after)) return;
+    const reqSnap = await admin.database().ref(`depositRequests/${event.params.reqId}`).once("value");
+    const req = reqSnap.val();
+    if (!req || !req.userId) return;
+    const approved = after === "approved" || after === "completed";
+    await sendToUser(req.userId, {
+      title: approved ? "Deposit Approved" : "Deposit Rejected",
+      body: approved
+        ? `Your deposit of ${fmtRupees(req.amount)} has been approved and added to your wallet.`
+        : `Your deposit of ${fmtRupees(req.amount)} was rejected${req.reason ? ": " + req.reason : "."}`,
+      target: "notifications",
+      dedupeKey: `req:depositRequests:${event.params.reqId}:${after}`
+    });
+  }
+);
+
+exports.onWithdrawalStatusUpdated = onValueUpdated(
+  { ref: "/withdrawalRequests/{reqId}/status", instance: DB_INSTANCE, region: REGION },
+  async (event) => {
+    const before = String(event.data.before.val() || "").toLowerCase();
+    const after = String(event.data.after.val() || "").toLowerCase();
+    if (before === after || !["approved", "completed", "rejected"].includes(after)) return;
+    const reqSnap = await admin.database().ref(`withdrawalRequests/${event.params.reqId}`).once("value");
+    const req = reqSnap.val();
+    if (!req || !req.userId) return;
+    const approved = after === "approved" || after === "completed";
+    await sendToUser(req.userId, {
+      title: approved ? "Withdrawal Approved" : "Withdrawal Rejected",
+      body: approved
+        ? `Your withdrawal of ${fmtRupees(req.amount)} has been processed.`
+        : `Your withdrawal of ${fmtRupees(req.amount)} was rejected${req.reason ? ": " + req.reason : "."}`,
+      target: "notifications",
+      dedupeKey: `req:withdrawalRequests:${event.params.reqId}:${after}`
     });
   }
 );

@@ -12,10 +12,12 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 import org.json.JSONException;
 
 @CapacitorPlugin(name = "NativeNotifications")
@@ -82,6 +84,23 @@ public class NativeNotificationPlugin extends Plugin {
         NotificationHelper.ensureChannel(ctx);
         NotificationHelper.saveSession(ctx, uid, databaseUrl, apiKey, idToken, refreshToken);
 
+        if (!NotificationHelper.hasKnownBalance(ctx)) {
+            Double initBal = call.getDouble("balance");
+            if (initBal != null) {
+                NotificationHelper.saveSnapshots(ctx, initBal, null);
+            }
+        }
+        if (!NotificationHelper.hasKnownDiamonds(ctx)) {
+            Long initDia = call.getLong("diamonds");
+            if (initDia == null) {
+                Integer initDiaInt = call.getInt("diamonds");
+                if (initDiaInt != null) initDia = initDiaInt.longValue();
+            }
+            if (initDia != null) {
+                NotificationHelper.saveSnapshots(ctx, null, initDia);
+            }
+        }
+
         JSArray seenArr = call.getArray("seenKeys");
         if (seenArr != null && seenArr.length() > 0) {
             List<String> keys = new ArrayList<>();
@@ -106,8 +125,17 @@ public class NativeNotificationPlugin extends Plugin {
         long lastDia = NotificationHelper.getLastKnownDiamonds(ctx);
 
         boolean fcmReady = NotificationHelper.isFirebaseConfigured(ctx);
+        if (!fcmReady) {
+            try {
+                if (FirebaseApp.initializeApp(ctx.getApplicationContext()) != null) {
+                    fcmReady = NotificationHelper.isFirebaseConfigured(ctx);
+                }
+            } catch (Throwable ignored) {
+            }
+        }
         if (fcmReady) {
             try {
+                FirebaseMessaging.getInstance().setAutoInitEnabled(true);
                 FirebaseMessaging.getInstance().subscribeToTopic("all_users");
                 FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
                     JSObject ret = new JSObject();
@@ -120,6 +148,9 @@ public class NativeNotificationPlugin extends Plugin {
                     if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
                         String token = task.getResult();
                         NotificationHelper.saveFcmToken(ctx, token);
+                        Executors.newSingleThreadExecutor().execute(() ->
+                                NotificationHelper.syncFcmTokenToDatabase(ctx.getApplicationContext(), token)
+                        );
                         ret.put("fcmToken", token);
                     } else {
                         ret.put("fcmToken", NotificationHelper.getFcmToken(ctx));
