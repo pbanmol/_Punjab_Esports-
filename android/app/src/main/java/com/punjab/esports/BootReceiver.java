@@ -17,6 +17,7 @@ public class BootReceiver extends BroadcastReceiver {
             Context appCtx = context.getApplicationContext();
             if (!NotificationHelper.getUid(appCtx).isEmpty()) {
                 NotificationHelper.ensureChannel(appCtx);
+                RealtimePushService.start(appCtx);
                 NotificationHelper.schedulePeriodicSync(appCtx);
                 NotificationHelper.scheduleAlarmLoop(appCtx, 45_000L);
             }

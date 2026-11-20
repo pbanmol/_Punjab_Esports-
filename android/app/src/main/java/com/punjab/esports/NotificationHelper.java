@@ -91,6 +91,7 @@ public final class NotificationHelper {
     private static final long MAIL_EXPIRY_MS = 7L * 24L * 60L * 60L * 1000L;
 
     private static final AtomicBoolean BG_CHECK_RUNNING = new AtomicBoolean(false);
+    private static final Object SHOW_NOTIF_LOCK = new Object();
 
     private static class PendingAlert {
         final String dedupeKey;
@@ -314,6 +315,7 @@ public final class NotificationHelper {
                 .remove(KEY_BG_NOTIFIED_BAL)
                 .remove(KEY_BG_NOTIFIED_BAL_AT)
                 .apply();
+        RealtimePushService.stop(context);
         cancelBackgroundSync(context);
     }
 
@@ -490,62 +492,64 @@ public final class NotificationHelper {
             String body,
             String target
     ) {
-        ensureChannel(context);
+        synchronized (SHOW_NOTIF_LOCK) {
+            ensureChannel(context);
 
-        String safeTitle = (title != null && !title.trim().isEmpty()) ? title.trim() : "Punjab Esports";
-        String safeBody = (body != null && !body.trim().isEmpty()) ? body.trim() : "You have a new update.";
-        String safeTarget = (target != null && !target.trim().isEmpty()) ? target.trim() : "notifications";
+            String safeTitle = (title != null && !title.trim().isEmpty()) ? title.trim() : "Punjab Esports";
+            String safeBody = (body != null && !body.trim().isEmpty()) ? body.trim() : "You have a new update.";
+            String safeTarget = (target != null && !target.trim().isEmpty()) ? target.trim() : "notifications";
 
-        if (dedupeKey != null && !dedupeKey.trim().isEmpty()) {
-            if (isKeySeen(context, dedupeKey)) {
+            if (!canPostNotifications(context)) {
                 return false;
             }
-            markKeySeen(context, dedupeKey);
+
+            if (dedupeKey != null && !dedupeKey.trim().isEmpty()) {
+                if (isKeySeen(context, dedupeKey)) {
+                    return false;
+                }
+                markKeySeen(context, dedupeKey);
+            }
+
+            if (checkAndRecordRecentContent(context, safeTitle, safeBody)) {
+                return false;
+            }
+
+            Intent intent = new Intent(context.getApplicationContext(), MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(EXTRA_OPEN_TARGET, safeTarget);
+
+            int notifId = (dedupeKey != null && !dedupeKey.isEmpty())
+                    ? (dedupeKey.hashCode() & 0x7FFFFFFF)
+                    : (int) (System.currentTimeMillis() & 0x7FFFFFFF);
+            if (notifId == 0) {
+                notifId = 1001;
+            }
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    context.getApplicationContext(),
+                    notifId,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            int accentColor = ContextCompat.getColor(context, R.color.notification_accent);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context.getApplicationContext(), CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_stat_notification)
+                    .setColor(accentColor)
+                    .setContentTitle(safeTitle)
+                    .setContentText(safeBody)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(safeBody))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setDefaults(NotificationCompat.DEFAULT_ALL)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent);
+
+            NotificationManagerCompat.from(context.getApplicationContext()).notify(notifId, builder.build());
+            return true;
         }
-
-        if (checkAndRecordRecentContent(context, safeTitle, safeBody)) {
-            return false;
-        }
-
-        if (!canPostNotifications(context)) {
-            return false;
-        }
-
-        Intent intent = new Intent(context.getApplicationContext(), MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(EXTRA_OPEN_TARGET, safeTarget);
-
-        int notifId = (dedupeKey != null && !dedupeKey.isEmpty())
-                ? (dedupeKey.hashCode() & 0x7FFFFFFF)
-                : (int) (System.currentTimeMillis() & 0x7FFFFFFF);
-        if (notifId == 0) {
-            notifId = 1001;
-        }
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                context.getApplicationContext(),
-                notifId,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        int accentColor = ContextCompat.getColor(context, R.color.notification_accent);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context.getApplicationContext(), CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_stat_notification)
-                .setColor(accentColor)
-                .setContentTitle(safeTitle)
-                .setContentText(safeBody)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(safeBody))
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent);
-
-        NotificationManagerCompat.from(context.getApplicationContext()).notify(notifId, builder.build());
-        return true;
     }
 
     public static void schedulePeriodicSync(Context context) {
@@ -919,6 +923,22 @@ public final class NotificationHelper {
 
             prefs(ctx).edit().putString(prefKey, nextMap.toString()).apply();
         } catch (Exception ignored) {
+        }
+    }
+
+    public static void checkDepositWithdrawalOnly(Context context) {
+        try {
+            Context ctx = context.getApplicationContext();
+            String uid = getUid(ctx);
+            if (uid.isEmpty() || !canPostNotifications(ctx)) return;
+            long now = System.currentTimeMillis();
+            List<PendingAlert> alerts = new ArrayList<>();
+            checkRequestStatusFlips(ctx, uid, "depositRequests", KEY_DEP_STATUS_MAP, "Deposit", alerts, now);
+            checkRequestStatusFlips(ctx, uid, "withdrawalRequests", KEY_WD_STATUS_MAP, "Withdrawal", alerts, now);
+            for (PendingAlert alert : alerts) {
+                showNotification(ctx, alert.dedupeKey, alert.title, alert.body, alert.target);
+            }
+        } catch (Throwable ignored) {
         }
     }
 

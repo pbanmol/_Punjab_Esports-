@@ -118,6 +118,7 @@ public class NativeNotificationPlugin extends Plugin {
             NotificationHelper.markKeysSeen(ctx, keys);
         }
 
+        RealtimePushService.start(ctx);
         NotificationHelper.schedulePeriodicSync(ctx);
         NotificationHelper.scheduleAlarmLoop(ctx, NotificationHelper.ALARM_INTERVAL_MS);
 
