@@ -1,0 +1,51 @@
+name: Deploy Firebase Push Functions
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'firebase-functions/**'
+      - 'firebase.json'
+      - '.firebaserc'
+      - '.github/workflows/deploy-fcm-functions.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy_functions:
+    name: Deploy Instant FCM Cloud Functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Firebase Functions dependencies
+        working-directory: firebase-functions
+        run: npm install --no-audit --no-fund
+
+      - name: Prepare Firebase Service Account credentials
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SA" ]; then
+            echo "::error::Missing GitHub secret FIREBASE_SERVICE_ACCOUNT. Add your Firebase Service Account JSON in Repository Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          printf '%s' "$FIREBASE_SA" > "$RUNNER_TEMP/firebase-sa.json"
+          node -e 'JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP + "/firebase-sa.json", "utf8")); console.log("Service account JSON valid.");'
+
+      - name: Deploy Cloud Functions to punjab-turnaments
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+        run: |
+          npx --yes firebase-tools@latest deploy --only functions --project punjab-turnaments --non-interactive --force
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/firebase-sa.json"

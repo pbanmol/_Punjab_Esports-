@@ -215,6 +215,93 @@ exports.onWithdrawalStatusUpdated = onValueUpdated(
   }
 );
 
+exports.onMatchResultWritten = onValueWritten(
+  { ref: "/matchResults/{matchId}", instance: DB_INSTANCE, region: REGION },
+  async (event) => {
+    const before = event.data.before.val() || {};
+    const after = event.data.after.val();
+    if (!after || !after.entries || typeof after.entries !== "object") return;
+    const afterStatus = String(after.status || "").toLowerCase();
+    const beforeStatus = String(before.status || "").toLowerCase();
+    if (afterStatus !== "approved") return;
+
+    const justApproved = beforeStatus !== "approved";
+    const matchSnap = await admin.database().ref(`tournaments/${event.params.matchId}`).once("value");
+    const match = matchSnap.val() || {};
+    const matchTitle = match.title || "Tournament Match";
+
+    const beforeEntries = (before && before.entries && typeof before.entries === "object") ? before.entries : {};
+    const entries = Object.entries(after.entries);
+    for (const [uid, entry] of entries) {
+      if (!uid || !entry || typeof entry !== "object") continue;
+      const prevEntry = beforeEntries[uid];
+      const changed = justApproved || !prevEntry ||
+        Number(prevEntry.rank || 0) !== Number(entry.rank || 0) ||
+        Number(prevEntry.kills || 0) !== Number(entry.kills || 0) ||
+        Number(prevEntry.reward || 0) !== Number(entry.reward || 0);
+      if (!changed) continue;
+
+      const rankNum = Number(entry.rank || 0);
+      const killsNum = Number(entry.kills || 0);
+      const rewardNum = Number(entry.reward || 0);
+      const rankLabel = rankNum === 1 ? "🥇 Rank #1"
+        : rankNum === 2 ? "🥈 Rank #2"
+        : rankNum === 3 ? "🥉 Rank #3"
+        : (rankNum > 0 ? `Rank #${rankNum}` : "Result Updated");
+      const rewardPart = rewardNum > 0 ? ` • Prize: ${fmtRupees(rewardNum)}` : "";
+
+      await sendToUser(uid, {
+        title: "Match Result Declared!",
+        body: `${matchTitle}: ${rankLabel} • ${killsNum} Kills${rewardPart}`,
+        target: "notifications",
+        dedupeKey: `result:${event.params.matchId}:${uid}:${rankNum}:${killsNum}:${Math.round(rewardNum * 100)}`,
+        tag: `result_${event.params.matchId}`
+      });
+    }
+  }
+);
+
+exports.onRoomCredentialsWritten = onValueWritten(
+  { ref: "/privateRoomCredentials/{matchId}", instance: DB_INSTANCE, region: REGION },
+  async (event) => {
+    const before = event.data.before.val() || {};
+    const after = event.data.after.val();
+    if (!after || (!after.roomId && !after.roomPass)) return;
+    if (
+      String(before.roomId || "") === String(after.roomId || "") &&
+      String(before.roomPass || "") === String(after.roomPass || "")
+    ) {
+      return;
+    }
+
+    const [matchSnap, regSnap] = await Promise.all([
+      admin.database().ref(`tournaments/${event.params.matchId}`).once("value"),
+      admin.database().ref("registrations").orderByChild("matchId").equalTo(event.params.matchId).once("value")
+    ]);
+    const match = matchSnap.val() || {};
+    const matchTitle = match.title || "Your Match";
+    const regs = regSnap.val();
+    if (!regs || typeof regs !== "object") return;
+
+    const uidSet = new Set();
+    Object.values(regs).forEach((r) => {
+      if (r && r.userId && String(r.status || "confirmed").toLowerCase() !== "cancelled") {
+        uidSet.add(r.userId);
+      }
+    });
+
+    for (const uid of uidSet) {
+      await sendToUser(uid, {
+        title: "Room ID & Password Live!",
+        body: `${matchTitle} — Room ID & Password are now ready. Open Punjab Esports to join!`,
+        target: "notifications",
+        dedupeKey: `room:${event.params.matchId}:${after.roomId || ""}:${after.roomPass || ""}`,
+        tag: `room_${event.params.matchId}`
+      });
+    }
+  }
+);
+
 exports.onMailboxGiftCreated = onValueCreated(
   { ref: "/users/{uid}/mailbox/{mailId}", instance: DB_INSTANCE, region: REGION },
   async (event) => {

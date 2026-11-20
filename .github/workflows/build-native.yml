@@ -1,4 +1,4 @@
-name: .github/workflows/firebase-deploy.yml
+name: Build Android APK & AAB
 
 on:
   push:
