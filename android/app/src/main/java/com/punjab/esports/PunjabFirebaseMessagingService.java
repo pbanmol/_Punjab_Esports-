@@ -52,6 +52,18 @@ public class PunjabFirebaseMessagingService extends FirebaseMessagingService {
             dedupeKey = (msgId != null && !msgId.isEmpty()) ? ("fcm:" + msgId) : ("fcm:" + System.currentTimeMillis());
         }
 
+        String newBalanceStr = data.get("newBalance");
+        if (newBalanceStr != null && !newBalanceStr.trim().isEmpty()) {
+            try {
+                double nb = Double.parseDouble(newBalanceStr.trim());
+                if (!Double.isNaN(nb) && !Double.isInfinite(nb)) {
+                    NotificationHelper.saveSnapshots(getApplicationContext(), nb, null);
+                    NotificationHelper.recordBgNotifiedBalance(getApplicationContext(), nb);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
         NotificationHelper.showNotification(getApplicationContext(), dedupeKey, title, body, target);
     }
 }

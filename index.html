@@ -3619,7 +3619,7 @@ async function ensureSyntheticNotification(uid, key, payload) {
     const targetRef = ref(db, `notifications/${uid}/${key}`);
     const snap = await get(targetRef).catch(() => null);
     if (snap && snap.exists()) return;
-    await set(targetRef, { id: key, ...payload, read: false, createdAt: payload.createdAt || Date.now() });
+    await set(targetRef, { id: key, ...payload, synthetic: true, read: false, createdAt: payload.createdAt || Date.now() });
   } catch(e) {}
 }
 
@@ -3722,6 +3722,7 @@ async function syncNativeNotificationSession(user) {
       sessionPayload.diamonds = Math.max(0, Math.round(Number(State.profile.diamonds || 0)));
     }
     const res = await plugin.syncSession(sessionPayload).catch(() => null);
+    State.fcmReady = !!(res && res.fcmReady);
     if (res && typeof res.lastKnownBalance === 'number' && !isNaN(res.lastKnownBalance)) {
       State.nativeLastKnownBalance = res.lastKnownBalance;
       State.lastKnownBalance = res.lastKnownBalance;
@@ -3869,7 +3870,10 @@ function attachListeners() {
     mailInit = true;
   });
 
+  let walletFirstSnap = true;
   trackListener(ref(db, 'wallets/' + uid), (snap) => {
+    const isInitialWalletSnap = walletFirstSnap;
+    walletFirstSnap = false;
     const w = snap.val() || { balance: 0, reserved: 0 };
     State.wallet = isObj(w) ? w : { balance: 0, reserved: 0 };
     const newBal = Number(State.wallet.balance || 0);
@@ -3890,9 +3894,10 @@ function attachListeners() {
         State.lastWalletSynthAt = Date.now();
         setTimeout(() => {
           const alreadyNotifiedInBg =
-            typeof State.nativeBgNotifiedBalance === 'number' &&
-            Math.abs(State.nativeBgNotifiedBalance - newBal) < 0.01 &&
-            (Date.now() - (State.nativeBgNotifiedBalanceAt || 0)) < 15 * 60 * 1000;
+            (isInitialWalletSnap && State.fcmReady) ||
+            (typeof State.nativeBgNotifiedBalance === 'number' &&
+              Math.abs(State.nativeBgNotifiedBalance - newBal) < 0.01 &&
+              (Date.now() - (State.nativeBgNotifiedBalanceAt || 0)) < 15 * 60 * 1000);
           const hasAdminNotif = (State.rawNotifications || []).some(n =>
             Number(n.createdAt || 0) >= notifCheckTs &&
             /balance|deposit|withdraw|reward|prize|bonus|admin|refund/i.test(`${n.type || ''} ${n.title || ''} ${n.body || ''}`)

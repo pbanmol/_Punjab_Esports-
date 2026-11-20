@@ -1,4 +1,4 @@
-const { onValueCreated, onValueUpdated } = require("firebase-functions/v2/database");
+const { onValueCreated, onValueUpdated, onValueWritten } = require("firebase-functions/v2/database");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
@@ -32,9 +32,33 @@ async function getUserTokens(uid) {
   return Array.from(tokenSet);
 }
 
-async function sendToUser(uid, { title, body, target, dedupeKey }) {
+async function sendToUser(uid, { title, body, target, dedupeKey, tag, extraData }) {
   const tokens = await getUserTokens(uid);
   if (!tokens.length) return;
+
+  const dataPayload = {
+    title: String(title || "Punjab Esports"),
+    body: String(body || "You have a new update."),
+    target: String(target || "notifications"),
+    dedupeKey: String(dedupeKey || "")
+  };
+  if (extraData && typeof extraData === "object") {
+    Object.entries(extraData).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) {
+        dataPayload[k] = String(v);
+      }
+    });
+  }
+
+  const androidNotif = {
+    channelId: "punjab_esports_alerts",
+    sound: "default",
+    defaultVibrateTimings: true,
+    visibility: "public"
+  };
+  if (tag) {
+    androidNotif.tag = String(tag);
+  }
 
   const response = await admin.messaging().sendEachForMulticast({
     tokens,
@@ -42,20 +66,10 @@ async function sendToUser(uid, { title, body, target, dedupeKey }) {
       title: String(title || "Punjab Esports"),
       body: String(body || "You have a new update.")
     },
-    data: {
-      title: String(title || "Punjab Esports"),
-      body: String(body || "You have a new update."),
-      target: String(target || "notifications"),
-      dedupeKey: String(dedupeKey || "")
-    },
+    data: dataPayload,
     android: {
       priority: "high",
-      notification: {
-        channelId: "punjab_esports_alerts",
-        sound: "default",
-        defaultVibrateTimings: true,
-        visibility: "public"
-      }
+      notification: androidNotif
     }
   });
 
@@ -90,22 +104,31 @@ async function sendToUser(uid, { title, body, target, dedupeKey }) {
 exports.onUserNotificationCreated = onValueCreated(
   { ref: "/notifications/{uid}/{notifId}", instance: DB_INSTANCE, region: REGION },
   async (event) => {
+    const notifId = String(event.params.notifId || "");
     const data = event.data.val();
     if (!data || data.read === true || data.type === "announcement") return;
+    if (data.synthetic === true || notifId.startsWith("auto_")) return;
     await sendToUser(event.params.uid, {
       title: data.title || "New Notification",
       body: data.body || data.message || "Tap to view in Punjab Esports.",
       target: "notifications",
-      dedupeKey: `notif:${event.params.notifId}`
+      dedupeKey: `notif:${notifId}`,
+      tag: `notif_${notifId}`
     });
   }
 );
 
-exports.onWalletBalanceUpdated = onValueUpdated(
+exports.onWalletBalanceUpdated = onValueWritten(
   { ref: "/wallets/{uid}/balance", instance: DB_INSTANCE, region: REGION },
   async (event) => {
-    const before = Number(event.data.before.val() || 0);
-    const after = Number(event.data.after.val() || 0);
+    const beforeRaw = event.data.before.val();
+    const afterRaw = event.data.after.val();
+    if (afterRaw === null || afterRaw === undefined) return;
+    const before = beforeRaw === null || beforeRaw === undefined ? 0 : Number(beforeRaw);
+    const after = Number(afterRaw);
+    if (Number.isNaN(before) || Number.isNaN(after)) return;
+    if ((beforeRaw === null || beforeRaw === undefined) && after === 0) return;
+
     const diff = Math.round((after - before) * 100) / 100;
     if (Math.abs(diff) < 0.01) return;
     const actionLabel = diff > 0
@@ -113,28 +136,37 @@ exports.onWalletBalanceUpdated = onValueUpdated(
       : `${fmtRupees(Math.abs(diff))} deducted`;
     await sendToUser(event.params.uid, {
       title: "Wallet Balance Updated",
-      body: `Your wallet was updated (${actionLabel}). New balance: ${fmtRupees(after)}.`,
+      body: `Your wallet was updated by admin (${actionLabel}). New balance: ${fmtRupees(after)}.`,
       target: "notifications",
-      dedupeKey: `fcm_bal:${event.params.uid}:${Math.round(after * 100)}:${Math.floor(Date.now() / 5000)}`
+      dedupeKey: `fcm_bal:${event.params.uid}:${Math.round(after * 100)}:${Math.floor(Date.now() / 5000)}`,
+      tag: "wallet_balance",
+      extraData: { newBalance: String(after) }
     });
   }
 );
 
-exports.onUserDiamondsUpdated = onValueUpdated(
+exports.onUserDiamondsUpdated = onValueWritten(
   { ref: "/users/{uid}/diamonds", instance: DB_INSTANCE, region: REGION },
   async (event) => {
-    const before = Number(event.data.before.val() || 0);
-    const after = Number(event.data.after.val() || 0);
+    const beforeRaw = event.data.before.val();
+    const afterRaw = event.data.after.val();
+    if (afterRaw === null || afterRaw === undefined) return;
+    const before = beforeRaw === null || beforeRaw === undefined ? 0 : Number(beforeRaw);
+    const after = Number(afterRaw);
+    if (Number.isNaN(before) || Number.isNaN(after)) return;
+    if ((beforeRaw === null || beforeRaw === undefined) && after === 0) return;
+
     const diff = after - before;
     if (diff === 0) return;
     const actionLabel = diff > 0
       ? `+${diff} Diamonds added`
       : `${Math.abs(diff)} Diamonds deducted`;
     await sendToUser(event.params.uid, {
-      title: "Diamonds Updated",
-      body: `Your diamonds were updated (${actionLabel}). Total: ${after} Diamonds.`,
+      title: "Diamonds Updated by Admin",
+      body: `Your diamonds were updated by admin (${actionLabel}). Total: ${after} Diamonds.`,
       target: "notifications",
-      dedupeKey: `fcm_dia:${event.params.uid}:${after}:${Math.floor(Date.now() / 5000)}`
+      dedupeKey: `fcm_dia:${event.params.uid}:${after}:${Math.floor(Date.now() / 5000)}`,
+      tag: "diamonds_update"
     });
   }
 );
@@ -155,7 +187,8 @@ exports.onDepositStatusUpdated = onValueUpdated(
         ? `Your deposit of ${fmtRupees(req.amount)} has been approved and added to your wallet.`
         : `Your deposit of ${fmtRupees(req.amount)} was rejected${req.reason ? ": " + req.reason : "."}`,
       target: "notifications",
-      dedupeKey: `req:depositRequests:${event.params.reqId}:${after}`
+      dedupeKey: `req:depositRequests:${event.params.reqId}:${after}`,
+      tag: `dep_${event.params.reqId}`
     });
   }
 );
@@ -176,7 +209,8 @@ exports.onWithdrawalStatusUpdated = onValueUpdated(
         ? `Your withdrawal of ${fmtRupees(req.amount)} has been processed.`
         : `Your withdrawal of ${fmtRupees(req.amount)} was rejected${req.reason ? ": " + req.reason : "."}`,
       target: "notifications",
-      dedupeKey: `req:withdrawalRequests:${event.params.reqId}:${after}`
+      dedupeKey: `req:withdrawalRequests:${event.params.reqId}:${after}`,
+      tag: `wd_${event.params.reqId}`
     });
   }
 );
@@ -184,13 +218,16 @@ exports.onWithdrawalStatusUpdated = onValueUpdated(
 exports.onMailboxGiftCreated = onValueCreated(
   { ref: "/users/{uid}/mailbox/{mailId}", instance: DB_INSTANCE, region: REGION },
   async (event) => {
+    const mailId = String(event.params.mailId || "");
+    if (mailId === "welcome_vip_7d") return;
     const data = event.data.val();
     if (!data || data.deleted || data.status !== "unclaimed") return;
     await sendToUser(event.params.uid, {
       title: "New Gift in Mailbox!",
       body: data.title || "Claim your reward within 7 days before it expires.",
       target: "mailbox",
-      dedupeKey: `mail:${event.params.mailId}`
+      dedupeKey: `mail:${mailId}`,
+      tag: `mail_${mailId}`
     });
   }
 );
@@ -204,7 +241,8 @@ exports.onAdminReplyCreated = onValueCreated(
       title: "Official Admin Reply",
       body: data.text || "Official Admin sent you a reply.",
       target: "admindm",
-      dedupeKey: `dm:${event.params.msgId}`
+      dedupeKey: `dm:${event.params.msgId}`,
+      tag: "admindm"
     });
   }
 );
@@ -231,7 +269,8 @@ exports.onAnnouncementCreated = onValueCreated(
         notification: {
           channelId: "punjab_esports_alerts",
           sound: "default",
-          visibility: "public"
+          visibility: "public",
+          tag: `ann_${event.params.annId}`
         }
       }
     });

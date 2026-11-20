@@ -27,6 +27,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.messaging.FirebaseMessaging;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,6 +44,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONArray;
@@ -184,9 +186,37 @@ public final class NotificationHelper {
             if (resId == 0) {
                 return false;
             }
+            if (FirebaseApp.getApps(appCtx).isEmpty()) {
+                try {
+                    FirebaseApp.initializeApp(appCtx);
+                } catch (Throwable ignored) {
+                }
+            }
             return !FirebaseApp.getApps(appCtx).isEmpty();
         } catch (Throwable ignored) {
             return false;
+        }
+    }
+
+    public static void refreshFcmTokenIfNeeded(Context context) {
+        try {
+            Context appCtx = context.getApplicationContext();
+            if (getUid(appCtx).isEmpty() || !isFirebaseConfigured(appCtx)) {
+                return;
+            }
+            FirebaseMessaging.getInstance().setAutoInitEnabled(true);
+            FirebaseMessaging.getInstance().subscribeToTopic("all_users");
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                    String token = task.getResult().trim();
+                    saveFcmToken(appCtx, token);
+                    NativeNotificationPlugin.notifyTokenRefreshed(token);
+                    Executors.newSingleThreadExecutor().execute(() ->
+                            syncFcmTokenToDatabase(appCtx, token)
+                    );
+                }
+            });
+        } catch (Throwable ignored) {
         }
     }
 

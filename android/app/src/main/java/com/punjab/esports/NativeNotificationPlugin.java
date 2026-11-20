@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -161,6 +163,10 @@ public class NativeNotificationPlugin extends Plugin {
                         ret.put("fcmToken", token);
                     } else {
                         ret.put("fcmToken", NotificationHelper.getFcmToken(ctx));
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                                () -> NotificationHelper.refreshFcmTokenIfNeeded(ctx.getApplicationContext()),
+                                4000L
+                        );
                     }
                     call.resolve(ret);
                 });

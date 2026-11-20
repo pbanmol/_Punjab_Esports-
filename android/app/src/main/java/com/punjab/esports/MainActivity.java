@@ -42,6 +42,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
+        NotificationHelper.refreshFcmTokenIfNeeded(this);
         if (openedSettingsForPermission) {
             openedSettingsForPermission = false;
             if (!hasImagePermission()) {
@@ -67,6 +68,18 @@ public class MainActivity extends BridgeActivity {
         if (dedupeKey != null && !dedupeKey.trim().isEmpty()) {
             NotificationHelper.markKeySeen(this, dedupeKey.trim());
             intent.removeExtra("dedupeKey");
+        }
+        String newBalStr = intent.getStringExtra("newBalance");
+        if (newBalStr != null && !newBalStr.trim().isEmpty()) {
+            try {
+                double nb = Double.parseDouble(newBalStr.trim());
+                if (!Double.isNaN(nb) && !Double.isInfinite(nb)) {
+                    NotificationHelper.saveSnapshots(this, nb, null);
+                    NotificationHelper.recordBgNotifiedBalance(this, nb);
+                }
+            } catch (Exception ignored) {
+            }
+            intent.removeExtra("newBalance");
         }
         String target = intent.getStringExtra(NotificationHelper.EXTRA_OPEN_TARGET);
         if (target == null || target.trim().isEmpty()) {
