@@ -1,0 +1,15 @@
+{
+  "name": "punjab-esports-push-server",
+  "version": "1.0.0",
+  "description": "Free 24x7 Firebase RTDB to Google FCM v1 Push Server for Punjab Esports (No Blaze Plan required)",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

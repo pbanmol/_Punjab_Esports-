@@ -1106,40 +1106,253 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
   text-overflow: ellipsis;
 }
 
-/* SMART EMAIL AUTOCOMPLETE DROPDOWN */
-.email-suggest-box {
-  position: absolute;
-  top: 100%;
+/* 3D ZERO-SHAKE PASSWORD SIGN-IN MODAL */
+.mb.auth-login-modal {
+  position: fixed;
+  top: 0;
   left: 0;
   right: 0;
-  background: var(--sf);
-  border: 1px solid var(--bd2);
-  border-radius: 12px;
-  box-shadow: var(--sh2);
-  z-index: 50;
-  max-height: 160px;
+  bottom: 0;
+  height: 100svh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: max(46px, calc(26px + var(--safe-t))) 18px 24px 18px;
+  background: rgba(9, 13, 24, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   overflow-y: auto;
-  margin-top: 4px;
-  display: none;
+  overscroll-behavior: contain;
+  animation: authOverlayIn 0.22s ease-out both;
 }
-.email-suggest-box.show { display: block; }
-.email-suggest-item {
-  padding: 10px 14px;
-  cursor: pointer;
-  font-size: 0.84rem;
-  color: var(--tx);
+@keyframes authOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes authCard3DIn {
+  from {
+    opacity: 0;
+    transform: perspective(950px) rotateX(9deg) translateY(18px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(950px) rotateX(0deg) translateY(0) scale(1);
+  }
+}
+.mb.auth-login-modal .modal {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 372px;
+  max-height: none;
+  overflow: visible;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-bottom: 4px solid #cbd5e1;
+  box-shadow:
+    0 28px 60px -14px rgba(2, 6, 23, 0.48),
+    0 12px 24px -8px rgba(2, 6, 23, 0.24),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+  transform-origin: center top;
+  animation: authCard3DIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.mb.auth-login-modal .mh {
+  padding: 18px 18px 12px 18px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+  background: transparent;
+}
+.mb.auth-login-modal .mh h3 {
   display: flex;
   align-items: center;
+  gap: 11px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: #0f172a;
+}
+.auth-3d-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #27272a 0%, #09090b 100%);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 4px 0 #000000,
+    0 10px 18px rgba(9, 9, 11, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.auth-3d-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.auth-3d-sub {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748b;
+  letter-spacing: 0;
+}
+.mb.auth-login-modal .close-x {
+  width: 32px;
+  height: 32px;
+  border-radius: 11px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 0 #cbd5e1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.mb.auth-login-modal .close-x:active {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.mb.auth-login-modal .mbody {
+  padding: 16px 18px 14px 18px;
+  overflow: visible;
+  flex: none;
+}
+.mb.auth-login-modal .field {
+  margin-bottom: 10px;
+}
+.mb.auth-login-modal .field label {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+  letter-spacing: 0.1px;
+}
+.mb.auth-login-modal .ig {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.mb.auth-login-modal .ig .igi {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  font-size: 0.88rem;
+  pointer-events: none;
+  z-index: 2;
+}
+.mb.auth-login-modal .ig .input {
+  width: 100%;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0 42px 0 40px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+.mb.auth-login-modal .ig .input::placeholder {
+  color: #94a3b8;
+}
+.mb.auth-login-modal .ig .input:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3.5px rgba(15, 23, 42, 0.10), inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.mb.auth-login-modal .ig .igt {
+  position: absolute;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.mb.auth-login-modal .field-error {
+  display: block;
+  min-height: 15px;
+  line-height: 15px;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: #dc2626;
+}
+.auth-3d-submit-btn {
+  width: 100%;
+  height: 48px;
+  margin-top: 4px;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 15px;
+  background: linear-gradient(180deg, #27272a 0%, #09090b 100%);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
-  transition: background 0.15s;
-  border-bottom: 1px solid var(--bd);
+  cursor: pointer;
+  box-shadow:
+    0 4px 0 #000000,
+    0 12px 22px rgba(9, 9, 11, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: box-shadow 0.14s ease, opacity 0.14s ease;
 }
-.email-suggest-item:last-child { border-bottom: none; }
-.email-suggest-item:hover, .email-suggest-item:active {
-  background: var(--acs);
-  color: var(--ac);
+.auth-3d-submit-btn:active {
+  box-shadow:
+    0 2px 0 #000000,
+    0 6px 12px rgba(9, 9, 11, 0.22);
 }
-.email-suggest-item i { color: var(--ac2); font-size: 0.8rem; }
+.auth-3d-submit-btn:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+.auth-3d-forgot-row {
+  text-align: center;
+  margin: 12px 0 2px 0;
+}
+.auth-3d-forgot-row a {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  text-decoration: none;
+}
+.auth-3d-forgot-row a:hover {
+  color: #0f172a;
+  text-decoration: underline;
+}
+.mb.auth-login-modal .mfoot {
+  padding: 10px 18px 16px 18px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  background: transparent;
+}
+.mb.auth-login-modal .mfoot .btn-ghost {
+  width: 100%;
+  height: 40px;
+  border-radius: 13px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  font-weight: 600;
+}
+@media (max-width: 480px) {
+  .mb.auth-login-modal {
+    padding: max(42px, calc(22px + var(--safe-t))) 16px 20px 16px;
+  }
+  .mb.auth-login-modal .modal {
+    max-height: none;
+  }
+}
 
 
 /* Media & Photos Access Permission Modal */
@@ -2269,73 +2482,6 @@ setTimeout(() => { if (splashEl && !splashEl.classList.contains('hide')) hideSpl
 // PUNJAB ESPORTS AUTH & LOGIN LOGIC (GOOGLE, PASSWORD, SIGN UP)
 // ============================================================
 
-const KNOWN_DEVICE_EMAILS = [
-  'pbanmol025@gmail.com',
-  'anmolpreetsingh47902@gmail.com'
-];
-try {
-  const saved = localStorage.getItem('pe_saved_email');
-  if (saved && !KNOWN_DEVICE_EMAILS.includes(saved)) KNOWN_DEVICE_EMAILS.unshift(saved);
-} catch(e) {}
-
-function setupEmailAutocomplete(inputEl, suggestBoxEl) {
-  if (!inputEl || !suggestBoxEl) return;
-
-  const renderSuggestions = (val) => {
-    const q = val.trim().toLowerCase();
-    if (!q) {
-      suggestBoxEl.classList.remove('show');
-      return;
-    }
-
-    let matches = [];
-    if (!q.includes('@')) {
-      KNOWN_DEVICE_EMAILS.forEach(em => {
-        if (em.toLowerCase().includes(q)) matches.push(em);
-      });
-      ['@gmail.com', '@yahoo.com', '@outlook.com'].forEach(dom => {
-        matches.push(q + dom);
-      });
-    } else {
-      const parts = q.split('@');
-      const prefix = parts[0];
-      const suffix = parts[1] || '';
-      ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'].forEach(d => {
-        if (d.startsWith(suffix)) matches.push(prefix + '@' + d);
-      });
-      KNOWN_DEVICE_EMAILS.forEach(em => {
-        if (em.toLowerCase().startsWith(q) && !matches.includes(em)) matches.push(em);
-      });
-    }
-
-    const unique = [...new Set(matches)].slice(0, 4);
-    if (!unique.length) {
-      suggestBoxEl.classList.remove('show');
-      return;
-    }
-
-    suggestBoxEl.innerHTML = unique.map(em => `
-      <div class="email-suggest-item" data-val="${esc(em)}">
-        <i class="fa-solid fa-envelope"></i> <span>${esc(em)}</span>
-      </div>
-    `).join('');
-    suggestBoxEl.classList.add('show');
-
-    suggestBoxEl.querySelectorAll('.email-suggest-item').forEach(item => {
-      item.onmousedown = (e) => {
-        e.preventDefault();
-        inputEl.value = item.dataset.val;
-        suggestBoxEl.classList.remove('show');
-        inputEl.focus();
-      };
-    });
-  };
-
-  inputEl.addEventListener('input', () => renderSuggestions(inputEl.value));
-  inputEl.addEventListener('focus', () => { if (inputEl.value) renderSuggestions(inputEl.value); });
-  inputEl.addEventListener('blur', () => setTimeout(() => suggestBoxEl.classList.remove('show'), 200));
-}
-
 let pendingAuthAction = null;
 
 function ensureTermsAgreed(actionCallback) {
@@ -3105,49 +3251,44 @@ function openRegisterModal(prefilledEmail = '', prefilledName = '') {
 function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
   document.querySelectorAll('#modalHost .auth-login-modal').forEach(m => m.remove());
   openModal({
-    title: 'Sign In with Password',
+    title: `<span class="auth-3d-badge"><i class="fa-solid fa-key"></i></span><span class="auth-3d-title-wrap"><span>Sign In with Password</span><span class="auth-3d-sub">Access your Punjab Esports account</span></span>`,
     extraClass: 'auth-login-modal',
     bodyHTML: `
       <div id="pwdModalAlert">${isExistingNotice ? `<div class="alert info" style="margin-bottom:12px;"><i class="fa-solid fa-circle-info"></i><span>Account found for <b>${esc(prefilledEmail)}</b>. Enter your password to sign in.</span></div>` : ''}</div>
-      <form id="pwdLoginForm" novalidate>
-        <div class="field" style="position:relative;">
-          <label>Email <span class="req">*</span></label>
+      <form id="pwdLoginForm" autocomplete="on" novalidate>
+        <div class="field">
+          <label for="modalLoginEmail">Email <span class="req">*</span></label>
           <div class="ig">
             <i class="fa-solid fa-envelope igi"></i>
-            <input type="email" id="modalLoginEmail" class="input" placeholder="you@example.com" autocomplete="email" required>
+            <input type="email" id="modalLoginEmail" name="email" class="input" placeholder="you@example.com" inputmode="email" autocomplete="username email" autocapitalize="none" autocorrect="off" spellcheck="false" required>
           </div>
-          <div class="email-suggest-box" id="modalLoginEmailSuggest"></div>
           <small class="field-error" id="errModalLoginEmail"></small>
         </div>
 
         <div class="field">
-          <label>Password <span class="req">*</span></label>
+          <label for="modalLoginPass">Password <span class="req">*</span></label>
           <div class="ig">
             <i class="fa-solid fa-lock igi"></i>
-            <input type="password" id="modalLoginPass" class="input" placeholder="Enter password" autocomplete="current-password" required>
-            <button type="button" class="igt" id="modalLoginPassToggle"><i class="fa-solid fa-eye"></i></button>
+            <input type="password" id="modalLoginPass" name="password" class="input" placeholder="Enter your password" autocomplete="current-password" required>
+            <button type="button" class="igt" id="modalLoginPassToggle" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
           </div>
           <small class="field-error" id="errModalLoginPass"></small>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" id="modalLoginBtn">
+        <button type="submit" class="auth-3d-submit-btn" id="modalLoginBtn">
           <i class="fa-solid fa-right-to-bracket"></i> Sign In
         </button>
-        <p class="tc mt-3"><a href="#" id="modalForgotLink" style="font-size:.82rem;">Forgot password?</a></p>
+        <p class="auth-3d-forgot-row"><a href="#" id="modalForgotLink">Forgot password?</a></p>
       </form>
     `,
-    footerHTML: `<button class="btn btn-ghost w-100" data-x="c">Close</button>`,
+    footerHTML: `<button type="button" class="btn btn-ghost w-100" data-x="c">Close</button>`,
     onMount: (el, close) => {
       el.querySelector('[data-x="c"]').onclick = close;
 
       const emailInput = el.querySelector('#modalLoginEmail');
-      const emailSuggest = el.querySelector('#modalLoginEmailSuggest');
-      setupEmailAutocomplete(emailInput, emailSuggest);
-
-      try {
-        const saved = prefilledEmail || localStorage.getItem('pe_saved_email');
-        if (saved) emailInput.value = saved;
-      } catch(e) {}
+      if (prefilledEmail) {
+        emailInput.value = String(prefilledEmail).trim();
+      }
 
       const passInput = el.querySelector('#modalLoginPass');
       const passToggle = el.querySelector('#modalLoginPassToggle');
