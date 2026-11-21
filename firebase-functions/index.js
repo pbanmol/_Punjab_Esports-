@@ -1,10 +1,13 @@
 const { onValueCreated, onValueUpdated, onValueWritten } = require("firebase-functions/v2/database");
 const admin = require("firebase-admin");
 
-admin.initializeApp();
-
 const DB_INSTANCE = "punjab-turnaments-default-rtdb";
+const DB_URL = "https://punjab-turnaments-default-rtdb.asia-southeast1.firebasedatabase.app";
 const REGION = "asia-southeast1";
+
+admin.initializeApp({
+  databaseURL: DB_URL
+});
 
 function fmtRupees(val) {
   const n = Number(val || 0);
@@ -76,6 +79,7 @@ async function sendToUser(uid, { title, body, target, dedupeKey, tag, extraData 
 
   const androidNotif = {
     channelId: "punjab_esports_alerts",
+    priority: "high",
     sound: "default",
     defaultVibrateTimings: true,
     visibility: "public"
@@ -418,6 +422,7 @@ exports.onAnnouncementCreated = onValueCreated(
         priority: "high",
         notification: {
           channelId: "punjab_esports_alerts",
+          priority: "high",
           sound: "default",
           visibility: "public",
           tag: `ann_${event.params.annId}`
