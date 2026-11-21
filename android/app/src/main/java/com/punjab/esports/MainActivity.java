@@ -43,6 +43,7 @@ public class MainActivity extends BridgeActivity {
     public void onResume() {
         super.onResume();
         NotificationHelper.refreshFcmTokenIfNeeded(this);
+        RealtimePushService.startIfLoggedIn(this);
         if (openedSettingsForPermission) {
             openedSettingsForPermission = false;
             if (!hasImagePermission()) {
@@ -56,6 +57,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onStop() {
         super.onStop();
+        RealtimePushService.startIfLoggedIn(this);
         NotificationHelper.scheduleQuickBackgroundCheck(this);
         NotificationHelper.scheduleAlarmLoop(this, NotificationHelper.ALARM_INTERVAL_MS);
     }
@@ -139,6 +141,7 @@ public class MainActivity extends BridgeActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 NotificationHelper.schedulePeriodicSync(this);
                 NotificationHelper.scheduleAlarmLoop(this, NotificationHelper.ALARM_INTERVAL_MS);
+                RealtimePushService.startIfLoggedIn(this);
             }
             return;
         }

@@ -19,6 +19,7 @@ public class BootReceiver extends BroadcastReceiver {
                 NotificationHelper.ensureChannel(appCtx);
                 NotificationHelper.schedulePeriodicSync(appCtx);
                 NotificationHelper.scheduleAlarmLoop(appCtx, 45_000L);
+                RealtimePushService.startIfLoggedIn(appCtx);
             }
         }
     }

@@ -321,6 +321,7 @@ public final class NotificationHelper {
                 .remove(KEY_LAST_DIAMOND_ALERT_AT)
                 .apply();
         cancelBackgroundSync(context);
+        RealtimePushService.stopService(context);
     }
 
     public static void recordBgNotifiedBalance(Context context, double balance) {

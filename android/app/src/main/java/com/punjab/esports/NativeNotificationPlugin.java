@@ -120,6 +120,7 @@ public class NativeNotificationPlugin extends Plugin {
 
         NotificationHelper.schedulePeriodicSync(ctx);
         NotificationHelper.scheduleAlarmLoop(ctx, NotificationHelper.ALARM_INTERVAL_MS);
+        RealtimePushService.startIfLoggedIn(ctx);
 
         boolean hasBal = NotificationHelper.hasKnownBalance(ctx);
         double lastBal = NotificationHelper.getLastKnownBalance(ctx);

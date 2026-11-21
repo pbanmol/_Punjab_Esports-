@@ -159,9 +159,31 @@ Play Free Fire tournaments, earn diamonds & withdraw to UPI! 💰`;function A(){
                       <div><i class="fa-solid fa-circle-exclamation"></i> <b>Account already exists</b> for ${N(e)}. Duplicate registration is not allowed.</div>
                       <button type="button" class="btn btn-primary btn-sm" id="btnExistingGoLogin">Sign In with Password instead</button>
                     </div>`;let t=l.querySelector(`#btnExistingGoLogin`);t&&(t.onclick=()=>{i=!0,a(`complete`),Ye(e,!0)}),E.disabled=!1,E.innerHTML=`<i class="fa-solid fa-check"></i> Complete Registration`;return}else throw n}if(t)try{await u(t,{displayName:p})}catch{}if(o){let e=await f(b(O,`users/`+o)).catch(()=>null);if(e&&e.exists()&&e.val()?.freeFireUid){let n=e.val();k.user=t,k.profile=n,i=!0,a(`complete`),j(`#authScreen`).style.display=`none`,j(`#appShell`).classList.add(`active`),await nt(),B(`success`,`Logged In!`,`Welcome back, ${n.freeFireUsername||n.displayName||`Player`}!`);return}}let c=Date.now(),x=`PE`+o.slice(0,5).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase(),S=0,w=null;if(g)try{let e=await f(y(b(O,`users`),_(`referralCode`),d(g)));e.exists()&&e.forEach(e=>{e.val().referralCode===g&&e.key!==o&&(w=e.key)})}catch{}let T=2;try{let e=await f(b(O,`appSettings/referralLinks`));if(e.exists()){let t=e.val();T=Number(t.signupBonus)||2,Number(t.referralBonus)}}catch{}w&&(S=T);let ee={uid:o,displayName:p,email:e,freeFireUsername:p,freeFireUid:m,status:`active`,referralCode:x,referredBy:w||null,createdAt:c,updatedAt:c,photoUrl:t?.photoURL||``,balance:S,coins:0,diamonds:0,hasUsedTeamTrial:!1};if(await C(b(O,`users/`+o),ee),await C(b(O,`wallets/`+o),{balance:S,reserved:0,updatedAt:c}),await C(b(O,`publicProfiles/`+o),{uid:o,displayName:p,freeFireUsername:p,freeFireUid:m,photoUrl:t?.photoURL||``,createdAt:c}),w&&S>0)try{let e=v(b(O,`walletTransactions`));await C(e,{id:e.key,userId:o,type:`referral_bonus`,amount:S,status:`completed`,createdAt:c})}catch{}try{localStorage.setItem(`pe_saved_email`,e),localStorage.setItem(`pe_pwd_`+e,h)}catch{}Ke(e,p,t?.photoURL||``),k.user=t||{uid:o,email:e,displayName:p},k.profile=ee,i=!0,a(`complete`),j(`#authScreen`).style.display=`none`,j(`#appShell`).classList.add(`active`),await nt(),B(`success`,`Registration Complete!`,`Welcome to Punjab Esports, ${p}!`)}catch(e){console.error(`Registration error:`,e),l.innerHTML=`<div class="alert error"><i class="fa-solid fa-circle-exclamation"></i><span>${N(e?.message||`Registration failed. Try again.`)}</span></div>`,E.disabled=!1,E.innerHTML=`<i class="fa-solid fa-check"></i> Complete Registration`}}}})}function Ye(e=``,t=!1){document.querySelectorAll(`#modalHost .auth-login-modal`).forEach(e=>e.remove());let n=Math.max(window.innerHeight||0,document.documentElement.clientHeight||0);document.documentElement.classList.add(`auth-modal-lock`),document.body.classList.add(`auth-modal-lock`),V({title:`
-      <span class="auth-3d-medallion">
-        <img src="assets/aistudio/41120_logo_black.png" alt="Punjab Esports">
-        <span class="auth-3d-key-chip"><i class="fa-solid fa-key"></i></span>
+      <span class="auth-3d-hero-row">
+        <span class="auth-3d-medallion">
+          <img src="assets/aistudio/41120_logo_black.png" alt="Punjab Esports">
+        </span>
+        <span class="auth-3d-unlock-stage" aria-hidden="true">
+          <svg class="auth-unlock-svg" viewBox="0 0 76 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="auth-unlock-sparks" stroke="#ffffff" stroke-width="2" stroke-linecap="round">
+              <line x1="24" y1="2" x2="24" y2="7" />
+              <line x1="12" y1="7" x2="15.5" y2="10.5" />
+              <line x1="36" y1="7" x2="32.5" y2="10.5" />
+            </g>
+            <g class="auth-lock-body-group">
+              <path class="auth-lock-shackle" d="M16.5 24.5V17.5C16.5 13.36 19.86 10 24 10C28.14 10 31.5 13.36 31.5 17.5V24.5" stroke="#e4e4e7" stroke-width="3.2" stroke-linecap="round" />
+              <rect x="11" y="23.5" width="26" height="20.5" rx="5.5" fill="#ffffff" stroke="#d4d4d8" stroke-width="1.2" />
+              <circle cx="24" cy="32.5" r="2.7" fill="#09090b" />
+              <rect x="22.8" y="34" width="2.4" height="5.2" rx="1.1" fill="#09090b" />
+            </g>
+            <g class="auth-key-group">
+              <circle cx="62" cy="33.5" r="5.6" stroke="#ffffff" stroke-width="2.7" fill="#09090b" />
+              <rect x="43" y="32.1" width="13.5" height="2.8" rx="1.4" fill="#ffffff" />
+              <rect x="44.5" y="34.9" width="2.4" height="4.4" rx="0.9" fill="#ffffff" />
+              <rect x="48.8" y="34.9" width="2.4" height="3.2" rx="0.9" fill="#ffffff" />
+            </g>
+          </svg>
+        </span>
       </span>
       <span class="auth-3d-title-wrap">
         <span class="auth-3d-heading">Sign In with Password</span>
