@@ -34,7 +34,7 @@ public class RealtimePushService extends Service {
     private static final String SERVICE_CHANNEL_NAME = "Background Alert Sync";
     private static final int SERVICE_NOTIF_ID = 90421;
     private static final int RESTART_REQ_CODE = 44091;
-    private static final long FAST_SWEEP_SECONDS = 8L;
+    private static final long FAST_SWEEP_SECONDS = 6L;
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<HttpURLConnection> activeStreams = new ArrayList<>();
@@ -90,7 +90,13 @@ public class RealtimePushService extends Service {
 
         try {
             Notification notif = buildServiceNotification();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                try {
+                    startForeground(SERVICE_NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING);
+                } catch (Throwable inner) {
+                    startForeground(SERVICE_NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(SERVICE_NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
             } else {
                 startForeground(SERVICE_NOTIF_ID, notif);
@@ -285,7 +291,7 @@ public class RealtimePushService extends Service {
                         if (loc == null || loc.isEmpty()) {
                             break;
                         }
-                        currentUrl = loc;
+                        currentUrl = new URL(url, loc).toString();
                         continue;
                     }
                     break;

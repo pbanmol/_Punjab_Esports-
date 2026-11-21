@@ -31,7 +31,10 @@ public class NotificationAlarmReceiver extends BroadcastReceiver {
                     wakeLock.setReferenceCounted(false);
                     wakeLock.acquire(20_000L);
                 }
-                NotificationHelper.runBackgroundCheck(appCtx);
+                if (NotificationHelper.isIgnoringBatteryOptimizations(appCtx)) {
+                    RealtimePushService.startIfLoggedIn(appCtx);
+                }
+                NotificationHelper.runBackgroundCheck(appCtx, true);
             } catch (Throwable ignored) {
             } finally {
                 NotificationHelper.scheduleAlarmLoop(appCtx, NotificationHelper.ALARM_INTERVAL_MS);

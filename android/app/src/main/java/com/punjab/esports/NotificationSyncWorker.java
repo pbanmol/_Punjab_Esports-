@@ -15,7 +15,10 @@ public class NotificationSyncWorker extends Worker {
     @Override
     public Result doWork() {
         Context ctx = getApplicationContext();
-        NotificationHelper.runBackgroundCheck(ctx);
+        if (NotificationHelper.isIgnoringBatteryOptimizations(ctx)) {
+            RealtimePushService.startIfLoggedIn(ctx);
+        }
+        NotificationHelper.runBackgroundCheck(ctx, true);
         NotificationHelper.scheduleAlarmLoop(ctx, NotificationHelper.ALARM_INTERVAL_MS);
         return Result.success();
     }

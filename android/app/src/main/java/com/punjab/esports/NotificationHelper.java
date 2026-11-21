@@ -56,7 +56,7 @@ public final class NotificationHelper {
     public static final String CHANNEL_DESC = "Match updates, room IDs, wallet credits, mailbox gifts and admin replies";
     public static final String EXTRA_OPEN_TARGET = "pe_open_target";
 
-    public static final long ALARM_INTERVAL_MS = 60_000L;
+    public static final long ALARM_INTERVAL_MS = 20_000L;
 
     private static final String PREFS_NAME = "pe_notif_prefs";
     private static final String KEY_UID = "uid";
@@ -68,6 +68,7 @@ public final class NotificationHelper {
     private static final String KEY_SEEN_KEYS = "seen_keys";
     private static final String KEY_PENDING_TARGET = "pending_open_target";
     private static final String KEY_ASKED_NOTIF_PERM = "asked_notif_perm";
+    private static final String KEY_ASKED_BATTERY_OPT = "asked_battery_opt";
     private static final String KEY_LAST_BALANCE = "last_known_balance";
     private static final String KEY_HAS_BALANCE = "has_known_balance";
     private static final String KEY_LAST_DIAMONDS = "last_known_diamonds";
@@ -86,8 +87,8 @@ public final class NotificationHelper {
     private static final int ALARM_REQUEST_CODE = 44019;
     private static final int MAX_SEEN_KEYS = 300;
     private static final int MAX_NOTIFS_PER_RUN = 5;
-    private static final long CONTENT_DEDUPE_WINDOW_MS = 5L * 60L * 1000L;
-    private static final long CATEGORY_DEDUPE_WINDOW_MS = 10_000L;
+    private static final long CONTENT_DEDUPE_WINDOW_MS = 12_000L;
+    private static final long CATEGORY_DEDUPE_WINDOW_MS = 4_000L;
 
     private static final long FIVE_DAYS_MS = 5L * 24L * 60L * 60L * 1000L;
     private static final long TWO_DAYS_MS = 2L * 24L * 60L * 60L * 1000L;
@@ -96,6 +97,8 @@ public final class NotificationHelper {
     private static final AtomicBoolean BG_CHECK_RUNNING = new AtomicBoolean(false);
     private static final AtomicBoolean PENDING_RECHECK = new AtomicBoolean(false);
     private static final Object SHOW_NOTIF_LOCK = new Object();
+    private static final Object TOKEN_REFRESH_LOCK = new Object();
+    private static volatile long lastTokenRefreshAt = 0L;
 
     private static class PendingAlert {
         final String dedupeKey;
@@ -182,6 +185,14 @@ public final class NotificationHelper {
 
     public static void markAskedNotificationPermission(Context context) {
         prefs(context).edit().putBoolean(KEY_ASKED_NOTIF_PERM, true).apply();
+    }
+
+    public static boolean hasAskedBatteryOptimization(Context context) {
+        return prefs(context).getBoolean(KEY_ASKED_BATTERY_OPT, false);
+    }
+
+    public static void markAskedBatteryOptimization(Context context) {
+        prefs(context).edit().putBoolean(KEY_ASKED_BATTERY_OPT, true).apply();
     }
 
     public static boolean isFirebaseConfigured(Context context) {
@@ -651,9 +662,18 @@ public final class NotificationHelper {
                     intent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
-            long safeDelay = Math.max(30_000L, delayMs);
+            long safeDelay = Math.max(15_000L, delayMs);
             long triggerAt = SystemClock.elapsedRealtime() + safeDelay;
-            am.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pi);
+            boolean canExact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || am.canScheduleExactAlarms();
+            if (canExact) {
+                try {
+                    am.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pi);
+                } catch (SecurityException se) {
+                    am.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pi);
+                }
+            } else {
+                am.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pi);
+            }
         } catch (Throwable ignored) {
         }
     }
@@ -736,8 +756,8 @@ public final class NotificationHelper {
                     String dedupeKey = "notif:" + id;
                     if (isKeySeen(ctx, dedupeKey)) continue;
 
-                    String title = item.optString("title", "New Notification");
-                    String body = item.optString("body", item.optString("message", "Tap to view details in Punjab Esports."));
+                    String title = safeOptString(item, "New Notification", "title");
+                    String body = safeOptString(item, "Tap to view details in Punjab Esports.", "body", "message", "text", "description");
                     long ts = extractTimestamp(item);
                     String combined = (type + " " + title + " " + body).toLowerCase(Locale.ROOT);
                     if (combined.contains("balance") || combined.contains("wallet") || combined.contains("deposit")
@@ -827,7 +847,7 @@ public final class NotificationHelper {
                         if (isKeySeen(ctx, dedupeKey)) continue;
 
                         String title = "New Gift in Mailbox!";
-                        String body = item.optString("title", item.optString("body", "Claim your reward within 7 days before it expires."));
+                        String body = safeOptString(item, "Claim your reward within 7 days before it expires.", "title", "body", "message");
                         alerts.add(new PendingAlert(dedupeKey, title, body, "mailbox", createdAt > 0 ? createdAt : now));
                     }
                 }
@@ -872,8 +892,8 @@ public final class NotificationHelper {
                     String dedupeKey = "ann:" + id;
                     if (isKeySeen(ctx, dedupeKey)) continue;
 
-                    String title = item.optString("title", "Punjab Esports Announcement");
-                    String body = item.optString("body", item.optString("message", item.optString("text", "New announcement available.")));
+                    String title = safeOptString(item, "Punjab Esports Announcement", "title");
+                    String body = safeOptString(item, "New announcement available.", "body", "message", "text");
                     alerts.add(new PendingAlert(dedupeKey, title, body, "notifications", createdAt > 0 ? createdAt : now));
                 }
             }
@@ -1002,49 +1022,70 @@ public final class NotificationHelper {
         return ts;
     }
 
-    public static String refreshIdToken(Context context) {
-        String apiKey = getApiKey(context);
-        String refreshToken = getRefreshToken(context);
-        if (apiKey.isEmpty() || refreshToken.isEmpty()) {
-            return "";
-        }
-        HttpURLConnection conn = null;
-        try {
-            URL url = new URL("https://securetoken.googleapis.com/v1/token?key=" + URLEncoder.encode(apiKey, "UTF-8"));
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setConnectTimeout(10000);
-            conn.setReadTimeout(10000);
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-            String body = "grant_type=refresh_token&refresh_token=" + URLEncoder.encode(refreshToken, "UTF-8");
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(body.getBytes(StandardCharsets.UTF_8));
-            }
-
-            if (conn.getResponseCode() == 200) {
-                String resp = readStream(conn.getInputStream());
-                JSONObject json = new JSONObject(resp);
-                String newIdToken = json.optString("id_token", "");
-                String newRefreshToken = json.optString("refresh_token", "");
-                if (!newIdToken.isEmpty()) {
-                    SharedPreferences.Editor ed = prefs(context).edit();
-                    ed.putString(KEY_ID_TOKEN, newIdToken);
-                    if (!newRefreshToken.isEmpty()) {
-                        ed.putString(KEY_REFRESH_TOKEN, newRefreshToken);
-                    }
-                    ed.apply();
-                    return newIdToken;
+    private static String safeOptString(JSONObject obj, String fallback, String... keys) {
+        if (obj != null && keys != null) {
+            for (String k : keys) {
+                if (k == null || !obj.has(k) || obj.isNull(k)) continue;
+                String val = obj.optString(k, "").trim();
+                if (!val.isEmpty() && !"null".equalsIgnoreCase(val)) {
+                    return val;
                 }
             }
-        } catch (Exception ignored) {
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
         }
-        return "";
+        return fallback;
+    }
+
+    public static String refreshIdToken(Context context) {
+        synchronized (TOKEN_REFRESH_LOCK) {
+            long now = System.currentTimeMillis();
+            String existingToken = getIdToken(context);
+            if (!existingToken.isEmpty() && (now - lastTokenRefreshAt) < 15_000L) {
+                return existingToken;
+            }
+            String apiKey = getApiKey(context);
+            String refreshToken = getRefreshToken(context);
+            if (apiKey.isEmpty() || refreshToken.isEmpty()) {
+                return "";
+            }
+            HttpURLConnection conn = null;
+            try {
+                URL url = new URL("https://securetoken.googleapis.com/v1/token?key=" + URLEncoder.encode(apiKey, "UTF-8"));
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setConnectTimeout(10000);
+                conn.setReadTimeout(10000);
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+                String body = "grant_type=refresh_token&refresh_token=" + URLEncoder.encode(refreshToken, "UTF-8");
+                try (OutputStream os = conn.getOutputStream()) {
+                    os.write(body.getBytes(StandardCharsets.UTF_8));
+                }
+
+                if (conn.getResponseCode() == 200) {
+                    String resp = readStream(conn.getInputStream());
+                    JSONObject json = new JSONObject(resp);
+                    String newIdToken = json.optString("id_token", "");
+                    String newRefreshToken = json.optString("refresh_token", "");
+                    if (!newIdToken.isEmpty()) {
+                        lastTokenRefreshAt = System.currentTimeMillis();
+                        SharedPreferences.Editor ed = prefs(context).edit();
+                        ed.putString(KEY_ID_TOKEN, newIdToken);
+                        if (!newRefreshToken.isEmpty()) {
+                            ed.putString(KEY_REFRESH_TOKEN, newRefreshToken);
+                        }
+                        ed.apply();
+                        return newIdToken;
+                    }
+                }
+            } catch (Exception ignored) {
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            }
+            return "";
+        }
     }
 
     public static JSONObject fetchRtdbObject(Context context, String path) {

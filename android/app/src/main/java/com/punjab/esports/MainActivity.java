@@ -98,9 +98,11 @@ public class MainActivity extends BridgeActivity {
     @SuppressLint("InlinedApi")
     private void requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            requestBatteryOptimizationExemptionIfNeeded();
             return;
         }
         if (NotificationHelper.hasNotificationPermission(this)) {
+            requestBatteryOptimizationExemptionIfNeeded();
             return;
         }
         if (NotificationHelper.hasAskedNotificationPermission(this)) {
@@ -108,6 +110,26 @@ public class MainActivity extends BridgeActivity {
         }
         NotificationHelper.markAskedNotificationPermission(this);
         requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST_CODE);
+    }
+
+    @SuppressLint("BatteryLife")
+    private void requestBatteryOptimizationExemptionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+        if (NotificationHelper.isIgnoringBatteryOptimizations(this)) {
+            return;
+        }
+        if (NotificationHelper.hasAskedBatteryOptimization(this)) {
+            return;
+        }
+        NotificationHelper.markAskedBatteryOptimization(this);
+        try {
+            Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        } catch (Throwable ignored) {
+        }
     }
 
     private String getRequiredImagePermission() {
@@ -142,6 +164,7 @@ public class MainActivity extends BridgeActivity {
                 NotificationHelper.schedulePeriodicSync(this);
                 NotificationHelper.scheduleAlarmLoop(this, NotificationHelper.ALARM_INTERVAL_MS);
                 RealtimePushService.startIfLoggedIn(this);
+                requestBatteryOptimizationExemptionIfNeeded();
             }
             return;
         }
