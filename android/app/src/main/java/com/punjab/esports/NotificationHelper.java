@@ -2,7 +2,6 @@ package com.punjab.esports;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,7 +14,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -56,8 +54,6 @@ public final class NotificationHelper {
     public static final String CHANNEL_DESC = "Match updates, room IDs, wallet credits, mailbox gifts and admin replies";
     public static final String EXTRA_OPEN_TARGET = "pe_open_target";
 
-    public static final long ALARM_INTERVAL_MS = 20_000L;
-
     private static final String PREFS_NAME = "pe_notif_prefs";
     private static final String KEY_UID = "uid";
     private static final String KEY_DB_URL = "database_url";
@@ -68,7 +64,6 @@ public final class NotificationHelper {
     private static final String KEY_SEEN_KEYS = "seen_keys";
     private static final String KEY_PENDING_TARGET = "pending_open_target";
     private static final String KEY_ASKED_NOTIF_PERM = "asked_notif_perm";
-    private static final String KEY_ASKED_BATTERY_OPT = "asked_battery_opt";
     private static final String KEY_LAST_BALANCE = "last_known_balance";
     private static final String KEY_HAS_BALANCE = "has_known_balance";
     private static final String KEY_LAST_DIAMONDS = "last_known_diamonds";
@@ -84,7 +79,6 @@ public final class NotificationHelper {
 
     private static final String WORK_PERIODIC_NAME = "pe_bg_notif_periodic";
     private static final String WORK_QUICK_NAME = "pe_bg_notif_quick";
-    private static final int ALARM_REQUEST_CODE = 44019;
     private static final int MAX_SEEN_KEYS = 300;
     private static final int MAX_NOTIFS_PER_RUN = 5;
     private static final long CONTENT_DEDUPE_WINDOW_MS = 12_000L;
@@ -185,14 +179,6 @@ public final class NotificationHelper {
 
     public static void markAskedNotificationPermission(Context context) {
         prefs(context).edit().putBoolean(KEY_ASKED_NOTIF_PERM, true).apply();
-    }
-
-    public static boolean hasAskedBatteryOptimization(Context context) {
-        return prefs(context).getBoolean(KEY_ASKED_BATTERY_OPT, false);
-    }
-
-    public static void markAskedBatteryOptimization(Context context) {
-        prefs(context).edit().putBoolean(KEY_ASKED_BATTERY_OPT, true).apply();
     }
 
     public static boolean isFirebaseConfigured(Context context) {
@@ -333,7 +319,6 @@ public final class NotificationHelper {
                 .remove(KEY_LAST_DIAMOND_ALERT_AT)
                 .apply();
         cancelBackgroundSync(context);
-        RealtimePushService.stopService(context);
     }
 
     public static void recordBgNotifiedBalance(Context context, double balance) {
@@ -644,62 +629,7 @@ public final class NotificationHelper {
         }
     }
 
-    public static void scheduleAlarmLoop(Context context, long delayMs) {
-        try {
-            Context appCtx = context.getApplicationContext();
-            if (getUid(appCtx).isEmpty()) {
-                return;
-            }
-            AlarmManager am = (AlarmManager) appCtx.getSystemService(Context.ALARM_SERVICE);
-            if (am == null) {
-                return;
-            }
-            Intent intent = new Intent(appCtx, NotificationAlarmReceiver.class);
-            intent.setAction(NotificationAlarmReceiver.ACTION_POLL);
-            PendingIntent pi = PendingIntent.getBroadcast(
-                    appCtx,
-                    ALARM_REQUEST_CODE,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-            );
-            long safeDelay = Math.max(15_000L, delayMs);
-            long triggerAt = SystemClock.elapsedRealtime() + safeDelay;
-            boolean canExact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || am.canScheduleExactAlarms();
-            if (canExact) {
-                try {
-                    am.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pi);
-                } catch (SecurityException se) {
-                    am.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pi);
-                }
-            } else {
-                am.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pi);
-            }
-        } catch (Throwable ignored) {
-        }
-    }
-
-    public static void cancelAlarmLoop(Context context) {
-        try {
-            Context appCtx = context.getApplicationContext();
-            AlarmManager am = (AlarmManager) appCtx.getSystemService(Context.ALARM_SERVICE);
-            if (am == null) {
-                return;
-            }
-            Intent intent = new Intent(appCtx, NotificationAlarmReceiver.class);
-            intent.setAction(NotificationAlarmReceiver.ACTION_POLL);
-            PendingIntent pi = PendingIntent.getBroadcast(
-                    appCtx,
-                    ALARM_REQUEST_CODE,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-            );
-            am.cancel(pi);
-        } catch (Throwable ignored) {
-        }
-    }
-
     public static void cancelBackgroundSync(Context context) {
-        cancelAlarmLoop(context);
         try {
             WorkManager wm = WorkManager.getInstance(context.getApplicationContext());
             wm.cancelUniqueWork(WORK_PERIODIC_NAME);
