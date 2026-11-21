@@ -186,17 +186,7 @@ Play Free Fire tournaments, earn diamonds & withdraw to UPI! 💰`;function A(){
     </div>
   `,t.addEventListener(`touchmove`,e=>e.preventDefault(),{passive:!1}),document.body.appendChild(t);let n=t.querySelector(`#alvStatusTitle`),r=t.querySelector(`#alvStatusSub`);return requestAnimationFrame(()=>{t.classList.add(`is-visible`),setTimeout(()=>{t.classList.add(`state-inserting`)},90)}),{setSuccess(e=`Login Successful`,i=`Welcome back to Punjab Esports`){t.classList.remove(`state-inserting`,`state-error`),t.classList.add(`state-success`),n&&(n.textContent=e),r&&(r.textContent=i)},setError(e=`Wrong Email or Password`,i=`Please check your email and password and try again.`){t.classList.remove(`state-inserting`,`state-success`),t.classList.add(`state-error`),n&&(n.textContent=e),r&&(r.textContent=i)},dismiss(){t.classList.add(`state-exit`),setTimeout(()=>t.remove(),250)}}}function Xe(e=``,t=!1){document.querySelectorAll(`#modalHost .auth-login-modal`).forEach(e=>e.remove());let n=Math.max(window.innerHeight||0,document.documentElement.clientHeight||0);document.documentElement.classList.add(`auth-modal-lock`),document.body.classList.add(`auth-modal-lock`),V({title:`
       <span class="auth-3d-medallion">
-        <span class="pe-3d-logo-stack">
-          <img class="pe-logo-slice s-b4" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-b3" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-b2" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-b1" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-0" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-f1" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-f2" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-f3" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-f4" src="assets/aistudio/41120_logo_black.png" alt="Punjab Esports">
-        </span>
+        <img src="assets/aistudio/41120_logo_black.png" alt="Punjab Esports">
       </span>
       <span class="auth-3d-title-wrap">
         <span class="auth-3d-heading">Sign In with Password</span>

@@ -1198,46 +1198,28 @@ body.auth-modal-lock {
 }
 .auth-3d-medallion {
   position: relative;
-  width: 72px;
-  height: 72px;
-  border-radius: 22px;
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
   background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
   border: 1.5px solid #e4e4e7;
   border-bottom: 4px solid #d4d4d8;
   display: grid;
   place-items: center;
-  perspective: 420px;
+  perspective: 360px;
   box-shadow:
     0 12px 24px rgba(9, 9, 11, 0.09),
     inset 0 1.5px 0 #ffffff;
 }
-.pe-3d-logo-stack {
-  position: relative;
-  width: 44px;
-  height: 44px;
+.auth-3d-medallion img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.16));
   transform-style: preserve-3d;
   will-change: transform;
-  animation: peLogoSpin3D 5.2s linear infinite;
+  animation: peLogoSpin3D 4.6s linear infinite;
 }
-.pe-3d-logo-stack .pe-logo-slice {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  backface-visibility: visible;
-}
-.pe-3d-logo-stack .s-b4 { transform: translateZ(-4px); filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.16)); }
-.pe-3d-logo-stack .s-b3 { transform: translateZ(-3px); filter: brightness(0.22); }
-.pe-3d-logo-stack .s-b2 { transform: translateZ(-2px); filter: brightness(0.22); }
-.pe-3d-logo-stack .s-b1 { transform: translateZ(-1px); filter: brightness(0.22); }
-.pe-3d-logo-stack .s-0  { transform: translateZ(0px);  filter: brightness(0.22); }
-.pe-3d-logo-stack .s-f1 { transform: translateZ(1px);  filter: brightness(0.22); }
-.pe-3d-logo-stack .s-f2 { transform: translateZ(2px);  filter: brightness(0.22); }
-.pe-3d-logo-stack .s-f3 { transform: translateZ(3px);  filter: brightness(0.22); }
-.pe-3d-logo-stack .s-f4 { transform: translateZ(4px);  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)); }
 .auth-3d-title-wrap {
   display: flex;
   flex-direction: column;
@@ -3550,17 +3532,7 @@ function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
   openModal({
     title: `
       <span class="auth-3d-medallion">
-        <span class="pe-3d-logo-stack">
-          <img class="pe-logo-slice s-b4" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-b3" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-b2" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-b1" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-0" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-f1" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-f2" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-f3" src="assets/aistudio/41120_logo_black.png" alt="">
-          <img class="pe-logo-slice s-f4" src="assets/aistudio/41120_logo_black.png" alt="Punjab Esports">
-        </span>
+        <img src="assets/aistudio/41120_logo_black.png" alt="Punjab Esports">
       </span>
       <span class="auth-3d-title-wrap">
         <span class="auth-3d-heading">Sign In with Password</span>
