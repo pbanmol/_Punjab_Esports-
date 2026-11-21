@@ -1106,23 +1106,31 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
   text-overflow: ellipsis;
 }
 
-/* 3D ZERO-SHAKE PASSWORD SIGN-IN MODAL */
+/* ULTRA-PREMIUM 3D DEAD-CENTER IMMOVABLE PASSWORD SIGN-IN MODAL */
+html.auth-modal-lock,
+body.auth-modal-lock {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
 .mb.auth-login-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  width: 100% !important;
   height: 100svh;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: max(46px, calc(26px + var(--safe-t))) 18px 24px 18px;
-  background: rgba(9, 13, 24, 0.62);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px 18px !important;
+  background: radial-gradient(circle at 50% 42%, rgba(28, 35, 58, 0.72) 0%, rgba(4, 6, 14, 0.86) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+  box-sizing: border-box;
   animation: authOverlayIn 0.22s ease-out both;
 }
 @keyframes authOverlayIn {
@@ -1132,89 +1140,143 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
 @keyframes authCard3DIn {
   from {
     opacity: 0;
-    transform: perspective(950px) rotateX(9deg) translateY(18px) scale(0.95);
+    transform: perspective(1050px) rotateX(14deg) scale(0.90);
   }
   to {
     opacity: 1;
-    transform: perspective(950px) rotateX(0deg) translateY(0) scale(1);
+    transform: perspective(1050px) rotateX(0deg) scale(1);
   }
 }
+@keyframes authBtnSheen {
+  0%, 72% { transform: translateX(-140%) skewX(-24deg); }
+  100% { transform: translateX(260%) skewX(-24deg); }
+}
 .mb.auth-login-modal .modal {
-  margin: 0 auto;
+  position: relative;
+  margin: 0 !important;
   width: 100%;
-  max-width: 372px;
-  max-height: none;
-  overflow: visible;
-  border-radius: 26px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  color: #0f172a;
-  border: 1px solid rgba(255, 255, 255, 0.92);
-  border-bottom: 4px solid #cbd5e1;
+  max-width: 356px;
+  max-height: none !important;
+  overflow: visible !important;
+  border-radius: 28px;
+  background:
+    radial-gradient(ellipse 85% 42% at 50% 0%, rgba(245, 200, 91, 0.20) 0%, rgba(245, 200, 91, 0) 70%),
+    linear-gradient(160deg, #1b2132 0%, #101522 52%, #080b13 100%);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1.5px solid rgba(255, 230, 160, 0.50);
+  border-bottom: 5px solid #04060c;
   box-shadow:
-    0 28px 60px -14px rgba(2, 6, 23, 0.48),
-    0 12px 24px -8px rgba(2, 6, 23, 0.24),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
-  transform-origin: center top;
-  animation: authCard3DIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+    0 34px 70px -12px rgba(0, 0, 0, 0.85),
+    0 12px 28px -8px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(245, 200, 91, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transform-origin: center center;
+  animation: authCard3DIn 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .mb.auth-login-modal .mh {
-  padding: 18px 18px 12px 18px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+  position: relative;
+  padding: 22px 20px 10px 20px;
+  border-bottom: none;
   background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 .mb.auth-login-modal .mh h3 {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 11px;
-  font-size: 1.02rem;
-  font-weight: 800;
-  letter-spacing: -0.2px;
-  color: #0f172a;
-}
-.auth-3d-badge {
-  width: 38px;
-  height: 38px;
-  border-radius: 13px;
-  background: linear-gradient(145deg, #27272a 0%, #09090b 100%);
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
   color: #ffffff;
+}
+.auth-3d-medallion {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #272f46 0%, #0e121e 100%);
+  border: 1.5px solid rgba(245, 200, 91, 0.55);
+  border-bottom: 3.5px solid #06080f;
   display: grid;
   place-items: center;
-  font-size: 0.95rem;
-  flex-shrink: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow:
-    0 4px 0 #000000,
-    0 10px 18px rgba(9, 9, 11, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 12px 24px rgba(0, 0, 0, 0.55),
+    0 0 22px rgba(245, 200, 91, 0.22),
+    inset 0 1.5px 0 rgba(255, 240, 195, 0.45);
+}
+.auth-3d-medallion img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: invert(1) brightness(1.15) drop-shadow(0 2px 6px rgba(245, 200, 91, 0.4));
+}
+.auth-3d-key-chip {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #ffe082 0%, #e5a31e 100%);
+  color: #0b0e17;
+  display: grid;
+  place-items: center;
+  font-size: 0.68rem;
+  border: 1.5px solid #101522;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.55);
 }
 .auth-3d-title-wrap {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  align-items: center;
+  gap: 3px;
+}
+.auth-3d-heading {
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: -0.25px;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
 }
 .auth-3d-sub {
   font-size: 0.72rem;
   font-weight: 500;
-  color: #64748b;
-  letter-spacing: 0;
+  color: rgba(226, 232, 240, 0.68);
+  letter-spacing: 0.15px;
+}
+.auth-3d-divider {
+  width: 100%;
+  height: 1px;
+  margin-top: 6px;
+  background: linear-gradient(90deg, transparent 0%, rgba(245, 200, 91, 0.42) 50%, transparent 100%);
 }
 .mb.auth-login-modal .close-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
   width: 32px;
   height: 32px;
   border-radius: 11px;
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 0 #cbd5e1;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transition: background 0.15s ease, color 0.15s ease;
 }
+.mb.auth-login-modal .close-x:hover,
 .mb.auth-login-modal .close-x:active {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
 }
 .mb.auth-login-modal .mbody {
-  padding: 16px 18px 14px 18px;
-  overflow: visible;
+  padding: 10px 20px 20px 20px;
+  overflow: visible !important;
   flex: none;
 }
 .mb.auth-login-modal .field {
@@ -1222,22 +1284,33 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
 }
 .mb.auth-login-modal .field label {
   display: block;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 700;
-  color: #334155;
+  color: #cbd5e1;
   margin-bottom: 6px;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.mb.auth-login-modal .field label .req {
+  color: #f5c85b;
 }
 .mb.auth-login-modal .ig {
   position: relative;
   display: flex;
   align-items: center;
 }
-.mb.auth-login-modal .ig .igi {
+.mb.auth-login-modal .ig .igi-pill {
   position: absolute;
-  left: 14px;
-  color: #64748b;
-  font-size: 0.88rem;
+  left: 9px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(245, 200, 91, 0.13);
+  border: 1px solid rgba(245, 200, 91, 0.24);
+  color: #f5c85b;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
   pointer-events: none;
   z-index: 2;
 }
@@ -1245,24 +1318,28 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
   width: 100%;
   height: 48px;
   box-sizing: border-box;
-  padding: 0 42px 0 40px;
-  border-radius: 14px;
-  border: 1.5px solid #cbd5e1;
-  background: #f8fafc;
-  color: #0f172a;
+  padding: 0 42px 0 48px;
+  border-radius: 15px;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: rgba(5, 8, 16, 0.72);
+  color: #ffffff;
   font-size: 0.9rem;
   font-weight: 500;
-  box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.06);
-  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.58),
+    0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 .mb.auth-login-modal .ig .input::placeholder {
-  color: #94a3b8;
+  color: rgba(148, 163, 184, 0.65);
 }
 .mb.auth-login-modal .ig .input:focus {
   outline: none;
-  background: #ffffff;
-  border-color: #0f172a;
-  box-shadow: 0 0 0 3.5px rgba(15, 23, 42, 0.10), inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  background: rgba(8, 12, 24, 0.92);
+  border-color: #f5c85b;
+  box-shadow:
+    0 0 0 3px rgba(245, 200, 91, 0.18),
+    inset 0 2px 6px rgba(0, 0, 0, 0.55);
 }
 .mb.auth-login-modal .ig .igt {
   position: absolute;
@@ -1272,46 +1349,62 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
   border-radius: 10px;
   border: none;
   background: transparent;
-  color: #64748b;
+  color: #94a3b8;
   display: grid;
   place-items: center;
   cursor: pointer;
+}
+.mb.auth-login-modal .ig .igt:active {
+  color: #f5c85b;
 }
 .mb.auth-login-modal .field-error {
   display: block;
   min-height: 15px;
   line-height: 15px;
   margin-top: 4px;
-  font-size: 0.72rem;
-  color: #dc2626;
+  font-size: 0.71rem;
+  color: #fb7185;
 }
 .auth-3d-submit-btn {
+  position: relative;
+  overflow: hidden;
   width: 100%;
   height: 48px;
   margin-top: 4px;
   border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.24);
+  border-top: 1px solid rgba(255, 250, 225, 0.72);
   border-radius: 15px;
-  background: linear-gradient(180deg, #27272a 0%, #09090b 100%);
-  color: #ffffff;
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0.2px;
+  background: linear-gradient(180deg, #ffe28a 0%, #f5b935 55%, #d69316 100%);
+  color: #0b0e17;
+  font-size: 0.93rem;
+  font-weight: 800;
+  letter-spacing: 0.25px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   cursor: pointer;
   box-shadow:
-    0 4px 0 #000000,
-    0 12px 22px rgba(9, 9, 11, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 5px 0 #8f5c06,
+    0 14px 28px rgba(245, 185, 53, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
   transition: box-shadow 0.14s ease, opacity 0.14s ease;
+}
+.auth-3d-submit-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: authBtnSheen 4.2s ease-in-out infinite;
+  pointer-events: none;
 }
 .auth-3d-submit-btn:active {
   box-shadow:
-    0 2px 0 #000000,
-    0 6px 12px rgba(9, 9, 11, 0.22);
+    0 2px 0 #8f5c06,
+    0 6px 14px rgba(245, 185, 53, 0.24);
 }
 .auth-3d-submit-btn:disabled {
   opacity: 0.72;
@@ -1319,39 +1412,28 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
 }
 .auth-3d-forgot-row {
   text-align: center;
-  margin: 12px 0 2px 0;
+  margin: 14px 0 0 0;
 }
 .auth-3d-forgot-row a {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #334155;
+  color: #f5c85b;
   text-decoration: none;
 }
 .auth-3d-forgot-row a:hover {
-  color: #0f172a;
   text-decoration: underline;
 }
-.mb.auth-login-modal .mfoot {
-  padding: 10px 18px 16px 18px;
-  border-top: 1px solid rgba(15, 23, 42, 0.06);
-  background: transparent;
+.mb.auth-login-modal .alert.error {
+  background: rgba(225, 29, 72, 0.16);
+  border: 1px solid rgba(251, 113, 133, 0.35);
+  color: #fecdd3;
+  margin-bottom: 10px;
 }
-.mb.auth-login-modal .mfoot .btn-ghost {
-  width: 100%;
-  height: 40px;
-  border-radius: 13px;
-  background: #f1f5f9;
-  color: #334155;
-  border: 1px solid #e2e8f0;
-  font-weight: 600;
-}
-@media (max-width: 480px) {
-  .mb.auth-login-modal {
-    padding: max(42px, calc(22px + var(--safe-t))) 16px 20px 16px;
-  }
-  .mb.auth-login-modal .modal {
-    max-height: none;
-  }
+.mb.auth-login-modal .alert.info {
+  background: rgba(245, 200, 91, 0.13);
+  border: 1px solid rgba(245, 200, 91, 0.32);
+  color: #fef3c7;
+  margin-bottom: 10px;
 }
 
 
@@ -3250,16 +3332,30 @@ function openRegisterModal(prefilledEmail = '', prefilledName = '') {
 
 function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
   document.querySelectorAll('#modalHost .auth-login-modal').forEach(m => m.remove());
+  const lockedViewportHeight = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0);
+  document.documentElement.classList.add('auth-modal-lock');
+  document.body.classList.add('auth-modal-lock');
+
   openModal({
-    title: `<span class="auth-3d-badge"><i class="fa-solid fa-key"></i></span><span class="auth-3d-title-wrap"><span>Sign In with Password</span><span class="auth-3d-sub">Access your Punjab Esports account</span></span>`,
+    title: `
+      <span class="auth-3d-medallion">
+        <img src="assets/aistudio/41120_logo_black.png" alt="Punjab Esports">
+        <span class="auth-3d-key-chip"><i class="fa-solid fa-key"></i></span>
+      </span>
+      <span class="auth-3d-title-wrap">
+        <span class="auth-3d-heading">Sign In with Password</span>
+        <span class="auth-3d-sub">Punjab Esports Player Account</span>
+      </span>
+      <span class="auth-3d-divider"></span>
+    `,
     extraClass: 'auth-login-modal',
     bodyHTML: `
-      <div id="pwdModalAlert">${isExistingNotice ? `<div class="alert info" style="margin-bottom:12px;"><i class="fa-solid fa-circle-info"></i><span>Account found for <b>${esc(prefilledEmail)}</b>. Enter your password to sign in.</span></div>` : ''}</div>
+      <div id="pwdModalAlert">${isExistingNotice ? `<div class="alert info"><i class="fa-solid fa-circle-info"></i><span>Account found for <b>${esc(prefilledEmail)}</b>. Enter your password to sign in.</span></div>` : ''}</div>
       <form id="pwdLoginForm" autocomplete="on" novalidate>
         <div class="field">
           <label for="modalLoginEmail">Email <span class="req">*</span></label>
           <div class="ig">
-            <i class="fa-solid fa-envelope igi"></i>
+            <span class="igi-pill"><i class="fa-solid fa-envelope"></i></span>
             <input type="email" id="modalLoginEmail" name="email" class="input" placeholder="you@example.com" inputmode="email" autocomplete="username email" autocapitalize="none" autocorrect="off" spellcheck="false" required>
           </div>
           <small class="field-error" id="errModalLoginEmail"></small>
@@ -3268,7 +3364,7 @@ function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
         <div class="field">
           <label for="modalLoginPass">Password <span class="req">*</span></label>
           <div class="ig">
-            <i class="fa-solid fa-lock igi"></i>
+            <span class="igi-pill"><i class="fa-solid fa-lock"></i></span>
             <input type="password" id="modalLoginPass" name="password" class="input" placeholder="Enter your password" autocomplete="current-password" required>
             <button type="button" class="igt" id="modalLoginPassToggle" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
           </div>
@@ -3281,9 +3377,19 @@ function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
         <p class="auth-3d-forgot-row"><a href="#" id="modalForgotLink">Forgot password?</a></p>
       </form>
     `,
-    footerHTML: `<button type="button" class="btn btn-ghost w-100" data-x="c">Close</button>`,
+    footerHTML: '',
+    onClose: () => {
+      document.documentElement.classList.remove('auth-modal-lock');
+      document.body.classList.remove('auth-modal-lock');
+    },
     onMount: (el, close) => {
-      el.querySelector('[data-x="c"]').onclick = close;
+      if (lockedViewportHeight > 320) {
+        el.style.height = lockedViewportHeight + 'px';
+        el.style.maxHeight = lockedViewportHeight + 'px';
+      }
+      el.addEventListener('touchmove', (evt) => {
+        evt.preventDefault();
+      }, { passive: false });
 
       const emailInput = el.querySelector('#modalLoginEmail');
       if (prefilledEmail) {
