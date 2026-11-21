@@ -94,6 +94,7 @@ public final class NotificationHelper {
     private static final long MAIL_EXPIRY_MS = 7L * 24L * 60L * 60L * 1000L;
 
     private static final AtomicBoolean BG_CHECK_RUNNING = new AtomicBoolean(false);
+    private static final AtomicBoolean PENDING_RECHECK = new AtomicBoolean(false);
     private static final Object SHOW_NOTIF_LOCK = new Object();
 
     private static class PendingAlert {
@@ -688,6 +689,10 @@ public final class NotificationHelper {
     }
 
     public static void runBackgroundCheck(Context context) {
+        runBackgroundCheck(context, false);
+    }
+
+    public static void runBackgroundCheck(Context context, boolean forceImmediate) {
         Context ctx = context.getApplicationContext();
         String uid = getUid(ctx);
         if (uid.isEmpty()) {
@@ -697,11 +702,16 @@ public final class NotificationHelper {
             return;
         }
         long now = System.currentTimeMillis();
-        long lastRun = prefs(ctx).getLong(KEY_LAST_BG_RUN_AT, 0L);
-        if ((now - lastRun) < 20_000L) {
-            return;
+        if (!forceImmediate) {
+            long lastRun = prefs(ctx).getLong(KEY_LAST_BG_RUN_AT, 0L);
+            if ((now - lastRun) < 4_000L) {
+                return;
+            }
         }
         if (!BG_CHECK_RUNNING.compareAndSet(false, true)) {
+            if (forceImmediate) {
+                PENDING_RECHECK.set(true);
+            }
             return;
         }
 
@@ -903,6 +913,9 @@ public final class NotificationHelper {
         } catch (Throwable ignored) {
         } finally {
             BG_CHECK_RUNNING.set(false);
+            if (PENDING_RECHECK.compareAndSet(true, false)) {
+                runBackgroundCheck(ctx, true);
+            }
         }
     }
 

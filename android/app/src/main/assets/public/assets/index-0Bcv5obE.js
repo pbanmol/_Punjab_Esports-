@@ -165,22 +165,22 @@ Play Free Fire tournaments, earn diamonds & withdraw to UPI! 💰`;function A(){
         </span>
         <span class="auth-3d-unlock-stage" aria-hidden="true">
           <svg class="auth-unlock-svg" viewBox="0 0 76 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g class="auth-unlock-sparks" stroke="#ffffff" stroke-width="2" stroke-linecap="round">
+            <g class="auth-unlock-sparks" stroke="#09090b" stroke-width="2" stroke-linecap="round">
               <line x1="24" y1="2" x2="24" y2="7" />
               <line x1="12" y1="7" x2="15.5" y2="10.5" />
               <line x1="36" y1="7" x2="32.5" y2="10.5" />
             </g>
             <g class="auth-lock-body-group">
-              <path class="auth-lock-shackle" d="M16.5 24.5V17.5C16.5 13.36 19.86 10 24 10C28.14 10 31.5 13.36 31.5 17.5V24.5" stroke="#e4e4e7" stroke-width="3.2" stroke-linecap="round" />
-              <rect x="11" y="23.5" width="26" height="20.5" rx="5.5" fill="#ffffff" stroke="#d4d4d8" stroke-width="1.2" />
-              <circle cx="24" cy="32.5" r="2.7" fill="#09090b" />
-              <rect x="22.8" y="34" width="2.4" height="5.2" rx="1.1" fill="#09090b" />
+              <path class="auth-lock-shackle" d="M16.5 24.5V17.5C16.5 13.36 19.86 10 24 10C28.14 10 31.5 13.36 31.5 17.5V24.5" stroke="#18181b" stroke-width="3.2" stroke-linecap="round" />
+              <rect x="11" y="23.5" width="26" height="20.5" rx="5.5" fill="#09090b" stroke="#09090b" stroke-width="1.2" />
+              <circle cx="24" cy="32.5" r="2.7" fill="#ffffff" />
+              <rect x="22.8" y="34" width="2.4" height="5.2" rx="1.1" fill="#ffffff" />
             </g>
             <g class="auth-key-group">
-              <circle cx="62" cy="33.5" r="5.6" stroke="#ffffff" stroke-width="2.7" fill="#09090b" />
-              <rect x="43" y="32.1" width="13.5" height="2.8" rx="1.4" fill="#ffffff" />
-              <rect x="44.5" y="34.9" width="2.4" height="4.4" rx="0.9" fill="#ffffff" />
-              <rect x="48.8" y="34.9" width="2.4" height="3.2" rx="0.9" fill="#ffffff" />
+              <circle cx="62" cy="33.5" r="5.6" stroke="#09090b" stroke-width="2.7" fill="#ffffff" />
+              <rect x="43" y="32.1" width="13.5" height="2.8" rx="1.4" fill="#09090b" />
+              <rect x="44.5" y="34.9" width="2.4" height="4.4" rx="0.9" fill="#09090b" />
+              <rect x="48.8" y="34.9" width="2.4" height="3.2" rx="0.9" fill="#09090b" />
             </g>
           </svg>
         </span>

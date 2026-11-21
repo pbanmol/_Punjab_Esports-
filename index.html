@@ -1106,7 +1106,7 @@ button:not(:disabled),a.channel-btn,.bn-item,.nav-item,.filter-chip,.theme-swatc
   text-overflow: ellipsis;
 }
 
-/* ULTRA-PREMIUM 3D STEALTH B&W DEAD-CENTER IMMOVABLE PASSWORD SIGN-IN MODAL */
+/* ULTRA-PREMIUM 3D PURE-WHITE & BLACK DEAD-CENTER IMMOVABLE PASSWORD SIGN-IN MODAL */
 html.auth-modal-lock,
 body.auth-modal-lock {
   overflow: hidden !important;
@@ -1124,7 +1124,7 @@ body.auth-modal-lock {
   align-items: center !important;
   justify-content: center !important;
   padding: 20px 18px !important;
-  background: radial-gradient(circle at 50% 42%, rgba(28, 30, 36, 0.72) 0%, rgba(0, 0, 0, 0.88) 100%);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   overflow: hidden !important;
@@ -1154,7 +1154,7 @@ body.auth-modal-lock {
 @keyframes authKeyUnlockLoop {
   0%, 10% {
     transform: translateX(6px) scaleY(1);
-    opacity: 0.9;
+    opacity: 0.92;
   }
   26% {
     transform: translateX(-16px) scaleY(1);
@@ -1170,11 +1170,11 @@ body.auth-modal-lock {
   }
   74% {
     transform: translateX(4px) scaleY(1);
-    opacity: 0.92;
+    opacity: 0.94;
   }
   90%, 100% {
     transform: translateX(6px) scaleY(1);
-    opacity: 0.9;
+    opacity: 0.92;
   }
 }
 @keyframes authShackleUnlockLoop {
@@ -1190,13 +1190,13 @@ body.auth-modal-lock {
 }
 @keyframes authLockBodyGlow {
   0%, 36% {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.14));
   }
   48%, 68% {
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.72));
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.28));
   }
   84%, 100% {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.14));
   }
 }
 @keyframes authSparkBurstLoop {
@@ -1229,18 +1229,15 @@ body.auth-modal-lock {
   max-height: none !important;
   overflow: visible !important;
   border-radius: 28px;
-  background:
-    radial-gradient(ellipse 85% 42% at 50% 0%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 70%),
-    linear-gradient(160deg, #1c1d22 0%, #101114 54%, #060608 100%);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.45);
-  border-bottom: 5px solid #000000;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #09090b;
+  border: 1.5px solid #e4e4e7;
+  border-top: 1.5px solid #ffffff;
+  border-bottom: 5px solid #d4d4d8;
   box-shadow:
-    0 34px 70px -12px rgba(0, 0, 0, 0.90),
-    0 12px 28px -8px rgba(0, 0, 0, 0.70),
-    0 0 0 1px rgba(255, 255, 255, 0.10),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    0 28px 60px -14px rgba(9, 9, 11, 0.16),
+    0 10px 24px -8px rgba(9, 9, 11, 0.09),
+    inset 0 2px 0 #ffffff;
   transform-origin: center center;
   animation: authCard3DIn 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -1263,7 +1260,7 @@ body.auth-modal-lock {
   gap: 11px;
   width: 100%;
   margin: 0;
-  color: #ffffff;
+  color: #09090b;
 }
 .auth-3d-hero-row {
   display: flex;
@@ -1276,22 +1273,21 @@ body.auth-modal-lock {
   width: 60px;
   height: 60px;
   border-radius: 19px;
-  background: linear-gradient(145deg, #27272a 0%, #09090b 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.34);
-  border-bottom: 3.5px solid #000000;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
+  border: 1.5px solid #e4e4e7;
+  border-bottom: 3.5px solid #d4d4d8;
   display: grid;
   place-items: center;
   perspective: 320px;
   box-shadow:
-    0 12px 24px rgba(0, 0, 0, 0.65),
-    0 0 18px rgba(255, 255, 255, 0.10),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.36);
+    0 10px 22px rgba(9, 9, 11, 0.09),
+    inset 0 1.5px 0 #ffffff;
 }
 .auth-3d-medallion img {
   width: 36px;
   height: 36px;
   object-fit: contain;
-  filter: invert(1) brightness(1.2) drop-shadow(0 2px 6px rgba(255, 255, 255, 0.35));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
   transform-style: preserve-3d;
   will-change: transform;
   animation: peLogoSpin360 3.2s linear infinite;
@@ -1300,15 +1296,15 @@ body.auth-modal-lock {
   width: 82px;
   height: 60px;
   border-radius: 19px;
-  background: linear-gradient(145deg, #1f2025 0%, #09090b 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
-  border-bottom: 3.5px solid #000000;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
+  border: 1.5px solid #e4e4e7;
+  border-bottom: 3.5px solid #d4d4d8;
   display: grid;
   place-items: center;
   overflow: hidden;
   box-shadow:
-    0 12px 24px rgba(0, 0, 0, 0.62),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.26);
+    0 10px 22px rgba(9, 9, 11, 0.09),
+    inset 0 1.5px 0 #ffffff;
 }
 .auth-unlock-svg {
   width: 72px;
@@ -1343,20 +1339,19 @@ body.auth-modal-lock {
   font-size: 1.16rem;
   font-weight: 800;
   letter-spacing: -0.25px;
-  color: #ffffff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+  color: #09090b;
 }
 .auth-3d-sub {
   font-size: 0.72rem;
   font-weight: 500;
-  color: rgba(228, 228, 231, 0.68);
+  color: #52525b;
   letter-spacing: 0.15px;
 }
 .auth-3d-divider {
   width: 100%;
   height: 1px;
   margin-top: 6px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.34) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(9, 9, 11, 0.16) 50%, transparent 100%);
 }
 .mb.auth-login-modal .close-x {
   position: absolute;
@@ -1365,16 +1360,16 @@ body.auth-modal-lock {
   width: 32px;
   height: 32px;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #d4d4d8;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  background: #ffffff;
+  color: #18181b;
+  border: 1.5px solid #e4e4e7;
+  box-shadow: 0 2px 0 #d4d4d8;
   transition: background 0.15s ease, color 0.15s ease;
 }
 .mb.auth-login-modal .close-x:hover,
 .mb.auth-login-modal .close-x:active {
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
+  background: #f4f4f5;
+  color: #000000;
 }
 .mb.auth-login-modal .mbody {
   padding: 10px 20px 20px 20px;
@@ -1388,13 +1383,13 @@ body.auth-modal-lock {
   display: block;
   font-size: 0.73rem;
   font-weight: 700;
-  color: #d4d4d8;
+  color: #18181b;
   margin-bottom: 6px;
   letter-spacing: 0.35px;
   text-transform: uppercase;
 }
 .mb.auth-login-modal .field label .req {
-  color: #ffffff;
+  color: #09090b;
 }
 .mb.auth-login-modal .ig {
   position: relative;
@@ -1407,9 +1402,9 @@ body.auth-modal-lock {
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.20);
-  color: #ffffff;
+  background: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  color: #09090b;
   display: grid;
   place-items: center;
   font-size: 0.8rem;
@@ -1422,26 +1417,26 @@ body.auth-modal-lock {
   box-sizing: border-box;
   padding: 0 42px 0 48px;
   border-radius: 15px;
-  border: 1.5px solid rgba(255, 255, 255, 0.14);
-  background: rgba(0, 0, 0, 0.62);
-  color: #ffffff;
+  border: 1.5px solid #d4d4d8;
+  background: #ffffff;
+  color: #09090b;
   font-size: 0.9rem;
   font-weight: 500;
   box-shadow:
-    inset 0 3px 8px rgba(0, 0, 0, 0.65),
-    0 1px 0 rgba(255, 255, 255, 0.08);
+    inset 0 2px 5px rgba(9, 9, 11, 0.05),
+    0 1px 0 #ffffff;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 .mb.auth-login-modal .ig .input::placeholder {
-  color: rgba(161, 161, 170, 0.70);
+  color: #a1a1aa;
 }
 .mb.auth-login-modal .ig .input:focus {
   outline: none;
-  background: rgba(0, 0, 0, 0.85);
-  border-color: #ffffff;
+  background: #ffffff;
+  border-color: #09090b;
   box-shadow:
-    0 0 0 3px rgba(255, 255, 255, 0.16),
-    inset 0 2px 6px rgba(0, 0, 0, 0.65);
+    0 0 0 3px rgba(9, 9, 11, 0.10),
+    inset 0 1px 3px rgba(9, 9, 11, 0.04);
 }
 .mb.auth-login-modal .ig .igt {
   position: absolute;
@@ -1451,13 +1446,13 @@ body.auth-modal-lock {
   border-radius: 10px;
   border: none;
   background: transparent;
-  color: #a1a1aa;
+  color: #52525b;
   display: grid;
   place-items: center;
   cursor: pointer;
 }
 .mb.auth-login-modal .ig .igt:active {
-  color: #ffffff;
+  color: #09090b;
 }
 .mb.auth-login-modal .field-error {
   display: block;
@@ -1465,7 +1460,7 @@ body.auth-modal-lock {
   line-height: 15px;
   margin-top: 4px;
   font-size: 0.71rem;
-  color: #fca5a5;
+  color: #dc2626;
 }
 .auth-3d-submit-btn {
   position: relative;
@@ -1474,10 +1469,10 @@ body.auth-modal-lock {
   height: 48px;
   margin-top: 4px;
   border: none;
-  border-top: 1px solid #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 15px;
-  background: linear-gradient(180deg, #ffffff 0%, #e4e4e7 100%);
-  color: #09090b;
+  background: linear-gradient(180deg, #27272a 0%, #09090b 100%);
+  color: #ffffff;
   font-size: 0.93rem;
   font-weight: 800;
   letter-spacing: 0.25px;
@@ -1487,9 +1482,9 @@ body.auth-modal-lock {
   gap: 8px;
   cursor: pointer;
   box-shadow:
-    0 5px 0 #71717a,
-    0 14px 28px rgba(255, 255, 255, 0.15),
-    inset 0 1px 0 #ffffff;
+    0 5px 0 #000000,
+    0 12px 24px rgba(9, 9, 11, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transition: box-shadow 0.14s ease, opacity 0.14s ease;
 }
 .auth-3d-submit-btn::after {
@@ -1499,14 +1494,14 @@ body.auth-modal-lock {
   left: 0;
   width: 42%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.78), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
   animation: authBtnSheen 4.2s ease-in-out infinite;
   pointer-events: none;
 }
 .auth-3d-submit-btn:active {
   box-shadow:
-    0 2px 0 #71717a,
-    0 6px 14px rgba(255, 255, 255, 0.12);
+    0 2px 0 #000000,
+    0 6px 14px rgba(9, 9, 11, 0.18);
 }
 .auth-3d-submit-btn:disabled {
   opacity: 0.72;
@@ -1518,24 +1513,24 @@ body.auth-modal-lock {
 }
 .auth-3d-forgot-row a {
   font-size: 0.8rem;
-  font-weight: 600;
-  color: #e4e4e7;
+  font-weight: 700;
+  color: #18181b;
   text-decoration: none;
 }
 .auth-3d-forgot-row a:hover {
-  color: #ffffff;
+  color: #000000;
   text-decoration: underline;
 }
 .mb.auth-login-modal .alert.error {
-  background: rgba(225, 29, 72, 0.16);
-  border: 1px solid rgba(251, 113, 133, 0.35);
-  color: #fecdd3;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
   margin-bottom: 10px;
 }
 .mb.auth-login-modal .alert.info {
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  color: #f4f4f5;
+  background: #f4f4f5;
+  border: 1px solid #d4d4d8;
+  color: #18181b;
   margin-bottom: 10px;
 }
 
@@ -3447,22 +3442,22 @@ function openPasswordLoginModal(prefilledEmail = '', isExistingNotice = false) {
         </span>
         <span class="auth-3d-unlock-stage" aria-hidden="true">
           <svg class="auth-unlock-svg" viewBox="0 0 76 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g class="auth-unlock-sparks" stroke="#ffffff" stroke-width="2" stroke-linecap="round">
+            <g class="auth-unlock-sparks" stroke="#09090b" stroke-width="2" stroke-linecap="round">
               <line x1="24" y1="2" x2="24" y2="7" />
               <line x1="12" y1="7" x2="15.5" y2="10.5" />
               <line x1="36" y1="7" x2="32.5" y2="10.5" />
             </g>
             <g class="auth-lock-body-group">
-              <path class="auth-lock-shackle" d="M16.5 24.5V17.5C16.5 13.36 19.86 10 24 10C28.14 10 31.5 13.36 31.5 17.5V24.5" stroke="#e4e4e7" stroke-width="3.2" stroke-linecap="round" />
-              <rect x="11" y="23.5" width="26" height="20.5" rx="5.5" fill="#ffffff" stroke="#d4d4d8" stroke-width="1.2" />
-              <circle cx="24" cy="32.5" r="2.7" fill="#09090b" />
-              <rect x="22.8" y="34" width="2.4" height="5.2" rx="1.1" fill="#09090b" />
+              <path class="auth-lock-shackle" d="M16.5 24.5V17.5C16.5 13.36 19.86 10 24 10C28.14 10 31.5 13.36 31.5 17.5V24.5" stroke="#18181b" stroke-width="3.2" stroke-linecap="round" />
+              <rect x="11" y="23.5" width="26" height="20.5" rx="5.5" fill="#09090b" stroke="#09090b" stroke-width="1.2" />
+              <circle cx="24" cy="32.5" r="2.7" fill="#ffffff" />
+              <rect x="22.8" y="34" width="2.4" height="5.2" rx="1.1" fill="#ffffff" />
             </g>
             <g class="auth-key-group">
-              <circle cx="62" cy="33.5" r="5.6" stroke="#ffffff" stroke-width="2.7" fill="#09090b" />
-              <rect x="43" y="32.1" width="13.5" height="2.8" rx="1.4" fill="#ffffff" />
-              <rect x="44.5" y="34.9" width="2.4" height="4.4" rx="0.9" fill="#ffffff" />
-              <rect x="48.8" y="34.9" width="2.4" height="3.2" rx="0.9" fill="#ffffff" />
+              <circle cx="62" cy="33.5" r="5.6" stroke="#09090b" stroke-width="2.7" fill="#ffffff" />
+              <rect x="43" y="32.1" width="13.5" height="2.8" rx="1.4" fill="#09090b" />
+              <rect x="44.5" y="34.9" width="2.4" height="4.4" rx="0.9" fill="#09090b" />
+              <rect x="48.8" y="34.9" width="2.4" height="3.2" rx="0.9" fill="#09090b" />
             </g>
           </svg>
         </span>

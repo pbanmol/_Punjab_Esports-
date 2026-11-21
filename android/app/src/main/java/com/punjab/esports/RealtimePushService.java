@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -33,10 +34,11 @@ public class RealtimePushService extends Service {
     private static final String SERVICE_CHANNEL_NAME = "Background Alert Sync";
     private static final int SERVICE_NOTIF_ID = 90421;
     private static final int RESTART_REQ_CODE = 44091;
-    private static final long FAST_SWEEP_SECONDS = 12L;
+    private static final long FAST_SWEEP_SECONDS = 8L;
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<HttpURLConnection> activeStreams = new ArrayList<>();
+    private volatile String activeUid = "";
     private ExecutorService streamExecutor;
     private ScheduledExecutorService sweepExecutor;
 
@@ -56,7 +58,6 @@ public class RealtimePushService extends Service {
                 appCtx.startService(intent);
             }
         } catch (Throwable ignored) {
-            // Android 14+ may block starting foreground service from background; fallback alarm stays active.
             NotificationHelper.scheduleAlarmLoop(appCtx, NotificationHelper.ALARM_INTERVAL_MS);
         }
     }
@@ -99,7 +100,10 @@ public class RealtimePushService extends Service {
             return START_NOT_STICKY;
         }
 
-        if (running.compareAndSet(false, true)) {
+        if (!running.get() || !uid.equals(activeUid)) {
+            shutdownWorkers();
+            activeUid = uid;
+            running.set(true);
             startLiveWatchers(uid);
         }
 
@@ -108,7 +112,6 @@ public class RealtimePushService extends Service {
 
     @Override
     public void onTimeout(int startId, int fgsType) {
-        // Android 15/16 dataSync foreground service timeout handler: stop cleanly and keep alarm sync alive.
         shutdownWorkers();
         NotificationHelper.scheduleAlarmLoop(getApplicationContext(), 30_000L);
         stopSelf();
@@ -150,7 +153,7 @@ public class RealtimePushService extends Service {
         NotificationChannel channel = new NotificationChannel(
                 SERVICE_CHANNEL_ID,
                 SERVICE_CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_MIN
+                NotificationManager.IMPORTANCE_LOW
         );
         channel.setDescription("Keeps live tournament and wallet notifications active");
         channel.setShowBadge(false);
@@ -175,7 +178,7 @@ public class RealtimePushService extends Service {
                 .setColor(ContextCompat.getColor(this, R.color.notification_accent))
                 .setContentTitle("Punjab Esports")
                 .setContentText("Live alerts active")
-                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                 .setOngoing(true)
@@ -185,12 +188,33 @@ public class RealtimePushService extends Service {
                 .build();
     }
 
+    private void runImmediateCheckWithWakeLock(Context appCtx) {
+        PowerManager.WakeLock wakeLock = null;
+        try {
+            PowerManager pm = (PowerManager) appCtx.getSystemService(Context.POWER_SERVICE);
+            if (pm != null) {
+                wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PunjabEsports:LivePush");
+                wakeLock.setReferenceCounted(false);
+                wakeLock.acquire(10_000L);
+            }
+            NotificationHelper.runBackgroundCheck(appCtx, true);
+        } catch (Throwable ignored) {
+        } finally {
+            if (wakeLock != null && wakeLock.isHeld()) {
+                try {
+                    wakeLock.release();
+                } catch (Throwable ignored) {
+                }
+            }
+        }
+    }
+
     private void startLiveWatchers(String uid) {
         final Context appCtx = getApplicationContext();
         streamExecutor = Executors.newFixedThreadPool(6);
         sweepExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        // Immediate baseline check + fast 12s sweep for requests, match results, room IDs & fallback
+        // Fast 8s sweep bypasses the 20s throttle so closed/locked phones always receive alerts promptly
         sweepExecutor.scheduleWithFixedDelay(() -> {
             if (!running.get()) return;
             try {
@@ -198,10 +222,10 @@ public class RealtimePushService extends Service {
                     stopSelf();
                     return;
                 }
-                NotificationHelper.runBackgroundCheck(appCtx);
+                runImmediateCheckWithWakeLock(appCtx);
             } catch (Throwable ignored) {
             }
-        }, 2L, FAST_SWEEP_SECONDS, TimeUnit.SECONDS);
+        }, 1L, FAST_SWEEP_SECONDS, TimeUnit.SECONDS);
 
         // Live Firebase RTDB SSE streams for <1s instant notification triggers
         String[] livePaths = new String[]{
@@ -220,7 +244,7 @@ public class RealtimePushService extends Service {
     }
 
     private void runSseLoop(Context appCtx, String path, boolean settleDelay) {
-        long backoffMs = 2_000L;
+        long backoffMs = 1_500L;
         while (running.get()) {
             String uid = NotificationHelper.getUid(appCtx);
             String dbUrl = NotificationHelper.getDatabaseUrl(appCtx);
@@ -236,28 +260,56 @@ public class RealtimePushService extends Service {
                     fullUrl += "?auth=" + URLEncoder.encode(token, "UTF-8");
                 }
 
-                URL url = new URL(fullUrl);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("Accept", "text/event-stream");
-                conn.setRequestProperty("Cache-Control", "no-cache");
-                conn.setConnectTimeout(15_000);
-                conn.setReadTimeout(70_000);
-                registerConn(conn);
+                String currentUrl = fullUrl;
+                int code = -1;
+                for (int hops = 0; hops < 4; hops++) {
+                    URL url = new URL(currentUrl);
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setInstanceFollowRedirects(false);
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Accept", "text/event-stream");
+                    conn.setRequestProperty("Cache-Control", "no-cache");
+                    conn.setConnectTimeout(15_000);
+                    conn.setReadTimeout(65_000);
+                    registerConn(conn);
 
-                int code = conn.getResponseCode();
+                    code = conn.getResponseCode();
+                    if (code == 301 || code == 302 || code == 303 || code == 307 || code == 308) {
+                        String loc = conn.getHeaderField("Location");
+                        unregisterConn(conn);
+                        try {
+                            conn.disconnect();
+                        } catch (Throwable ignored) {
+                        }
+                        conn = null;
+                        if (loc == null || loc.isEmpty()) {
+                            break;
+                        }
+                        currentUrl = loc;
+                        continue;
+                    }
+                    break;
+                }
+
+                if (conn == null) {
+                    sleepQuietly(backoffMs);
+                    backoffMs = Math.min(15_000L, backoffMs * 2);
+                    continue;
+                }
                 if (code == 401 || code == 403) {
-                    NotificationHelper.refreshIdToken(appCtx);
-                    sleepQuietly(2_000L);
+                    String refreshed = NotificationHelper.refreshIdToken(appCtx);
+                    if (refreshed == null || refreshed.isEmpty()) {
+                        sleepQuietly(3_000L);
+                    }
                     continue;
                 }
                 if (code < 200 || code >= 300) {
                     sleepQuietly(backoffMs);
-                    backoffMs = Math.min(30_000L, backoffMs * 2);
+                    backoffMs = Math.min(15_000L, backoffMs * 2);
                     continue;
                 }
 
-                backoffMs = 2_000L;
+                backoffMs = 1_500L;
                 boolean initialPutSkipped = false;
                 String currentEvent = "";
 
@@ -284,7 +336,7 @@ public class RealtimePushService extends Service {
                 }
             } catch (Throwable ignored) {
                 sleepQuietly(backoffMs);
-                backoffMs = Math.min(30_000L, backoffMs * 2);
+                backoffMs = Math.min(15_000L, backoffMs * 2);
             } finally {
                 unregisterConn(conn);
                 if (conn != null) {
@@ -301,14 +353,11 @@ public class RealtimePushService extends Service {
         if (!running.get() || sweepExecutor == null || sweepExecutor.isShutdown()) {
             return;
         }
-        long delayMs = settleDelay ? 1_400L : 250L;
+        long delayMs = settleDelay ? 1_200L : 120L;
         try {
             sweepExecutor.schedule(() -> {
                 if (!running.get()) return;
-                try {
-                    NotificationHelper.runBackgroundCheck(appCtx);
-                } catch (Throwable ignored) {
-                }
+                runImmediateCheckWithWakeLock(appCtx);
             }, delayMs, TimeUnit.MILLISECONDS);
         } catch (Throwable ignored) {
         }
@@ -329,6 +378,7 @@ public class RealtimePushService extends Service {
 
     private void shutdownWorkers() {
         running.set(false);
+        activeUid = "";
         synchronized (activeStreams) {
             for (HttpURLConnection c : activeStreams) {
                 try {
